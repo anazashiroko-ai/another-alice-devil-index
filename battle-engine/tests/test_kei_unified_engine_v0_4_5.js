@@ -6,6 +6,11 @@ const empty=Array(6).fill(null);
 const base=(atk=20,def=1000,hp=100000,magic=100)=>({attack:atk,defense:def,hp,magic});
 const make=(a={},b={})=>E.createBattle({title:'unit',mode:'full',damageMode:'estimate',player:{base:base(),...a},enemy:{base:base(),...b},orders:['player','player','player','player','player','player'],playerDeck:empty,enemyDeck:empty});
 const fixture=(pd,ed,overrides={})=>E.createBattle({mode:'full',damageMode:'estimate',player:{base:base()},enemy:{base:base()},orders:Array(6).fill('player'),playerDeck:pd,enemyDeck:ed,...overrides});
+// 004.5.1: original catalog restrictions, not merely phase-based validity.
+for(const [dev,name] of [['odradek','オドラデク'],['freya','フレイヤ'],['red_folter','赤い秘密を交わすフォルター夫妻']]) {
+ check(`${name}:1Tのセットを拒否する`,()=>assert.throws(()=>fixture([dev,null,null,null,null,null],empty),/2T以降/));
+ check(`${name}:2Tのセットは受理する`,()=>{const b=fixture([null,dev,null,null,null,null],empty);assert.equal(b.tables.player[1],dev);});
+}
 check('ショウ6T：実測値との最終体力完全一致',()=>{const b=E.createBattle(E.preset('sho'));E.playAll(b);assert.equal(b.outcome,'draw');assert.equal(b.fighters.player.current.hp,90916.5);assert.equal(b.fighters.enemy.current.hp,9516);});
 check('ショウ：6ターン分のスナップショット',()=>{const b=E.createBattle(E.preset('sho'));E.playAll(b);assert.equal(b.turns.length,6);assert.equal(b.turns[1].endTurn,true);});
 check('ナルキッソス：素の体力×2.5を加算',()=>{const b=E.createBattle(E.preset('sho'));E.round(b);assert.equal(b.turns[0].fighters.player.hp,92612.5);});
@@ -14,16 +19,16 @@ check('クロリッサ：攻撃・守備・魔力をバトル開始値へ戻す'
 check('グレモリー：魔力×2.5',()=>{const b=E.createBattle(E.preset('sho'));E.round(b);E.round(b);E.round(b);assert.equal(b.fighters.player.current.attack,8385);});
 check('キジ③：モロク先行時の発動順',()=>{const b=E.createBattle(E.preset('kijiEnemy'));E.playAll(b);assert.deepEqual(b.turns.map(t=>t.fired.enemy),[[],['moloch'],['furcas'],['beleth'],['beleth'],['moloch']]);});
 check('キジ③：ベルゼブブ先行時の発動順',()=>{const b=E.createBattle(E.preset('kijiPlayer'));E.playAll(b);assert.deepEqual(b.turns.map(t=>t.fired.enemy),[[],['tsuma_naberius'],['furcas'],['beleth'],['beleth'],['moloch']]);});
-check('ベルゼブブ：現在の配置を逆順に変更',()=>{const b=fixture(['beelzebub',...empty.slice(1)],['freya','odradek','rabbit',null,null,null],{mode:'trace'});E.round(b);assert.deepEqual(b.tables.enemy.slice(0,3),[null,null,null]);assert.deepEqual(b.tables.enemy.slice(3),['rabbit','odradek','freya']);});
+check('ベルゼブブ：現在の配置を逆順に変更',()=>{const b=fixture(['beelzebub',...empty.slice(1)],['marbas','odradek','rabbit',null,null,null],{mode:'trace'});E.round(b);assert.deepEqual(b.tables.enemy.slice(0,3),[null,null,null]);assert.deepEqual(b.tables.enemy.slice(3),['rabbit','odradek','marbas']);});
 check('トロール：6Tのデビルは押出記録に入る',()=>{const b=fixture(['troll',...empty.slice(1)],[null,null,null,null,null,'freya'],{mode:'trace'});E.round(b);assert.equal(b.truncations[0].devil,'freya');assert.equal(b.tables.enemy[5],null);});
 check('未実装デビル：完全戦闘モードで停止',()=>{const b=fixture(['other',...empty.slice(1)],empty);E.round(b);assert.equal(b.outcome,'undetermined');assert.ok(b.error.includes('未実装'));assert.equal(b.turns.length,1);});
 check('未実装デビル：追跡モードでは警告表示・継続',()=>{const b=fixture(['other',...empty.slice(1)],empty,{mode:'trace'});E.round(b);assert.equal(b.complete,false);assert.ok(b.events.some(x=>x.type==='caveat'));});
-check('フォルター夫妻：相手の装備を削り、HPが0以下なら即決着',()=>{const b=fixture(['red_folter',...empty.slice(1)],empty,{enemy:{base:base(20,1000,200,100),equipment:{attack:0,defense:0,hp:300,magic:0}}});b.fighters.enemy.current.hp=100;E.round(b);assert.equal(b.outcome,'winner:player');assert.equal(b.fighters.enemy.current.hp,-200);});
-check('フレイヤ：敵現在攻撃力分の直接ダメージ',()=>{const b=fixture(['freya',...empty.slice(1)],empty);E.round(b);assert.equal(b.fighters.enemy.current.hp,99900);assert.equal(b.events.filter(x=>x.type==='attack'&&x.text.includes('シロコの攻撃')).length,0);});
-check('オドラデク：魔力装備5000超で不発',()=>{const b=fixture(['odradek',...empty.slice(1)],empty,{enemy:{base:base(),equipment:{magic:5230}}});E.round(b);assert.equal(b.fighters.enemy.current.defense,1000);});
-check('オドラデク：魔力装備5000以下なら攻守1',()=>{const b=fixture(['odradek',...empty.slice(1)],empty,{enemy:{base:base(),equipment:{magic:3000}}});E.round(b);assert.equal(b.fighters.enemy.current.defense,1);assert.equal(b.fighters.enemy.current.attack,1);});
-check('遅延と反転が同じターンに逐次処理される',()=>{const b=fixture(['troll','beelzebub',null,null,null,null],['freya','odradek','rabbit','chlorissa',null,null],{mode:'trace'});E.round(b);E.round(b);assert.equal(b.tables.enemy[0],null);assert.equal(b.tables.enemy[5],null);});
-check('能力を処理した後、体力0以下なら敵は行動できない',()=>{const b=fixture(['freya',...empty.slice(1)],[null,...empty.slice(1)],{enemy:{base:base(100,100,50,100)}});E.round(b);assert.equal(b.outcome,'winner:player');assert.equal(b.events.filter(x=>x.type==='attack').length,0);});
+check('フォルター夫妻：相手の装備を削り、HPが0以下なら即決着',()=>{const b=fixture([null,'red_folter',null,null,null,null],empty,{enemy:{base:base(20,1000,200,100),equipment:{attack:0,defense:0,hp:300,magic:0}}});E.round(b);b.fighters.enemy.current.hp=100;E.round(b);assert.equal(b.outcome,'winner:player');assert.equal(b.fighters.enemy.current.hp,-200);});
+check('フレイヤ：敵現在攻撃力分の直接ダメージ',()=>{const b=fixture([null,'freya',null,null,null,null],empty);E.round(b);b.fighters.enemy.current.hp=100000;b.events=[];E.round(b);assert.equal(b.fighters.enemy.current.hp,99900);assert.equal(b.events.filter(x=>x.type==='attack'&&x.text.includes('シロコの攻撃')).length,0);});
+check('オドラデク：魔力装備5000超で不発',()=>{const b=fixture([null,'odradek',null,null,null,null],empty,{enemy:{base:base(),equipment:{magic:5230}}});E.round(b);E.round(b);assert.equal(b.fighters.enemy.current.defense,1000);});
+check('オドラデク：魔力装備5000以下なら攻守1',()=>{const b=fixture([null,'odradek',null,null,null,null],empty,{enemy:{base:base(),equipment:{magic:3000}}});E.round(b);E.round(b);assert.equal(b.fighters.enemy.current.defense,1);assert.equal(b.fighters.enemy.current.attack,1);});
+check('遅延と反転が同じターンに逐次処理される',()=>{const b=fixture(['troll','beelzebub',null,null,null,null],['marbas','odradek','rabbit','chlorissa',null,null],{mode:'trace'});E.round(b);E.round(b);assert.equal(b.tables.enemy[0],null);assert.equal(b.tables.enemy[5],null);});
+check('能力を処理した後、体力0以下なら敵は行動できない',()=>{const b=fixture([null,'freya',null,null,null,null],[null,...empty.slice(1)],{enemy:{base:base(100,100,50,100)}});E.round(b);b.fighters.enemy.current.hp=50;E.round(b);assert.equal(b.outcome,'winner:player');assert.equal(b.turns[1].events.filter(x=>x.type==='attack').length,0);});
 check('原始データを変更せず、戦闘用テーブルだけを変更する',()=>{const b=E.createBattle(E.preset('kijiPlayer'));E.round(b);assert.equal(b.original.enemy[0],'moloch');assert.equal(b.tables.enemy[0],null);});
 check('混合プレビュー：表操作と数値戦闘を同じ処理器で実行',()=>{const b=E.createBattle(E.preset('mixed'));E.round(b);assert.ok(b.events.some(e=>e.text.includes('遅延')));assert.ok(b.events.some(e=>e.type==='attack'));});
 check('カマエル→ヴィネ：二度加算して攻撃力13,665',()=>{const b=E.createBattle(E.preset('kamael'));E.round(b);E.round(b);assert.equal(b.fighters.player.current.attack,13665);assert.deepEqual(b.turns[1].fired.player,['vine','kamael']);});
@@ -79,12 +84,12 @@ check('単独モデルと先行試作を分類している',()=>{assert.ok(E.SOU
 check('後半の発動時期が未確定のモデルを誤って実装済み扱いしない',()=>{for(const key of ['orobas','matthew_hopkins','ariosh'])assert.equal(E.D[key],undefined);});
 check('単純な乗算：マルバス攻撃力1.5倍',()=>{const b=fixture(['marbas',...empty.slice(1)],empty);E.round(b);assert.equal(b.fighters.player.current.attack,30);});
 check('単純な交換：シルフェは双方の魔力を交換',()=>{const b=fixture(['sylphe',...empty.slice(1)],empty,{player:{base:base(20,1000,100000,321)},enemy:{base:base(20,1000,100000,654)}});E.round(b);assert.equal(b.fighters.player.current.magic,654);assert.equal(b.fighters.enemy.current.magic,321);});
-check('強制終了：マリア・グァッゾは後続の相手デビルを発動させない',()=>{const b=fixture(['maria_guazzo',...empty.slice(1)],['freya',...empty.slice(1)]);E.round(b);assert.deepEqual(b.turns[0].fired.enemy,[]);assert.equal(b.turns[0].endTurn,true);});
+check('強制終了：マリア・グァッゾは後続の相手デビルを発動させない',()=>{const b=fixture(['maria_guazzo',...empty.slice(1)],['marbas',...empty.slice(1)]);E.round(b);assert.deepEqual(b.turns[0].fired.enemy,[]);assert.equal(b.turns[0].endTurn,true);});
 check('複合攻撃前：ファタ・モルガナの守備が0、攻撃が2倍分増加',()=>{const b=fixture(['fata_morgana',...empty.slice(1)],empty);E.round(b);assert.equal(b.fighters.player.current.attack,2020);assert.equal(b.fighters.player.current.defense,0);});
 check('後続ターンの阻止：ベルフェゴールは2ターン後に妨害',()=>{const b=fixture(['belphegor',null,null,null,null,null],[null,'freya','freya',null,null,null]);E.round(b);E.round(b);assert.deepEqual(b.turns[1].fired.enemy,['freya']);E.round(b);assert.deepEqual(b.turns[2].fired.enemy,[]);});
 check('元データの入力制限：サレオスは1Tにセット不可',()=>{assert.throws(()=>fixture(['saleos',null,null,null,null,null],empty),/2T以降/);});
 check('最高能力の交換：シェミハザの回転変換',()=>{const b=fixture(['shemihazah',...empty.slice(1)],empty,{enemy:{base:base(11,22,444,33)}});E.round(b);assert.equal(b.fighters.enemy.current.attack,33);assert.equal(b.fighters.enemy.current.defense,11);assert.equal(b.fighters.enemy.current.magic,444);});
-check('フレイヤ：敵攻撃より魔力が高い場合は魔力を採用',()=>{const b=fixture(['freya',...empty.slice(1)],empty,{enemy:{base:base(11,1000,100000,1000)}});E.round(b);assert.equal(b.fighters.enemy.current.hp,99000);});
+check('フレイヤ：敵攻撃より魔力が高い場合は魔力を採用',()=>{const b=fixture([null,'freya',null,null,null,null],empty,{enemy:{base:base(11,1000,100000,1000)}});E.round(b);b.fighters.enemy.current.hp=100000;E.round(b);assert.equal(b.fighters.enemy.current.hp,99000);});
 check('クランプス：敵の最大値が体力以外でもそれに応じてダメージ',()=>{const b=fixture(['blood_krampus',...empty.slice(1)],empty,{enemy:{base:base(201000,1000,100000,100)}});E.round(b);assert.equal(b.fighters.enemy.current.hp,100000-Math.floor(201000/2));});
 console.log('Total new source models',E.SOURCE_RULES.length);
 // 004.5 : 2026-11-12 field logs, controlled hypotheses, and regression checks.
