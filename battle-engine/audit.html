@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>四月島・デビル能力監査／保留一覧</title><style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{font-family:system-ui,-apple-system,'Hiragino Kaku Gothic ProN',Meiryo,sans-serif;margin:0;background:#101f2b;color:#eee9dd;line-height:1.6}main{max-width:960px;margin:auto;padding:25px 14px 60px}h1{font-size:clamp(23px,4vw,32px);color:#dfc58b}h2{font-size:18px}p{color:#c4ced6}header,.panel{padding:17px;background:#1d3445;border:1px solid #455f70;border-radius:12px;margin-bottom:16px}.muted{font-size:13px;color:#bbcbd6}.counter{font-weight:700;background:#132938;border:1px solid #526777;padding:12px;border-radius:8px;color:#eddaaf}.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}input,select,button{font:inherit;padding:10px;border-radius:7px;background:#122737;color:#f1efe9;border:1px solid #657789;min-width:0}input[type=search]{flex:1;min-width:170px}button{background:#bfa375;color:#14232f;font-weight:700;border:0;cursor:pointer}label.file{display:inline-block;font-size:13px;padding:9px;border:1px solid #627d8d;border-radius:7px}input[type=file]{width:230px;max-width:100%;font-size:12px}a{color:#e7c88c}.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.result{border-bottom:1px solid #42596a;padding:10px 4px}.result h3{margin:0;color:#f0e7d5;font-size:15px;line-height:1.5}.result span{font-size:12px;margin-left:7px}.result .pending{color:#e9bf77}.result .verified{color:#7ee8b8}.result .provisional{color:#e9d2a0}.result .source{color:#91dfc5}.result .legacy{color:#aabcf8}.result .reason{color:#cfd5db;font-size:13px}.result details summary{cursor:pointer;color:#d9bb81;font-size:12px}.result .ability{white-space:pre-wrap;font-size:13px;background:#132735;padding:10px;border-radius:8px;color:#d2d6d6}#entries{max-height:70vh;overflow:auto}footer{font-size:12px;color:#adbdc7}@media(max-width:600px){main{padding:10px}header,.panel{padding:12px}.tools{align-items:stretch}input[type=search]{flex-basis:100%}button{flex:1}}
+</style></head><body><main><header><h1>❰四月島・デビル能力監査❱</h1><p>図鑑に収録された全396体を、実戦規則反映／部分暫定／記述モデル／旧試作／能力実装保留に分類するための独立台帳。保留理由は一次分類で、ゲーム固有の例外や計算式の正しさを保証しない。</p><p class="muted">参照：<a href="https://anazashiroko-ai.github.io/another-alice-devil-index/dist/devils.json" target="_blank" rel="noopener">公開デビル図鑑JSON</a>。モデルの検討時点は2026-11-12。記述の変更時は再審査が必要。実戦規則反映は全面的な正確性の保証ではない。</p></header>
+<section class="panel"><h2>図鑑の読み込み</h2><div id="status" class="counter" role="status">公開図鑑へ接続中…</div><div class="tools"><button id="refresh">公開図鑑を再取得</button><label class="file">JSONファイルを読み込む <input id="file" type="file" accept=".json,application/json"></label></div><p class="muted">自動取得できない場合は、元の図鑑から devils.json を保存して、この画面に読み込める。読み込み先は手元のブラウザ内のみ。</p></section>
+<section class="panel"><h2>実装分類と保留理由</h2><div class="tools"><input id="query" type="search" placeholder="名前や保留理由で検索" aria-label="名前と保留理由を検索"><select id="filter"><option value="pending">保留中のみ</option><option value="all">全396体</option><option value="verified">実戦規則反映</option><option value="provisional">部分暫定</option><option value="source">追加記述モデル</option><option value="legacy">旧試作モデル</option></select><button id="export">全件CSV保存</button></div><p class="muted" id="result-count"></p><div id="entries">図鑑の読み込み待ち</div></section>
+<footer>注意：記述モデルは説明文の数式を実行する暫定コードであり、実戦ログによる正解保証はない。部分効果だけを実装したデビルは完成扱いしない。</footer></main><script>
+(()=>{'use strict';
+const SOURCE=new Set(["ウァサゴ", "マルバス", "シトリー", "バティン", "サレオス", "アイム", "マルコシアス", "シャックス", "クロケル", "フルカス", "グレモリー", "オセ", "ウァプラ", "ベリアル", "パイモン", "カイム", "ザガン", "キマリス", "アモン", "アンドロマリウス", "ブネ", "ムルムル", "シルフェ", "ラナリル", "マリア・グァッゾ", "レヴィアタン", "○再生", "ベルフェゴール", "シュプレンゲル＆クラメル", "アウリス", "ファタ・モルガナ", "ニスロク", "◎パンプキィ・パンピキィ", "ヴィヴィアン", "マゴト", "リリス", "ニンフ", "ウコバク", "バラキエル", "スカアハ", "ダゴン", "アンドラメレク", "ウロボロス", "シェミハザ", "デュラハン", "ノッカー", "エウリノーム", "メロウ", "ハール・ベル", "ロッゲンメーメ", "ザントメンヒェン", "ネルガル", "ペリュトン", "ア・パオ・ア・クゥー", "轟雷の矢を放つレライエ", "オイフェ", "サイクロプス", "バジリスク", "エイル", "法を改訂するバフォメット", "永遠を灯すアスモデウス", "夜空に羽撃くスワニール", "ひまわりワンピを着たサレオス", "ニコラス・レミ", "モルモル", "ベローナ", "ライフセーバー・サブナック", "かぼちゃを投げ落とすシャックス", "アンリ・ボゲ", "◎イースターバニー", "セベク", "サマーバケーション・ファタ・モルガナ", "バラム・アスタルイズ", "スノトラ", "夜へと誘うアミー", "ヴィドフニル＆コゼット", "四月島にいたヴィドフニル", "夜に涼むオリアス", "ベッドに誘うマルコシアス", "シャンパンを開けるアンリ・ボゲ", "ギーブル", "料理をするニスロク"]),LEGACY=new Set(["カマエル", "バラム", "ヘクセンナハト", "エリゴス", "スクルド", "トロール", "ベルゼブブ", "ラプラス", "ヴィネ", "うさぎと戯れるナルキッソス", "ナルキッソス", "クロリッサ", "王の風・グレモリー", "フレイヤ", "赤い秘密を交わすフォルター夫妻", "オドラデク", "ハーゲンティ", "サルガタナス", "賢者の火・フルカス", "未来を視通すプルソン", "バフォメット", "鮮血を浴びたクランプス", "バアル"]);
+const VERIFIED=new Set(["プロセルピナ", "ウヴァル", "◎ナパイア", "ブランド・フォルター", "アガリアレプト", "ジャック・ロレ", "フルーレティ", "枷から解き放たれたマゴト"]), PROVISIONAL=new Set(["ウヴァル＆ファタ・モルガナ", "密かに微笑むブランド・フォルター", "ブラウナ", "オンディーナ"]);
+const $=id=>document.getElementById(id);
+const clean=x=>String(x||'').normalize('NFKC').trim().replace(/^[○◎]+/,'').trim();
+const snames=new Set([...SOURCE].map(clean)),lnames=new Set([...LEGACY].map(clean)),vnames=new Set([...VERIFIED].map(clean)),pnames=new Set([...PROVISIONAL].map(clean));
+let catalog=[];
+const phase=x=>{const raw=x?.timing||[];return Array.isArray(raw)&&raw.length===1&&['ターン開始時','攻撃時','攻撃後','ターン終了時'].includes(raw[0]);};
+function classify(x){const k=clean(x.name),s=String(x.ability||'');
+ if(vnames.has(k))return ['verified','実戦規則反映','今回の実戦ログで主処理を照合。未観測の競合・境界は残る'];
+ if(pnames.has(k))return ['provisional','部分暫定','確認済みの主処理のみ反映。周辺仕様・攻撃式・再発動連鎖などは未確定'];
+ if(snames.has(k))return ['source','追加記述モデル','図鑑記述を数値操作にした試作。端数・組合せの実戦照合は未了'];
+ if(lnames.has(k))return ['legacy','旧試作モデル','従来の計算処理。能力の部分実装・再検証の可能性あり'];
+ let why='複合効果・計算端数・例外条件の再確認が必要';
+ if(!phase(x))why='発動段階を一意に特定できない';
+ else if(/詳細未記載|未記載|ただし…|さらに…|特定の相手|特定相手/.test(s))why='隠し条件・追加効果が未記載';
+ else if(/確率|ランダム|抽選|1\/3|１／３|クリティカル/.test(s))why='乱数・確率効果の処理が未検証';
+ else if(/魔力戦|混乱|反射|回避|軽減|ダメージカット/.test(s))why='特殊状態・魔力戦・ダメージ処理が未完成';
+ else if(/所持GOLD|ハーモニクス|レベル差|順位|ソウルストーン|勝利数|アシスト数|ドール/.test(s))why='外部情報・装備条件の入力が不足';
+ else if(/消去|消滅|セットしているデビル|先攻確定|次ターン|上書き/.test(s))why='配置操作・先攻・上書き競合の仕様未確認';
+ else if(/このターンのみ|３ターン|3ターン|毎ターン|バトル終了まで/.test(s))why='一時効果・継続効果の解除時期が不明';
+ return ['pending','保留',why];}
+function rows(){return catalog.map(x=>({data:x,decision:classify(x)}));}
+function render(){const target=$('entries');target.replaceChildren();if(!catalog.length){$('result-count').textContent='図鑑未読込';return;}
+ const all=rows(),wanted=$('filter').value,q=clean($('query').value).toLowerCase();
+ const shown=all.filter(x=>(wanted==='all'||x.decision[0]===wanted)&&(!q||(x.data.name+' '+x.decision[2]).toLowerCase().includes(q)));
+ $('result-count').textContent=`表示 ${shown.length}体 / 全${all.length}体`;
+ for(const x of shown){const d=x.data,cl=x.decision,div=document.createElement('div');div.className='result';
+ const h=document.createElement('h3');h.textContent=`#${d.id} ${d.name}`;const tag=document.createElement('span');tag.className=cl[0];tag.textContent='【'+cl[1]+'】';h.append(tag);
+ const reason=document.createElement('div');reason.className='reason';reason.textContent=`${d.dp||'DP不明'}・${d.attr||'属性不明'}｜${(d.timing||[]).join('、')||'時期未記載'}｜${cl[2]}`;
+ const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent='原文の能力説明を見る';const ability=document.createElement('p');ability.className='ability';ability.textContent=d.ability||'説明なし';details.append(summary,ability);div.append(h,reason,details);target.append(div);}
+ if(!shown.length)target.textContent='条件に合う項目はありません。';
+}
+function register(data,origin){if(!Array.isArray(data)||data.length<10)throw Error('配列のデビル図鑑データを指定してくれ');
+ catalog=data.filter(x=>x&&typeof x.name==='string'&&Number.isInteger(x.id));
+ const all=rows(),src=all.filter(x=>x.decision[0]==='source').length,leg=all.filter(x=>x.decision[0]==='legacy').length,ver=all.filter(x=>x.decision[0]==='verified').length,pro=all.filter(x=>x.decision[0]==='provisional').length,pending=all.length-src-leg-ver-pro;
+ $('status').textContent=`${origin}：${catalog.length}体 読込済み / 実戦規則反映 ${ver}体 / 部分暫定 ${pro}体 / 記述モデル ${src}体 / 旧試作 ${leg}体 / 保留 ${pending}体`;
+ render();}
+async function refresh(){let errors=[];for(const url of ['https://anazashiroko-ai.github.io/another-alice-devil-index/dist/devils.json','https://raw.githubusercontent.com/anazashiroko-ai/another-alice-devil-index/main/dist/devils.json']){
+ try{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),9500);const r=await fetch(url,{cache:'no-store',signal:controller.signal});clearTimeout(timer);if(!r.ok)throw Error('HTTP '+r.status);register(await r.json(),'公開図鑑');return;}catch(e){errors.push(String(e.message));}}
+ $('status').textContent='公開図鑑の読み込みに失敗。JSONを手動で読み込んでくれ。';}
+function download(){if(!catalog.length){$('status').textContent='図鑑読み込み後にCSVを保存できる';return;}
+ const lines=[['ID','名前','属性','DP','発動段階','分類','保留理由','図鑑能力説明'],...rows().map(x=>[x.data.id,x.data.name,x.data.attr||'',x.data.dp||'',(x.data.timing||[]).join('/'),x.decision[1],x.decision[2],x.data.ability||''])];
+ const csv='\ufeff'+lines.map(r=>r.map(c=>'"'+String(c??'').replaceAll('"','""')+'"').join(',')).join('\r\n');
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='四月島_デビル能力監査_全396体.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+$('refresh').addEventListener('click',refresh);$('file').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{register(JSON.parse(await f.text()),'手元のJSON');}catch(e){$('status').textContent='読み込みエラー：'+e.message;}});$('filter').addEventListener('change',render);$('query').addEventListener('input',render);$('export').addEventListener('click',download);refresh();
+})();
+</script></body></html>
