@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const E=require('./kei_unified_engine_v0_4_5.js');
+const E=require('../src/kei_unified_engine_v0_4_5.js');
 let passed=0;
 function check(name,fn){try{fn();passed++;console.log('PASS',name)}catch(err){console.error('FAIL',name,err.stack);process.exitCode=1;}}
 const empty=Array(6).fill(null);
