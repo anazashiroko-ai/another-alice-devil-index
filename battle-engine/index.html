@@ -362,9 +362,9 @@ const D={
  narcissus:{name:'ナルキッソス',phase:'start',model:true},
  chlorissa:{name:'クロリッサ',phase:'start',model:true},
  kings_wind_gremory:{name:'王の風・グレモリー',phase:'start',model:true},
- freya:{name:'フレイヤ',phase:'start',model:true},
- red_folter:{name:'赤い秘密を交わすフォルター夫妻',phase:'start',model:true},
- odradek:{name:'オドラデク',phase:'start',model:true},
+ freya:{name:'フレイヤ',phase:'start',model:true,minimumTurn:2},
+ red_folter:{name:'赤い秘密を交わすフォルター夫妻',phase:'start',model:true,minimumTurn:2},
+ odradek:{name:'オドラデク',phase:'start',model:true,minimumTurn:2},
  hagenti:{name:'ハーゲンティ',phase:'start',model:true},
  sargatanas:{name:'サルガタナス',phase:'start',model:true},
  furcas:{name:'賢者の火・フルカス',phase:'start',model:true},
@@ -858,7 +858,7 @@ function preset(name='sho'){
   player:{name:'シロコ',base:{attack:31,defense:6203,hp:50000,magic:10000}},
   enemy:{name:'試験相手',base:{attack:1010,defense:6133,hp:90000,magic:2000}},
   playerDeck:['troll','beelzebub','rabbit',null,'laplace',null],
-  enemyDeck:['freya','odradek','freya','kings_wind_gremory','chlorissa','red_folter']
+  enemyDeck:['marbas','odradek','freya','kings_wind_gremory','chlorissa','red_folter']
  };
  throw Error('不明なプリセット：'+name);
 }
