@@ -7,9 +7,9 @@
     "verified": 8,
     "provisional": 5,
     "description": 104,
-    "partial": 244,
+    "partial": 246,
     "legacy": 23,
-    "pending": 12
+    "pending": 10
   },
   "devils": [
     {
@@ -671,10 +671,10 @@
     {
       "id": 83,
       "name": "◎死と再生",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_83",
+      "notes": "当ターンの相手札を奪い、その能力を固有段階で発動する暫定モデル。既発動札・同時発動の順序未確認。"
     },
     {
       "id": 84,
@@ -1727,10 +1727,10 @@
     {
       "id": 215,
       "name": "◎誕生と消滅",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_215",
+      "notes": "次ターンの相手札を奪う予約モデル。相手先攻時や予約後の配置変更の競合は未検証。"
     },
     {
       "id": 216,
