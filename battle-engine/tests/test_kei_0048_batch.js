@@ -88,7 +88,7 @@ check('ジャックフロスト：火属性相手に70%の追ダメージ',()=>{
  assert.ok(b.fighters.enemy.current.hp<5e9);
 });
 check('ドリドルム：相手攻撃を1残して自攻撃を当ターンのみ加算',()=>{
- const p=blank(),e=blank();p[0]='catalog_157';e[0]='vasago';const b=E.createBattle(config(p,e));
+ const p=blank(),e=blank();p[0]='catalog_157';const b=E.createBattle(config(p,e));
  const before=b.fighters.player.current.attack;E.round(b);
  assert.equal(b.fighters.enemy.current.attack,1);
  assert.equal(b.fighters.player.current.attack,before);
