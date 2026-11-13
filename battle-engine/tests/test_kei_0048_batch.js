@@ -21,7 +21,7 @@ function check(name,fn){fn();tests++;console.log('PASS',name);}
 const partial=E.SOURCE_RULES.filter(x=>x.coverage==='partial');
 check('004.8部分モデル240体、既存記述モデル97件（重複なし）',()=>{
  assert.equal(partial.length,240);
- assert.equal(new Set(partial.map(x=>x.name)).size,232);
+ assert.equal(new Set(partial.map(x=>x.name)).size,240);
  assert.equal(E.SOURCE_RULES.length,337);
 });
 check('未対応の3候補はモデル計上しない',()=>{
