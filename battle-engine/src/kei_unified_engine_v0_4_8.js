@@ -72,7 +72,7 @@ const SOURCE_RULES=[{"key":"vasago","name":"ウァサゴ","phase":"before","minT
 const BATCH_0048=(root&&root.KeiBatchRules0048)||(typeof require==='function'?require('./kei_batch_rules_0048.js'):[]);
 const BATCH_META=Object.fromEntries(BATCH_0048.map(x=>[x.key,x]));
 const META_LOOKUP=new Map((root?.KeiDevilMeta0048||[]).map(x=>[String(x.name).normalize('NFKC').replace(/^[○◎]+/,'').trim(),x]));
-const BATCH_EXCLUDED_0048=new Set([94,309]); // Needs unresolved phases/effects: not counted as implemented.
+const BATCH_EXCLUDED_0048=new Set([94]); // Needs unresolved phases/effects: not counted as implemented.
 SOURCE_RULES.push(...BATCH_0048.filter(x=>!BATCH_EXCLUDED_0048.has(x.id)));
 for(const x of SOURCE_RULES)D[x.key]={name:x.name,phase:x.phase,model:true,tier:x.coverage==='partial'?'description-partial':'source-model',sourceId:x.key,minimumTurn:x.minTurn,notes:x.comment,coverage:x.coverage||'existing',phases:x.stages||[x.phase]};
 for(const d of Object.values(D)){const meta=META_LOOKUP.get(String(d.name).normalize('NFKC').replace(/^[○◎]+/,'').trim());if(meta){d.dp=meta.dp;d.attr=meta.attr;}}
@@ -286,7 +286,17 @@ function round(b){
      case 'extraAttackAtEnd':{const m=prev.estimateDamage(actor.current.attack*op.scale,target.current.defense);if(!m.ok){markUnknown('追加攻撃の式が未計算');break;}target.current.hp-=m.damage;emit('attack',`${dev.name}の終了時追撃！ ${target.name}に${fstr(m.damage)}のダメージ〔補間〕`);break;}
      case 'coppeliaDoll':{const isLatest=externalBool(s,'dollLatest');if(b.complete)break;if(isLatest){for(const st of ['attack','defense'])actor.current[st]+=actor.activeEquipment[st]*2;}else{const stolen=target.current.attack*.3;target.current.attack-=stolen;actor.current.attack+=stolen;}break;}
      case 'stealNextDevil':markUnknown('デビル奪取・再発動の仕様が未検証');break;
-     case 'fenrirRandomAttack':markUnknown('10匹出現時の追加攻撃倍率が未記載');break;
+     case 'fenrirRandomAttack':{
+       const drawn=roll(b),beasts=drawn<.7?1:drawn<.9?2:drawn<.99?3:10;
+       if(beasts===10){markUnknown('フェンリル：10匹出現時の倍率が図鑑未記載（1％の未解明分岐）');break;}
+       const estimate=prev.estimateDamage(actor.current.magic,target.current.magic);
+       if(!estimate.ok){markUnknown('フェンリル：追撃の魔力戦ダメージ式は未解明：'+estimate.reason);break;}
+       target.current.hp-=estimate.damage*beasts;
+       emit('attack',`フェンリル：獣${beasts}匹による魔力戦追撃 ${fstr(estimate.damage*beasts)}ダメージ〔物理経験式を魔力へ仮適用〕`);
+       const caveat='フェンリル：1／2／3匹の倍率は図鑑値。10匹（1％）は不明で停止し、魔力戦の基礎ダメージは仮式';
+       if(!b.warnings.includes(caveat))b.warnings.push(caveat);
+       break;
+     }
 
      case 'chanceSwap':if(roll(b)<op.p){const [wa,sa]=op.first.split('.'),[wb,sb]=op.second.split('.'),p=who(wa),q=who(wb),v=p.current[sa];p.current[sa]=q.current[sb];q.current[sb]=v;}break;
      case 'magicHit':{const h=prev.estimateDamage(actor.current.magic,target.current.magic);if(!h.ok){markUnknown('魔力攻撃の式を計算できない');break;}target.current.hp-=h.damage;emit('attack',`${dev.name}の魔力攻撃：${fstr(h.damage)}ダメージ〔仮式〕`);break;}
