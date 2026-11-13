@@ -5,7 +5,7 @@ const fs=require('fs'),path=require('path'),root=path.join(__dirname,'..');
 const get=p=>fs.readFileSync(path.join(root,p),'utf8');
 const check=process.argv.includes('--check'),changes=[];
 function save(file,value){const f=path.join(root,file);if(fs.existsSync(f)&&get(file)===value)return;changes.push(file);if(!check){fs.mkdirSync(path.dirname(f),{recursive:true});fs.writeFileSync(f,value,'utf8');}}
-function scripts(html,replace){let i=0;const result=html.replace(/<script>([\s\S]*?)<\/script>/g,(whole,source)=>{const v=replace[i++];return v===undefined?whole:'<script>\n'+v.trimEnd()+'\n</script>';});if(i!==4)throw Error('Expected four inline scripts, got '+i);return result;}
+function scripts(html,replace){let i=0;const result=html.replace(/<script>([\s\S]*?)<\/script>/g,(whole,source)=>{const v=replace[i++];return v===undefined?whole:'<script>\n'+v.trim()+'\n</script>';});if(i!==4)throw Error('Expected four inline scripts, got '+i);return result;}
 function name(x){return String(x||'').normalize('NFKC').replace(/^[○◎]+/,'').trim();}
 function main(){
  const source=JSON.parse(get('dist/devils.json')),base=get('battle-engine/src/kei_battle_engine_v0_2.js'),batch=get('battle-engine/src/kei_batch_rules_0048.js'),core=get('battle-engine/src/kei_unified_engine_v0_4_8.js');
