@@ -27,7 +27,13 @@ function main(){
  const tag='/* KEI-LEGACY-SHIM */';
  const keep=parts[0].includes(tag)?parts[0].slice(parts[0].indexOf(tag)+tag.length).trim():parts[0].trim();
  const shim=polyfill+'\nif(typeof globalThis==="undefined"){var globalThis=(function(){return this;})();}\nif(!String.prototype.normalize){String.prototype.normalize=function(){return String(this);};}\n'+tag+'\n'+keep;
- save('battle-engine/legacy.html',scripts(legacy,[shim,transpile(base,'damage-v2.js'),transpile(batch+'\n'+core,'engine-0048.js')]).replace(/004\.\d/g,version));
+ // Embedded library uses no network: attach official catalog IDs to existing engine keys.
+ const sourceIds={};for(const row of source){const k=name(row.name);if(sourceIds[k]!==undefined)throw Error('Duplicate normalized catalog name '+k);sourceIds[k]=row.id;}
+ const keyIds={};for(const key of Object.keys(E.D)){const id=sourceIds[name(E.D[key].name)];if(id!==undefined)keyIds[key]=id;}
+ const mapMarker=/^var DEVIL_ID_MAP=.*; \/\* KEI-DEVIL-ID-MAP \*\/$/m;
+ if(!mapMarker.test(parts[3]))throw Error('Legacy sort UI lacks generated catalog-ID anchor');
+ const ui=parts[3].replace(mapMarker,()=> 'var DEVIL_ID_MAP='+JSON.stringify(keyIds)+'; /* KEI-DEVIL-ID-MAP */');
+ save('battle-engine/legacy.html',scripts(legacy,[shim,transpile(base,'damage-v2.js'),transpile(batch+'\n'+core,'engine-0048.js'),ui]).replace(/004\.\d/g,version));
  console.log(version,JSON.stringify(counts));
 }
 try{main();if(check&&changes.length){console.error('Generated files stale:',changes.join(', '));process.exitCode=1;}else console.log('Sync:',changes.length?changes.join(', '):'up to date');}catch(e){console.error(e.stack||e);process.exitCode=1;}
