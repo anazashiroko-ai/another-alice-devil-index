@@ -7,9 +7,9 @@
     "verified": 8,
     "provisional": 5,
     "description": 104,
-    "partial": 232,
+    "partial": 240,
     "legacy": 23,
-    "pending": 24
+    "pending": 16
   },
   "devils": [
     {
@@ -55,10 +55,10 @@
     {
       "id": 6,
       "name": "ブエル",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_6",
+      "notes": "ブエル：攻撃時にHPを初期へ回復し、攻撃後に自HP30%の直接ダメージ。時系列別モデル。"
     },
     {
       "id": 7,
@@ -311,10 +311,10 @@
     {
       "id": 38,
       "name": "デカラビア",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_38",
+      "notes": "デカラビア：バトル中攻撃・魔力1.6倍、攻撃後に敵初期HP30%の追加ダメージ。"
     },
     {
       "id": 39,
@@ -391,10 +391,10 @@
     {
       "id": 48,
       "name": "アロケル",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_48",
+      "notes": "開始時守備1.3倍、攻撃時敵守備-30%（当ターンのみ）、攻撃後は敵現札が闇かどうかで敵魔力30%直接ダメージ／自HP80%自傷。空札は未確定として停止。"
     },
     {
       "id": 49,
@@ -823,10 +823,10 @@
     {
       "id": 102,
       "name": "○オスタル",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_102",
+      "notes": "素守備比較で高ければ通常攻撃吸収。"
     },
     {
       "id": 103,
@@ -1215,10 +1215,10 @@
     {
       "id": 151,
       "name": "ジャックフロスト",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_151",
+      "notes": "当ターン敵デビルが火・風・闇のとき敵HP70%の直接ダメージ。"
     },
     {
       "id": 152,
@@ -1263,10 +1263,10 @@
     {
       "id": 157,
       "name": "ドリドルム",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_157",
+      "notes": "敵攻撃力を1残して移し、自攻撃力への加算は当ターンのみ。『ただし…』の隠し効果は未解明。"
     },
     {
       "id": 158,
@@ -2359,10 +2359,10 @@
     {
       "id": 294,
       "name": "ルナ・スピアーナ",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_294",
+      "notes": "ルナ・スピアーナ：通常攻撃を停止し、ターン終了時に攻撃力×5で追撃（暫定物理式）。"
     },
     {
       "id": 295,
@@ -2727,10 +2727,10 @@
     {
       "id": 340,
       "name": "クエレブレ＆シャナ",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_340",
+      "notes": "クエレブレ＆シャナ：開始時に初期HP×2、攻撃後に敵魔力1。"
     },
     {
       "id": 341,
