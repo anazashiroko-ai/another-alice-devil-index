@@ -40,7 +40,8 @@ battle-engine/
 │   ├── kei_unified_engine_v0_4_5.js # 旧004.5のエンジン
 │   └── kei_battle_engine_v0_2.js    # 既存ダメージ推定基盤
 └── tests/
-    └── test_kei_unified_engine_v0_4_5.js
+    ├── test_kei_unified_engine_v0_4_5.js
+    └── test_kei_0046_additions.js  # 追加能力・保留規則の回帰テスト
 ```
 
 ### ソースをローカルで試験する
@@ -49,6 +50,7 @@ battle-engine/
 
 ```bash
 node battle-engine/tests/test_kei_unified_engine_v0_4_5.js
+node battle-engine/tests/test_kei_0046_additions.js
 ```
 
 `index.html` には動作に必要なJSを埋め込んでいるため、GitHub Pagesでは `src/` のファイルを別読み込みしません。HTMLの単独利用と、ソースの編集・回帰試験は別の用途です。
