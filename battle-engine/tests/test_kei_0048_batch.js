@@ -19,10 +19,10 @@ function battle(key,turn=1,enemyFirst='vasago'){
 let tests=0;
 function check(name,fn){fn();tests++;console.log('PASS',name);}
 const partial=E.SOURCE_RULES.filter(x=>x.coverage==='partial');
-check('004.8部分モデル240体、既存記述モデル97件（重複なし）',()=>{
- assert.equal(partial.length,240);
- assert.equal(new Set(partial.map(x=>x.name)).size,240);
- assert.equal(E.SOURCE_RULES.length,337);
+check('004.8部分モデル244体、既存記述モデル97件（重複なし）',()=>{
+ assert.equal(partial.length,244);
+ assert.equal(new Set(partial.map(x=>x.name)).size,244);
+ assert.equal(E.SOURCE_RULES.length,341);
 });
 check('未対応の3候補はモデル計上しない',()=>{
  for(const id of [94,215,309])assert.ok(!E.D['catalog_'+id]?.model,'#'+id);
@@ -92,5 +92,26 @@ check('ドリドルム：相手攻撃を1残して自攻撃を当ターンのみ
  const before=b.fighters.player.current.attack;E.round(b);
  assert.equal(b.fighters.enemy.current.attack,1);
  assert.equal(b.fighters.player.current.attack,before);
+});
+check('ネモフィラ：次ターンの両札交換と当ターンの戦闘停止',()=>{
+ const p=blank(),e=blank();p[0]='catalog_221';p[1]='marbas';e[1]='vasago';
+ const b=E.createBattle(config(p,e));E.round(b);
+ assert.equal(b.tables.player[1],'vasago');assert.equal(b.tables.enemy[1],'marbas');
+ assert.ok(b.turns[0].endTurn);
+});
+check('マクスウェル：現在ターン以外の全スロットを交換',()=>{
+ const p=blank(),e=blank();p[2]='catalog_306';p[3]='marbas';e[3]='vasago';
+ const b=E.createBattle(config(p,e));E.round(b);E.round(b);E.round(b);
+ assert.equal(b.tables.player[3],'vasago');assert.equal(b.tables.enemy[3],'marbas');
+ assert.equal(b.tables.player[2],'catalog_306');
+});
+check('スプリガン：即死に至らないダメージは回復し守備を増加',()=>{
+ const p=blank(),e=blank();p[0]='catalog_190';
+ const a={attack:0,defense:4000,hp:1e9,magic:500},z={attack:100000,defense:4700,hp:1e10,magic:1100};
+ const b=E.createBattle(config(p,e,{player:{base:a},enemy:{base:z}}));
+ const oldHP=b.fighters.player.current.hp;E.round(b);
+ assert.ok(!b.error);
+ assert.equal(b.fighters.player.current.hp,oldHP);
+ assert.ok(b.fighters.player.current.defense>4000);
 });
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
