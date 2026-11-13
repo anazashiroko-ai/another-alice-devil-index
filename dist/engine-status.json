@@ -7,9 +7,9 @@
     "verified": 8,
     "provisional": 5,
     "description": 104,
-    "partial": 246,
+    "partial": 247,
     "legacy": 23,
-    "pending": 10
+    "pending": 9
   },
   "devils": [
     {
@@ -2479,10 +2479,10 @@
     {
       "id": 309,
       "name": "フェンリル",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_309",
+      "notes": "フェンリルの複数獣魔力戦追撃（10匹倍率が不明）。"
     },
     {
       "id": 310,
