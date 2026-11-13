@@ -8,6 +8,7 @@ p{margin:8px 0}.note{background:#fff8e3;border:1px solid #caba8e;padding:10px;fo
 button{font-size:14px;padding:9px 11px;margin:3px;background:#1e5e7e;color:white;border:1px solid #1a4a61;border-radius:3px;}button:focus,input:focus,select:focus{outline:2px solid #bb814e}
 input,select{font-size:14px;max-width:100%;box-sizing:border-box}input[type=text]{padding:5px;border:1px solid #9ba9b0;}select{padding:5px;border:1px solid #9ba9b0;background:white;}
 label{font-size:13px;color:#425b6b}.block{display:block}.stats{width:100%;white-space:nowrap;overflow:hidden;line-height:31px}.stats span,.stats input{display:inline-block;vertical-align:middle}.stats .hd{width:19%;text-align:center;font-size:12px}.stats .statlabel{width:19%;font-size:12px}.stats input{width:19%;height:28px;font-size:13px;}
+.decksort{padding:8px 6px;margin:9px 0;background:#f1f5f7;border:1px solid #d3dfe3;line-height:2.5}.decksort label{margin-right:5px}.decksort select{margin-right:12px;font-size:14px}.decksort p{line-height:1.4;margin:2px 0 0}
 .deckline{padding:3px 0;border-bottom:1px solid #e4e7e8}.deckline label{display:inline-block;width:32px;font-weight:bold}.deckline select{width:85%;font-size:13px}
 .order{display:inline-block;margin:4px 7px 4px 0}.order select{font-size:12px}.statusbar{padding:10px;border:1px solid #b2cad5;background:#eaf6f8;margin:13px 0;font-size:14px}.statusbar.error{background:#fee6e3;border-color:#dbafa5;color:#9f2c2c}.statusbar.ok{background:#e5f3e8;border-color:#afcfb6;color:#22542d}#result{font-weight:bold;padding:10px 3px;font-size:14px}
 #log{background:#fff;border:1px solid #aeb8be;padding:8px;max-height:640px;overflow:auto}.event{padding:5px 2px;border-bottom:1px dotted #d5dadd;white-space:pre-wrap;word-wrap:break-word;font-size:13px}.event-devil{color:#583f83;font-weight:bold}.event-attack{color:#1f5572}.event-result{color:#196b46;font-weight:bold}.event-unknown{color:#ad2929;font-weight:bold}
@@ -23,7 +24,12 @@ small,.muted{font-size:12px;color:#596971}noscript{color:#a32222;font-weight:bol
 <div class="panel"><h2>1. ステータス</h2><label for="name-player">自分の名前</label><input type="text" id="name-player" value="シロコ">
 <div id="stats-player"></div><hr><label for="name-enemy">相手の名前</label><input type="text" id="name-enemy" value="対戦相手"><div id="stats-enemy"></div>
 <p class="muted">ステータスは「素＋アシスト＋装備」で計算します。</p></div>
-<div class="panel"><h2>2. デビルテーブル（各6枠）</h2><h3>自分</h3><div id="deck-player"></div><h3>相手</h3><div id="deck-enemy"></div>
+<div class="panel"><h2>2. デビルテーブル（各6枠）</h2>
+<div class="decksort"><label for="deck-sort-key">プルダウンの並び順</label>
+<select id="deck-sort-key" aria-label="デビルの並び順"><option value="kana">50音順</option><option value="id">図鑑ID順</option></select>
+<label for="deck-sort-dir">順序</label><select id="deck-sort-dir" aria-label="昇順・降順"><option value="asc">昇順</option><option value="desc">降順</option></select>
+<p class="muted">自分と相手の12枠をまとめて並べ替えます。セット済みの札は維持します。漢字名は読み仮名未登録のため端末の日本語照合順です。</p>
+</div><h3>自分</h3><div id="deck-player"></div><h3>相手</h3><div id="deck-enemy"></div>
 <p class="muted">選択欄は実装済みモデルと、未実装の一部を収録。未実装能力では「数値＋発動順」モードの計算を中断します。セット可能ターン制限にも対応します。</p></div>
 <div class="panel"><h2>3. 戦闘条件</h2><p><label for="mode">計算方式</label> <select id="mode"><option value="full">数値＋発動順</option><option value="trace">発動順のみ</option></select> <label for="seed">乱数値</label> <input type="text" id="seed" size="9" value="20261112"></p>
 <p class="muted">毎ターンの先攻を指定（ゲームのランダム抽選は再現しません）。</p>
@@ -85,6 +91,8 @@ function _slicedToArray(r,e){return _arrayWithHoles(r)||_iterableToArrayLimit(r,
 </script>
 <script>(function(){
 var E, battle=null, keys=['attack','defense','hp','magic'], labels=['攻撃','守備','体力','魔力'];
+var DEVIL_ID_MAP={}; /* KEI-DEVIL-ID-MAP */
+var devilChoices=[];
 function el(id){return document.getElementById(id);}
 function setText(target,txt){if(typeof target.textContent!=='undefined')target.textContent=String(txt);else target.innerText=String(txt);}
 function tell(message,isBad){var x=el('status');setText(x,message);x.className=isBad?'error':'ok';}
@@ -100,17 +108,55 @@ function rows(side){var title=side==='player'?'自分':'相手',h='<h3>'+title+'
   h+='</div>';}
  return h;
 }
+function sortDevils(list,kind,dir){
+ var result=list.slice(0),sign=dir==='desc'?-1:1;
+ result.sort(function(a,b){
+  var v=0;
+  if(kind==='id'){
+   if(a.id&&b.id)v=a.id-b.id;
+   else if(a.id&&!b.id)return -1;
+   else if(!a.id&&b.id)return 1;
+  }else{
+   var x=kanaName(a.name),y=kanaName(b.name);
+   try{v=x.localeCompare(y,'ja');}catch(e){v=x<y?-1:(x>y?1:0);}
+  }
+  if(!v){var x=kanaName(a.name),y=kanaName(b.name);v=x<y?-1:(x>y?1:0);}
+  if(!v)v=a.key<b.key?-1:(a.key>b.key?1:0);
+  return sign*v;
+ });
+ return result;
+}
+function kanaName(value){
+ var s=String(value||'').replace(/^[○◎]+/,'').replace(/[ァ-ヶ]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-96);});
+ return s;
+}
+function renderDeckChoices(){
+ var kind=el('deck-sort-key').value,dir=el('deck-sort-dir').value,list=sortDevils(devilChoices,kind,dir);
+ var sides=['player','enemy'];
+ for(var i=0;i<sides.length;i++)for(var t=1;t<=6;t++){
+  var select=el(sides[i]+'deck'+t);
+  if(!select)continue;
+  var chosen=select.value;
+  clear(select);option(select,'──── 空欄 ────','');
+  for(var j=0;j<list.length;j++){
+   var d=list[j],prefix=kind==='id'?(d.id?'ID '+d.id+'｜':'IDなし｜'):'';
+   var label=prefix+d.name+(d.key==='lucifer'?'（仮）':(!d.model?'（未実装）':''))+(d.min>1?'／'+d.min+'T以降':'');
+   option(select,label,d.key);
+  }
+  select.value=chosen;
+  if(select.value!==chosen)select.value='';
+ }
+}
 function build(){el('stats-player').innerHTML=rows('player');el('stats-enemy').innerHTML=rows('enemy');
- var d=E.D, names=[];
- for(var key in d)if(Object.prototype.hasOwnProperty.call(d,key))names.push({key:key,name:d[key].name,model:d[key].model,min:d[key].minimumTurn||1});
- names.sort(function(a,b){return a.name.localeCompare(b.name);});
+ var d=E.D;devilChoices=[];
+ for(var key in d)if(Object.prototype.hasOwnProperty.call(d,key))devilChoices.push({key:key,name:d[key].name,model:d[key].model,min:d[key].minimumTurn||1,id:DEVIL_ID_MAP[key]||0});
  var panels=[{side:'player',title:'自分のデビル'},{side:'enemy',title:'相手のデビル'}];
  for(var p=0;p<panels.length;p++){var pan=panels[p],wrap=el('deck-'+pan.side);clear(wrap);
   for(var t=1;t<=6;t++){var line=document.createElement('div');line.className='deckline';var lab=document.createElement('label');setText(lab,t+'T');lab.htmlFor=pan.side+'deck'+t;line.appendChild(lab);
-   var select=document.createElement('select');select.id=pan.side+'deck'+t;option(select,'──── 空欄 ────','');
-   for(var i=0;i<names.length;i++){var n=names[i];var desc=n.name+(n.key==='lucifer'?'（仮）':(!n.model?'（未実装）':''))+(n.min>1?'／'+n.min+'T以降':'');option(select,desc,n.key);}
+   var select=document.createElement('select');select.id=pan.side+'deck'+t;
    line.appendChild(select);wrap.appendChild(line);}
  }
+ renderDeckChoices();
  for(var t=1;t<=6;t++){var ord=el('order'+t);option(ord,'自分先攻','player');option(ord,'相手先攻','enemy');}
 }
 function fill(config){var sides=['player','enemy'];for(var si=0;si<sides.length;si++){
@@ -148,7 +194,10 @@ function demo(){var c=E.preset('free');c.mode='full';c.title='パイモン対キ
  c.playerDeck=['paimon','freya',null,null,null,null];c.enemyDeck=[null,null,null,null,null,null];fill(c);}
 function init(){try{
  E=window.KeiUnifiedEngineV45;if(!E)throw new Error('計算本体を読み込めません');
- build();el('loadDemo').onclick=demo;el('loadSho').onclick=function(){fill(E.preset('sho'));};el('loadEmpty').onclick=function(){fill(E.preset('free'));};
+ build();
+ el('deck-sort-key').onchange=renderDeckChoices;
+ el('deck-sort-dir').onchange=renderDeckChoices;
+ el('loadDemo').onclick=demo;el('loadSho').onclick=function(){fill(E.preset('sho'));};el('loadEmpty').onclick=function(){fill(E.preset('free'));};
  el('runTurn').onclick=function(){run(false);};el('runAll').onclick=function(){run(true);};
  demo();tell('JavaScript動作確認OK。旧形式のエンジンを読み込みました。',false);
  }catch(e){tell('起動エラー：'+(e.message||String(e)),true);}}
