@@ -71,7 +71,7 @@ check('ジェントルマン：123456→456123、後半3札を削除しない',(
 check('ブエル：攻撃前と攻撃後の２段階で発動する',()=>{
  const p=blank(),e=blank();p[0]='catalog_6';e[0]='vasago';const b=E.createBattle(config(p,e));b.fighters.player.current.hp=100000;E.round(b);
  assert.equal(b.turns[0].fired.player.filter(k=>k==='catalog_6').length,2);
- assert.ok(b.fighters.enemy.current.hp<6e9,'敵HP30%分が減っていない');
+ assert.ok(b.fighters.enemy.current.hp<8e9,'自HP30%分が追加ダメージになっていない');
 });
 check('ルナ・スピアーナ：通常攻撃停止と終了時追撃',()=>{
  const p=blank();p[0]='catalog_294';const b=E.createBattle(config(p,blank()));E.round(b);
