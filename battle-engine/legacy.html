@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>四月島・仮想戦闘エンジン 004.5 旧端末向け軽量版</title>
+<style>
+body{margin:0;background:#f6f4ee;color:#202a35;font:15px/1.55 Arial,Meiryo,sans-serif;}
+#wrapper{max-width:680px;margin:0 auto;padding:12px 9px 45px;}h1{font-size:23px;color:#234b64;line-height:1.3}h2{font-size:18px;background:#e3ebef;padding:6px 9px;border-left:4px solid #286482;margin-top:24px}h3{font-size:15px;margin:9px 0 5px;}
+p{margin:8px 0}.note{background:#fff8e3;border:1px solid #caba8e;padding:10px;font-size:13px}.panel{background:white;border:1px solid #cbd1d3;padding:11px;margin:11px 0;border-radius:5px;}
+button{font-size:14px;padding:9px 11px;margin:3px;background:#1e5e7e;color:white;border:1px solid #1a4a61;border-radius:3px;}button:focus,input:focus,select:focus{outline:2px solid #bb814e}
+input,select{font-size:14px;max-width:100%;box-sizing:border-box}input[type=text]{padding:5px;border:1px solid #9ba9b0;}select{padding:5px;border:1px solid #9ba9b0;background:white;}
+label{font-size:13px;color:#425b6b}.block{display:block}.stats{width:100%;white-space:nowrap;overflow:hidden;line-height:31px}.stats span,.stats input{display:inline-block;vertical-align:middle}.stats .hd{width:19%;text-align:center;font-size:12px}.stats .statlabel{width:19%;font-size:12px}.stats input{width:19%;height:28px;font-size:13px;}
+.deckline{padding:3px 0;border-bottom:1px solid #e4e7e8}.deckline label{display:inline-block;width:32px;font-weight:bold}.deckline select{width:85%;font-size:13px}
+.order{display:inline-block;margin:4px 7px 4px 0}.order select{font-size:12px}.statusbar{padding:10px;border:1px solid #b2cad5;background:#eaf6f8;margin:13px 0;font-size:14px}.statusbar.error{background:#fee6e3;border-color:#dbafa5;color:#9f2c2c}.statusbar.ok{background:#e5f3e8;border-color:#afcfb6;color:#22542d}#result{font-weight:bold;padding:10px 3px;font-size:14px}
+#log{background:#fff;border:1px solid #aeb8be;padding:8px;max-height:640px;overflow:auto}.event{padding:5px 2px;border-bottom:1px dotted #d5dadd;white-space:pre-wrap;word-wrap:break-word;font-size:13px}.event-devil{color:#583f83;font-weight:bold}.event-attack{color:#1f5572}.event-result{color:#196b46;font-weight:bold}.event-unknown{color:#ad2929;font-weight:bold}
+small,.muted{font-size:12px;color:#596971}noscript{color:#a32222;font-weight:bold}
+</style></head><body><div id="wrapper">
+<h1>四月島・仮想戦闘エンジン<br>004.5 旧端末向け軽量版</h1>
+<p class="note"><b>古いブラウザ用：</b>現行004.5の計算本体を古いJavaScript形式に変換。外部ライブラリ・通信・ログイン不要。<b>JavaScript自体が無効な場合は動作しません。</b> デビル索引のオンライン検索・JSON読込等は省略しました。研究用の暫定モデルなので公式の戦闘結果を保証しません。</p>
+<noscript><p>この端末ではJavaScriptが無効、または非対応です。ブラウザ設定で有効化してください。有効化できなければ、こちらの画面から戦闘計算はできません。</p></noscript>
+<div id="status" class="statusbar">読み込み中。ここが変わらなければJavaScriptが動作していないか、ブラウザが古すぎる可能性があります。</div>
+<div class="panel"><h2>最初に動作確認</h2>
+<button type="button" id="loadDemo">パイモン対キジの例</button><button type="button" id="loadSho">ショウ戦の例</button><button type="button" id="loadEmpty">空テーブル</button>
+<p class="muted">「パイモン対キジの例」→「6ターン一括実行」で試せます。操作ができれば起動成功です。</p></div>
+<div class="panel"><h2>1. ステータス</h2><label for="name-player">自分の名前</label><input type="text" id="name-player" value="シロコ">
+<div id="stats-player"></div><hr><label for="name-enemy">相手の名前</label><input type="text" id="name-enemy" value="対戦相手"><div id="stats-enemy"></div>
+<p class="muted">ステータスは「素＋アシスト＋装備」で計算します。</p></div>
+<div class="panel"><h2>2. デビルテーブル（各6枠）</h2><h3>自分</h3><div id="deck-player"></div><h3>相手</h3><div id="deck-enemy"></div>
+<p class="muted">選択欄は実装済みモデルと、未実装の一部を収録。未実装能力では「数値＋発動順」モードの計算を中断します。セット可能ターン制限にも対応します。</p></div>
+<div class="panel"><h2>3. 戦闘条件</h2><p><label for="mode">計算方式</label> <select id="mode"><option value="full">数値＋発動順</option><option value="trace">発動順のみ</option></select> <label for="seed">乱数値</label> <input type="text" id="seed" size="9" value="20261112"></p>
+<p class="muted">毎ターンの先攻を指定（ゲームのランダム抽選は再現しません）。</p>
+<div id="orders">
+<span class="order">1T <select id="order1"></select></span><span class="order">2T <select id="order2"></select></span><span class="order">3T <select id="order3"></select></span><span class="order">4T <select id="order4"></select></span><span class="order">5T <select id="order5"></select></span><span class="order">6T <select id="order6"></select></span>
+</div></div>
+<div class="panel"><h2>4. 実行</h2><button id="runTurn" type="button">1ターン進める</button><button id="runAll" type="button">6ターン一括実行</button>
+<div id="result">未実行</div><div id="log">戦闘ログがここに表示されます。</div></div>
+<p class="muted">四月島研究室／互換版試作。現行004.5と同じ暫定戦闘ロジックを使用。元のソースは変更しません。発動順・未知の効果・物理ダメージには未確定部分があります。</p>
+</div>
+<script>(function(){
+if(!Array.isArray)Array.isArray=function(x){return Object.prototype.toString.call(x)==='[object Array]';};
+if(!Array.prototype.fill)Array.prototype.fill=function(v){for(var i=0;i<this.length;i++)this[i]=v;return this;};
+if(!Array.prototype.includes)Array.prototype.includes=function(v){for(var i=0;i<this.length;i++)if(this[i]===v ||(this[i]!==this[i]&&v!==v))return true;return false;};
+if(!Array.prototype.find)Array.prototype.find=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return this[i];};
+if(!Array.prototype.findIndex)Array.prototype.findIndex=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return i;return -1;};
+if(!String.prototype.includes)String.prototype.includes=function(s){return this.indexOf(s)!==-1;};
+if(!String.prototype.startsWith)String.prototype.startsWith=function(s){return this.substr(0,s.length)===s;};
+if(!Object.keys)Object.keys=function(o){var a=[];for(var k in o)if(Object.prototype.hasOwnProperty.call(o,k))a.push(k);return a;};
+if(!Object.values)Object.values=function(o){var a=[],ks=Object.keys(o);for(var i=0;i<ks.length;i++)a.push(o[ks[i]]);return a;};
+if(!Object.entries)Object.entries=function(o){var a=[],ks=Object.keys(o);for(var i=0;i<ks.length;i++)a.push([ks[i],o[ks[i]]]);return a;};
+if(!Object.fromEntries)Object.fromEntries=function(arr){var a={},i;for(i=0;i<arr.length;i++)a[arr[i][0]]=arr[i][1];return a;};
+if(!Object.assign)Object.assign=function(o){for(var i=1;i<arguments.length;i++){var src=arguments[i];for(var k in src)if(Object.prototype.hasOwnProperty.call(src,k))o[k]=src[k];}return o;};
+if(!Number.isFinite)Number.isFinite=function(x){return typeof x==='number'&&isFinite(x);};
+if(!Number.isInteger)Number.isInteger=function(x){return typeof x==='number'&&isFinite(x)&&Math.floor(x)===x;};
+if(!Math.trunc)Math.trunc=function(x){return x<0?Math.ceil(x):Math.floor(x);};
+if(typeof window.Map==='undefined'){window.Map=function(pairs){this.k=[];this.v=[];if(pairs)for(var i=0;i<pairs.length;i++)this.set(pairs[i][0],pairs[i][1]);};
+Map.prototype.has=function(k){return this.k.indexOf(k)>=0;};Map.prototype.get=function(k){var i=this.k.indexOf(k);return i>=0?this.v[i]:void 0;};
+Map.prototype.set=function(k,v){var i=this.k.indexOf(k);if(i<0){this.k.push(k);this.v.push(v);}else this.v[i]=v;return this;};}
+if(typeof window.Set==='undefined'){window.Set=function(){this.a=[];};Set.prototype.has=function(v){return this.a.indexOf(v)>=0;};Set.prototype.add=function(v){if(!this.has(v))this.a.push(v);return this;};Set.prototype.delete=function(v){var i=this.a.indexOf(v);if(i<0)return false;this.a.splice(i,1);return true;};Set.prototype.clear=function(){this.a=[];};}
+})();</script>
+<script>var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+(function (root, factory) {
+    var api = factory();
+    if (typeof module === 'object' && module.exports)
+        module.exports = api;
+    if (root)
+        root.KeiBattleEngineV2 = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+    'use strict';
+    var STATS = ['attack', 'defense', 'hp', 'magic'];
+    var NAMES = { attack: '攻撃力', defense: '守備力', hp: '体力', magic: '魔力' };
+    var DEVILS = {
+        rabbit: 'うさぎと戯れるナルキッソス', chlorissa: 'クロリッサ',
+        kings_wind_gremory: '王の風・グレモリー', freya: 'フレイヤ',
+        red_folter: '赤い秘密を交わすフォルター夫妻', odradek: 'オドラデク'
+    };
+    var fmt = function (n) { return String(Math.round(Number(n) * 100) / 100).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+    var copy = function (obj) { return Object.fromEntries(STATS.map(function (k) { var _a; return [k, Number((_a = obj[k]) !== null && _a !== void 0 ? _a : 0)]; })); };
+    var assertNumber = function (n, key) {
+        if (!Number.isFinite(n) || n < 0)
+            throw Error(key + 'は0以上の有限数で入力すること');
+        return n;
+    };
+    var DAMAGE_ANCHORS = [
+        [11, 2570, 19126], [21, 2570, 5870], [31, 2570, 3368], [41, 2570, 2385],
+        [51, 2570, 1876], [61, 2570, 1571], [71, 2570, 1370], [81, 2570, 1229],
+        [91, 2570, 1125], [101, 2570, 1045], [111, 2570, 983],
+        [500, 822, 183], [1050, 12799, 2732], [1560, 885, 183],
+        [2147, 2020, 415], [3067, 2020, 411], [4800, 12799, 2589],
+        [5537, 59670, 12069], [6133, 52170, 10537], [9400, 12799, 2573],
+        [12000, 12799, 2570], [12341, 2570, 516], [15010, 8610, 1728],
+        [21607, 12799, 2566], [43214, 12799, 2562]
+    ].map(function (_a) {
+        var _b = __read(_a, 3), defense = _b[0], attack = _b[1], damage = _b[2];
+        return ({
+            defense: defense,
+            attack: attack,
+            damage: damage,
+            factor: (damage + 0.5 - attack / 5) / (attack * Math.log(attack))
+        });
+    });
+    var LOW_DEF_COEF = 803.993367;
+    function estimateDamage(attack, defense) {
+        attack = Number(attack);
+        defense = Number(defense);
+        if (!Number.isFinite(attack) || !Number.isFinite(defense))
+            return { ok: false, reason: '数値が不正' };
+        if (attack <= 0)
+            return { ok: true, damage: 0, confidence: '推定', method: '攻撃力が0以下', note: '低・負攻撃力の仕様は未検証' };
+        if (defense < 0)
+            return { ok: false, reason: '守備力が負のときの公式は未検証' };
+        if (defense !== 0 && defense !== 1 && defense < 11)
+            return { ok: false, reason: '守備力0・1以外で11未満の領域は未検証' };
+        if (defense <= 1) {
+            if (attack < 1)
+                return { ok: false, reason: '攻撃力1未満の範囲は未検証' };
+            var amount = Math.floor(Math.max(0, attack * (0.2 + LOW_DEF_COEF * Math.log(attack))));
+            return { ok: true, damage: amount, confidence: attack >= 11 && attack <= 8610 ? '検証範囲' : '範囲外',
+                method: '低守備力・対数経験式', note: '守備力0と1は同じ式と仮定（同一攻撃力での直接比較は未実施）' };
+        }
+        var lo = DAMAGE_ANCHORS[0], hi = DAMAGE_ANCHORS[DAMAGE_ANCHORS.length - 1];
+        for (var i = 0; i < DAMAGE_ANCHORS.length; i++) {
+            var point = DAMAGE_ANCHORS[i];
+            if (point.defense <= defense)
+                lo = point;
+            if (point.defense >= defense) {
+                hi = point;
+                break;
+            }
+        }
+        var factor;
+        var confidence = '補間';
+        if (defense >= DAMAGE_ANCHORS[DAMAGE_ANCHORS.length - 1].defense) {
+            var last = DAMAGE_ANCHORS[DAMAGE_ANCHORS.length - 1];
+            factor = last.factor * last.defense / defense;
+            confidence = '外挿';
+        }
+        else if (lo.defense === hi.defense) {
+            factor = lo.factor;
+            confidence = '校正点';
+        }
+        else {
+            var t = (Math.log(defense) - Math.log(lo.defense)) / (Math.log(hi.defense) - Math.log(lo.defense));
+            factor = Math.exp((1 - t) * Math.log(lo.factor) + t * Math.log(hi.factor));
+        }
+        var raw = attack * (0.2 + Math.log(attack) * factor);
+        return { ok: true, damage: Math.max(0, Math.floor(raw + 1e-9)), confidence: confidence, method: '守備力補間・対数経験式',
+            note: '異なる戦闘の実測点を使う近似。小さい攻撃力や未測定条件では誤差が大きくなり得る' };
+    }
+    function fighter(spec) {
+        var base = copy(spec.base), assist = copy(spec.assist || {}), equipment = copy(spec.equipment || {});
+        STATS.forEach(function (k) { assertNumber(base[k], spec.name + 'の素' + k); assertNumber(assist[k], spec.name + 'の補正' + k); assertNumber(equipment[k], spec.name + 'の装備' + k); });
+        var initial = {};
+        STATS.forEach(function (k) { return initial[k] = base[k] + assist[k] + equipment[k]; });
+        return { id: spec.id, name: spec.name, base: base, assist: assist, equipment: equipment, activeEquipment: __assign({}, equipment), initial: initial, current: __assign({}, initial) };
+    }
+    function referenceScenario() {
+        return {
+            title: 'ショウ・ルースソルト戦（実戦ログとの照合）', ids: ['shiroko', 'sho'], maxTurns: 6,
+            fighters: [
+                { id: 'shiroko', name: 'シロコ', base: { attack: 1, defense: 1, hp: 23437, magic: 1 }, assist: { attack: 30, defense: 10, hp: 90, magic: 303 }, equipment: { attack: 5775, defense: 9812, hp: 10917, magic: 3050 } },
+                { id: 'sho', name: 'ショウ・ルースソルト', base: { attack: 1500, defense: 8200, hp: 10700, magic: 80 }, assist: { attack: 13, hp: 18 }, equipment: { attack: 600, defense: 4910, hp: 6700, magic: 5230 } }
+            ],
+            rounds: [
+                { devils: ['rabbit', null], devilOrder: ['shiroko', 'sho'], attackOrder: ['shiroko', 'sho'] },
+                { devils: ['chlorissa', null], devilOrder: ['shiroko', 'sho'], attackOrder: ['sho', 'shiroko'] },
+                { devils: ['kings_wind_gremory', null], devilOrder: ['shiroko', 'sho'], attackOrder: ['shiroko', 'sho'] },
+                { devils: [null, null], devilOrder: ['shiroko', 'sho'], attackOrder: ['shiroko', 'sho'] },
+                { devils: [null, null], devilOrder: ['shiroko', 'sho'], attackOrder: ['sho', 'shiroko'] },
+                { devils: [null, null], devilOrder: ['shiroko', 'sho'], attackOrder: ['shiroko', 'sho'] }
+            ],
+            observedHits: [
+                { attacker: 'shiroko', defender: 'sho', attack: 5808.5, defense: 13110, damage: 1166 },
+                { attacker: 'shiroko', defender: 'sho', attack: 8385, defense: 13110, damage: 1684 },
+                { attacker: 'sho', defender: 'shiroko', attack: 2113, defense: 9825.5, damage: 424 },
+                { attacker: 'sho', defender: 'shiroko', attack: 2113, defense: 9823, damage: 424 }
+            ],
+            expected: { shiroko: 90916.5, sho: 9516, outcome: 'draw' }
+        };
+    }
+    function sandboxScenario(_a) {
+        var shiroko = _a.shiroko, enemy = _a.enemy, _b = _a.deck, deck = _b === void 0 ? [] : _b, _c = _a.enemyDeck, enemyDeck = _c === void 0 ? [] : _c, _d = _a.first, first = _d === void 0 ? 'shiroko' : _d;
+        function spec(id, name, values) {
+            var cur = { attack: Number(values.attack), defense: Number(values.defense), hp: Number(values.hp), magic: Number(values.magic) };
+            return { id: id, name: name, base: cur, assist: {}, equipment: {} };
+        }
+        var firstID = first === 'enemy' ? 'enemy' : 'shiroko';
+        var other = firstID === 'enemy' ? 'shiroko' : 'enemy';
+        return {
+            title: '自由試験（両者の能力値・自分のテーブルを設定）', ids: ['shiroko', 'enemy'], maxTurns: 6,
+            fighters: [spec('shiroko', 'シロコ', shiroko), spec('enemy', '対戦相手', enemy)],
+            rounds: Array.from({ length: 6 }, function (_, i) { return ({
+                devils: [deck[i] || null, enemyDeck[i] || null],
+                devilOrder: [firstID, other],
+                attackOrder: i % 2 === 0 ? [firstID, other] : [other, firstID]
+            }); }), observedHits: [], expected: null
+        };
+    }
+    function createBattle(config, damageMode) {
+        if (config === void 0) { config = referenceScenario(); }
+        if (damageMode === void 0) { damageMode = 'estimate'; }
+        if (!['estimate', 'observed'].includes(damageMode))
+            throw Error('未対応のダメージモード');
+        var f = Object.fromEntries(config.fighters.map(function (x) { return [x.id, fighter(x)]; }));
+        return { config: config, fighters: f, turn: 0, outcome: null, turns: [], damageMode: damageMode, disabledAttacks: new Set(), suppressedDevils: new Set(), blockedDevilsUntil: {}, warnings: [], estimatedHits: [] };
+    }
+    function observedDamage(b, actor, enemy) {
+        var hit = (b.config.observedHits || []).find(function (x) { return x.attacker === actor.id && x.defender === enemy.id &&
+            Math.abs(x.attack - actor.current.attack) < 0.00001 && Math.abs(x.defense - enemy.current.defense) < 0.00001; });
+        return hit ? { ok: true, damage: hit.damage, confidence: '実測', method: '実測値' } : { ok: false, reason: 'この攻撃に対応する実測値がない' };
+    }
+    function outcomeFor(b) {
+        var _a = __read(b.config.ids, 2), a = _a[0], c = _a[1];
+        if (b.fighters[a].current.hp <= 0 && b.fighters[c].current.hp <= 0)
+            return 'draw';
+        if (b.fighters[a].current.hp <= 0)
+            return "winner:".concat(c);
+        if (b.fighters[c].current.hp <= 0)
+            return "winner:".concat(a);
+        return null;
+    }
+    function applyAbility(key, b, actor, enemy, emit) {
+        switch (key) {
+            case 'rabbit':
+                STATS.forEach(function (k) { var delta = 2.5 * actor.base[k]; actor.current[k] += delta; emit("".concat(NAMES[k], "\u3092\uFF0B").concat(fmt(delta), "\uFF08\u73FE\u5728").concat(fmt(actor.current[k]), "\uFF09"), 'effect'); });
+                b.suppressedDevils.add(enemy.id);
+                emit('敵の当ターンのデビルを消滅', 'effect');
+                break;
+            case 'chlorissa':
+                [actor, enemy].forEach(function (f) { return ['attack', 'defense', 'magic'].forEach(function (k) { f.current[k] = f.initial[k]; }); });
+                b.disabledAttacks.add(actor.id);
+                b.disabledAttacks.add(enemy.id);
+                emit('両者の攻撃力・守備力・魔力を戦闘開始時へ戻し、双方の通常攻撃を封じた', 'effect');
+                break;
+            case 'kings_wind_gremory':
+                b.suppressedDevils.add(enemy.id);
+                actor.current.attack = actor.current.magic * 2.5;
+                emit("\u6575\u306E\u5F53\u30BF\u30FC\u30F3\u306E\u30C7\u30D3\u30EB\u3092\u963B\u6B62\u3002\u653B\u6483\u529B\uFF1D\u9B54\u529B".concat(fmt(actor.current.magic), "\u00D72.5\uFF1D").concat(fmt(actor.current.attack)), 'effect');
+                break;
+            case 'freya':
+                enemy.current.hp -= enemy.current.attack;
+                b.disabledAttacks.add(actor.id);
+                emit("".concat(enemy.name, "\u306B").concat(fmt(enemy.current.attack), "\u306E\u76F4\u63A5\u30C0\u30E1\u30FC\u30B8\u3002").concat(actor.name, "\u306F\u653B\u6483\u4E0D\u80FD"), 'special');
+                break;
+            case 'red_folter':
+                STATS.forEach(function (k) { var loss = enemy.activeEquipment[k]; enemy.current[k] -= loss; enemy.activeEquipment[k] = 0; });
+                b.blockedDevilsUntil[enemy.id] = b.turn + 1;
+                emit("".concat(enemy.name, "\u306E\u6709\u52B9\u306A\u88C5\u5099\u88DC\u6B63\u3092\u3059\u3079\u3066\u6E1B\u7B97\u3002\u6B21\u30BF\u30FC\u30F3\u306E\u6575\u30C7\u30D3\u30EB\u3092\u5C01\u3058\u308B"), 'effect');
+                break;
+            case 'odradek':
+                if (enemy.activeEquipment.magic <= 5000) {
+                    enemy.current.attack = 1;
+                    enemy.current.defense = 1;
+                    emit("".concat(enemy.name, "\u306E\u653B\u6483\u529B\u30FB\u5B88\u5099\u529B\u30921\u306B\u3057\u305F"), 'effect');
+                }
+                else
+                    emit("\u76F8\u624B\u306E\u6709\u52B9\u9B54\u529B\u88C5\u5099\u88DC\u6B63".concat(fmt(enemy.activeEquipment.magic), "\u304C5000\u3092\u8D85\u3048\u308B\u305F\u3081\u4E0D\u767A"), 'block');
+                break;
+            default: throw Error('未実装デビル: ' + key);
+        }
+    }
+    function advance(b) {
+        var e_1, _a, e_2, _b;
+        if (b.outcome || b.turn >= b.config.maxTurns)
+            return null;
+        var row = b.config.rounds[b.turn];
+        b.turn++;
+        b.disabledAttacks.clear();
+        b.suppressedDevils.clear();
+        var events = [];
+        var emit = function (message, type) {
+            if (type === void 0) { type = 'info'; }
+            return events.push({ message: message, type: type });
+        };
+        emit("\u7B2C".concat(b.turn, "\u30BF\u30FC\u30F3"), 'turn');
+        try {
+            for (var _c = __values(row.devilOrder), _d = _c.next(); !_d.done; _d = _c.next()) {
+                var id = _d.value;
+                var i = b.config.ids.indexOf(id);
+                if (i < 0)
+                    throw Error('未登録の発動者');
+                var key = row.devils[i], actor = b.fighters[id], enemy = b.fighters[b.config.ids[1 - i]];
+                if (!key)
+                    continue;
+                if (b.suppressedDevils.has(id) || b.blockedDevilsUntil[id] === b.turn) {
+                    emit("".concat(actor.name, "\u306E\u3010").concat(DEVILS[key], "\u3011\u306F\u767A\u52D5\u3067\u304D\u306A\u304B\u3063\u305F"), 'block');
+                    continue;
+                }
+                if (!DEVILS[key])
+                    throw Error('未実装のデビル: ' + key);
+                emit("".concat(actor.name, "\u306E\u30C7\u30D3\u30EB\u3010").concat(DEVILS[key], "\u3011\u304C\u767A\u52D5"), 'devil');
+                applyAbility(key, b, actor, enemy, emit);
+                b.outcome = outcomeFor(b);
+                if (b.outcome) {
+                    emit('デビルの効果によって決着', 'end');
+                    break;
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        if (!b.outcome)
+            try {
+                for (var _e = __values(row.attackOrder), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    var id = _f.value;
+                    var i = b.config.ids.indexOf(id);
+                    var actor = b.fighters[id], enemy = b.fighters[b.config.ids[1 - i]];
+                    if (b.disabledAttacks.has(id)) {
+                        emit("".concat(actor.name, "\u306F\u653B\u6483\u3067\u304D\u306A\u3044"), 'block');
+                        continue;
+                    }
+                    var hit = b.damageMode === 'observed' ? observedDamage(b, actor, enemy) : estimateDamage(actor.current.attack, enemy.current.defense);
+                    if (!hit.ok) {
+                        var m = "".concat(actor.name, "\u306E\u653B\u6483\u3092\u8A08\u7B97\u3067\u304D\u306A\u3044\uFF1A").concat(hit.reason);
+                        b.warnings.push(m);
+                        emit(m, 'unknown');
+                        b.outcome = 'undetermined';
+                        break;
+                    }
+                    enemy.current.hp -= hit.damage;
+                    b.estimatedHits.push({ turn: b.turn, attacker: id, defender: enemy.id, attack: actor.current.attack,
+                        defense: enemy.current.defense, damage: hit.damage, confidence: hit.confidence, method: hit.method });
+                    emit("".concat(actor.name, "\u306E\u653B\u6483\uFF01 ").concat(enemy.name, "\u306B").concat(fmt(hit.damage), "\u306E\u30C0\u30E1\u30FC\u30B8\u3014").concat(hit.confidence, "\u3015\u3002\u6B8B\u308A\u4F53\u529B").concat(fmt(enemy.current.hp)), 'attack');
+                    b.outcome = outcomeFor(b);
+                    if (b.outcome) {
+                        emit("".concat(actor.name, "\u306E\u52DD\u5229"), 'end');
+                        break;
+                    }
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+        if (!b.outcome && b.turn >= b.config.maxTurns) {
+            b.outcome = 'draw';
+            emit('6ターン終了。両者生存のため引き分け', 'end');
+        }
+        var snap = Object.fromEntries(Object.entries(b.fighters).map(function (_a) {
+            var _b = __read(_a, 2), k = _b[0], v = _b[1];
+            return [k, __assign({}, v.current)];
+        }));
+        var result = { turn: b.turn, events: events, snapshot: snap, outcome: b.outcome };
+        b.turns.push(result);
+        return result;
+    }
+    function playAll(b) { while (!b.outcome && b.turn < b.config.maxTurns)
+        advance(b); return b; }
+    function checkReference(b) {
+        var e = b.config.expected;
+        if (!e)
+            return null;
+        return { reference: __assign({}, e), actual: Object.fromEntries(b.config.ids.map(function (id) { return [id, b.fighters[id].current.hp]; })),
+            deltas: Object.fromEntries(b.config.ids.map(function (id) { return [id, b.fighters[id].current.hp - e[id]]; })),
+            outcome: b.outcome, exact: b.outcome === e.outcome && b.config.ids.every(function (id) { return b.fighters[id].current.hp === e[id]; }) };
+    }
+    function verifyLowDefense() {
+        var tests = [[11, 1, 21209], [61, 1, 201624], [121, 1, 466574], [4214, 0, 28277892], [8610, 1, 62723215]];
+        return tests.map(function (_a) {
+            var _b = __read(_a, 3), attack = _b[0], defense = _b[1], actual = _b[2];
+            return ({ attack: attack, defense: defense, actual: actual, estimated: estimateDamage(attack, defense).damage });
+        });
+    }
+    return { STATS: STATS, DEVILS: DEVILS, DAMAGE_ANCHORS: DAMAGE_ANCHORS, estimateDamage: estimateDamage, referenceScenario: referenceScenario, sandboxScenario: sandboxScenario, createBattle: createBattle, advance: advance, playAll: playAll, checkReference: checkReference, verifyLowDefense: verifyLowDefense, fmt: fmt };
+});
+</script>
+<script>var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+(function (root, factory) {
+    var api = factory(root);
+    if (typeof module === 'object' && module.exports)
+        module.exports = api;
+    if (root)
+        root.KeiUnifiedEngineV45 = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
+    'use strict';
+    var e_1, _a, e_2, _b;
+    var prev = (root === null || root === void 0 ? void 0 : root.KeiBattleEngineV2) || (typeof require === 'function' ? require('./kei_battle_engine_v0_2.js') : null);
+    var STAT = ['attack', 'defense', 'hp', 'magic'];
+    var LABEL = { attack: '攻撃力', defense: '守備力', hp: '体力', magic: '魔力' };
+    var D = {
+        kamael: { name: 'カマエル', phase: 'start', model: true },
+        balam: { name: 'バラム', phase: 'start', model: true },
+        hexennacht: { name: 'ヘクセンナハト', phase: 'start', model: true },
+        eligos: { name: 'エリゴス', phase: 'start', model: true },
+        skuld: { name: 'スクルド', phase: 'start', model: true },
+        troll: { name: 'トロール', phase: 'start', model: true },
+        beelzebub: { name: 'ベルゼブブ', phase: 'start', model: true },
+        laplace: { name: 'ラプラス', phase: 'start', model: true },
+        vine: { name: 'ヴィネ', phase: 'start', model: true },
+        rabbit: { name: 'うさぎと戯れるナルキッソス', phase: 'start', model: true },
+        narcissus: { name: 'ナルキッソス', phase: 'start', model: true },
+        chlorissa: { name: 'クロリッサ', phase: 'start', model: true },
+        kings_wind_gremory: { name: '王の風・グレモリー', phase: 'start', model: true },
+        freya: { name: 'フレイヤ', phase: 'start', model: true, minimumTurn: 2 },
+        red_folter: { name: '赤い秘密を交わすフォルター夫妻', phase: 'start', model: true, minimumTurn: 2 },
+        odradek: { name: 'オドラデク', phase: 'start', model: true, minimumTurn: 2 },
+        hagenti: { name: 'ハーゲンティ', phase: 'start', model: true },
+        sargatanas: { name: 'サルガタナス', phase: 'start', model: true },
+        furcas: { name: '賢者の火・フルカス', phase: 'start', model: true },
+        purson: { name: '未来を視通すプルソン', phase: 'start', model: true },
+        baphomet: { name: 'バフォメット', phase: 'start', model: true },
+        blood_krampus: { name: '鮮血を浴びたクランプス', phase: 'before', model: true },
+        stras: { name: 'ストラス', phase: 'after', model: false },
+        focalor: { name: 'フォカロル', phase: 'after', model: false },
+        bifrons: { name: 'ビフロンス', phase: 'after', model: false },
+        morax: { name: 'モラクス', phase: 'before', model: false },
+        baal: { name: 'バアル', phase: 'before', model: true },
+        lilah: { name: 'ライラ・ケプルス', phase: 'end', model: false },
+        moloch: { name: '虚の扉を開くモロク', phase: 'start', model: false },
+        beleth: { name: '党首の威光を放つベレト', phase: 'start', model: false },
+        tsuma_naberius: { name: 'ツマ・ナベリウス', phase: 'start', model: false },
+        lucifer: { name: '雪崩を切り裂くルシファー', phase: 'start', model: false },
+        lady_almiraj: { name: 'レディ・アルミラージ', phase: 'start', model: false },
+        spring_bridget: { name: '春を喜ぶブリギット', phase: 'start', model: false },
+        nicholas: { name: 'ニコラス・レミ', phase: 'start', model: false },
+        shemihaza: { name: 'シャミハザ', phase: 'start', model: false },
+        proserpina: { name: 'プロセルピナ', phase: 'start', model: true, tier: 'field-verified' },
+        uval: { name: 'ウヴァル', phase: 'start', model: true, tier: 'field-verified' },
+        uval_fata: { name: 'ウヴァル＆ファタ・モルガナ', phase: 'start', model: true, tier: 'field-provisional' },
+        napaiya: { name: '◎ナパイア', phase: 'start', model: true, minimumTurn: 2, tier: 'field-verified' },
+        brand_folter: { name: 'ブランド・フォルター', phase: 'start', model: true, tier: 'field-verified' },
+        secret_brand_folter: { name: '密かに微笑むブランド・フォルター', phase: 'start', model: true, tier: 'field-provisional' },
+        agaliarept: { name: 'アガリアレプト', phase: 'start', model: true, minimumTurn: 2, tier: 'field-verified' },
+        jack_lore: { name: 'ジャック・ロレ', phase: 'start', model: true, tier: 'field-verified' },
+        flauros_fleurety: { name: 'フルーレティ', phase: 'start', model: true, minimumTurn: 2, tier: 'field-verified' },
+        brauna: { name: 'ブラウナ', phase: 'start', model: true, minimumTurn: 3, tier: 'field-provisional' },
+        shackled_magot: { name: '枷から解き放たれたマゴト', phase: 'start', model: true, tier: 'field-verified' },
+        ondine: { name: 'オンディーナ', phase: 'start', model: true, tier: 'field-provisional' },
+        nemophila: { name: 'ネモフィラ', phase: 'start', model: false },
+        other: { name: '未実装デビル（テスト札）', phase: 'start', model: false }
+    };
+    var SOURCE_RULES = [{ "key": "vasago", "name": "ウァサゴ", "phase": "before", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["attack"], "value": 1.2 }], "comment": "" }, { "key": "marbas", "name": "マルバス", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["attack"], "value": 1.5 }], "comment": "" }, { "key": "sitri", "name": "シトリー", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["defense"], "value": 2 }], "comment": "" }, { "key": "batin", "name": "バティン", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "defense", "ref": "self.attack", "scale": 1 }], "comment": "" }, { "key": "saleos", "name": "サレオス", "phase": "start", "minTurn": 2, "ops": [{ "op": "multiply", "who": "self", "stats": ["attack", "defense"], "value": 2.5 }], "comment": "" }, { "key": "aim", "name": "アイム", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "attack", "ref": "self.magic", "scale": 1.5 }], "comment": "" }, { "key": "marchosias", "name": "マルコシアス", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "enemy", "stats": ["defense"], "value": 0.6 }], "comment": "" }, { "key": "shax", "name": "シャックス", "phase": "start", "minTurn": 1, "ops": [{ "op": "reset", "who": "self", "stats": ["attack", "defense", "magic"] }, { "op": "reset", "who": "enemy", "stats": ["attack", "defense", "magic"] }], "comment": "" }, { "key": "crocell", "name": "クロケル", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "attack", "ref": "enemy.attack", "scale": 0.5 }], "comment": "" }, { "key": "furcas_basic", "name": "フルカス", "phase": "start", "minTurn": 1, "ops": [{ "op": "suppressEnemy" }, { "op": "multiply", "who": "self", "stats": ["hp"], "value": 1.2 }], "comment": "" }, { "key": "gremory", "name": "グレモリー", "phase": "start", "minTurn": 2, "ops": [{ "op": "suppressEnemy" }, { "op": "set", "who": "self", "stat": "attack", "ref": "self.magic", "scale": 1.5 }], "comment": "" }, { "key": "ose", "name": "オセ", "phase": "start", "minTurn": 1, "ops": [{ "op": "reset", "who": "enemy", "stats": ["attack", "defense", "magic"] }], "comment": "" }, { "key": "vapula", "name": "ウァプラ", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["attack", "defense"], "value": 1.6 }], "comment": "" }, { "key": "belial", "name": "ベリアル", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["magic"], "value": 1.5 }], "comment": "" }, { "key": "paimon", "name": "パイモン", "phase": "start", "minTurn": 1, "ops": [{ "op": "swap", "first": "enemy.hp", "second": "enemy.magic" }], "comment": "" }, { "key": "caim", "name": "カイム", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["magic"], "value": 3 }], "comment": "" }, { "key": "zagan", "name": "ザガン", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["attack"], "value": 2 }, { "op": "multiply", "who": "self", "stats": ["defense"], "value": 1.5 }, { "op": "multiply", "who": "self", "stats": ["hp"], "value": 0.6 }, { "op": "set", "who": "self", "stat": "magic", "ref": "const.0", "scale": 1 }], "comment": "" }, { "key": "cimejes", "name": "キマリス", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "enemy", "stats": ["attack", "magic"], "value": 0.6 }], "comment": "" }, { "key": "amon", "name": "アモン", "phase": "start", "minTurn": 1, "ops": [{ "op": "subtract", "who": "enemy", "stat": "attack", "ref": "self.magic", "scale": 0.5 }, { "op": "subtract", "who": "enemy", "stat": "defense", "ref": "self.magic", "scale": 0.5 }, { "op": "subtract", "who": "enemy", "stat": "magic", "ref": "self.magic", "scale": 0.5 }], "comment": "自分の魔力の50％を先に固定し、同値を三能力へ減算" }, { "key": "andromalius", "name": "アンドロマリウス", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["magic"], "value": 2.5 }], "comment": "" }, { "key": "bune", "name": "ブネ", "phase": "start", "minTurn": 1, "ops": [{ "op": "subtract", "who": "enemy", "stat": "attack", "ref": "self.attack", "scale": 0.8 }, { "op": "subtract", "who": "enemy", "stat": "defense", "ref": "self.defense", "scale": 0.8 }, { "op": "subtract", "who": "enemy", "stat": "magic", "ref": "self.magic", "scale": 0.8 }, { "op": "noAttack", "who": "self" }], "comment": "" }, { "key": "murmur", "name": "ムルムル", "phase": "before", "minTurn": 1, "ops": [{ "op": "reset", "who": "enemy", "stats": ["attack", "defense", "magic"] }], "comment": "" }, { "key": "sylphe", "name": "シルフェ", "phase": "start", "minTurn": 1, "ops": [{ "op": "swap", "first": "self.magic", "second": "enemy.magic" }], "comment": "" }, { "key": "ranaril", "name": "ラナリル", "phase": "start", "minTurn": 1, "ops": [{ "op": "swap", "first": "enemy.attack", "second": "enemy.hp" }], "comment": "" }, { "key": "maria_guazzo", "name": "マリア・グァッゾ", "phase": "start", "minTurn": 1, "ops": [{ "op": "stopTurn" }], "comment": "" }, { "key": "leviathan", "name": "レヴィアタン", "phase": "start", "minTurn": 1, "ops": [{ "op": "swap", "first": "self.defense", "second": "enemy.defense" }], "comment": "" }, { "key": "regeneration", "name": "○再生", "phase": "start", "minTurn": 1, "ops": [{ "op": "reset", "who": "self", "stats": ["attack", "defense", "hp", "magic"] }], "comment": "" }, { "key": "belphegor", "name": "ベルフェゴール", "phase": "start", "minTurn": 1, "ops": [{ "op": "blockDevil", "offset": 2 }, { "op": "add", "who": "self", "stat": "defense", "ref": "self.magic", "scale": 0.4 }], "comment": "" }, { "key": "sprenger_kramer", "name": "シュプレンゲル＆クラメル", "phase": "start", "minTurn": 1, "ops": [{ "op": "subtract", "who": "enemy", "stat": "attack", "ref": "const.6666", "scale": 1 }, { "op": "subtract", "who": "enemy", "stat": "defense", "ref": "const.6666", "scale": 1 }, { "op": "subtract", "who": "enemy", "stat": "hp", "ref": "const.6666", "scale": 1 }, { "op": "subtract", "who": "enemy", "stat": "magic", "ref": "const.6666", "scale": 1 }, { "op": "noAttack", "who": "self" }], "comment": "" }, { "key": "aulis", "name": "アウリス", "phase": "start", "minTurn": 1, "ops": [{ "op": "swap", "first": "self.hp", "second": "self.magic" }], "comment": "" }, { "key": "fata_morgana", "name": "ファタ・モルガナ", "phase": "before", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "attack", "ref": "self.defense", "scale": 2 }, { "op": "set", "who": "self", "stat": "defense", "ref": "const.0", "scale": 1 }], "comment": "" }, { "key": "nisroc", "name": "ニスロク", "phase": "start", "minTurn": 1, "ops": [{ "op": "transfer", "who": "enemy", "to": "self", "stat": "hp", "scale": 0.4 }, { "op": "transfer", "who": "enemy", "to": "self", "stat": "attack", "scale": 0.4 }], "comment": "" }, { "key": "pumpkin_panpiki", "name": "◎パンプキィ・パンピキィ", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "attack", "ref": "self.equipment.attack", "scale": 3 }], "comment": "" }, { "key": "vivian", "name": "ヴィヴィアン", "phase": "start", "minTurn": 1, "ops": [{ "op": "set", "who": "self", "stat": "hp", "ref": "self.initial.hp", "scale": 1 }, { "op": "noAttack", "who": "self" }], "comment": "" }, { "key": "magot", "name": "マゴト", "phase": "start", "minTurn": 1, "ops": [{ "op": "damage", "ref": "enemy.defense", "scale": 0.4 }, { "op": "noAttack", "who": "self" }, { "op": "noAttack", "who": "enemy" }], "comment": "" }, { "key": "lilith", "name": "リリス", "phase": "start", "minTurn": 3, "ops": [{ "op": "swap", "first": "self.attack", "second": "enemy.attack" }, { "op": "swap", "first": "self.defense", "second": "enemy.defense" }, { "op": "swap", "first": "self.magic", "second": "enemy.magic" }], "comment": "" }, { "key": "nymph", "name": "ニンフ", "phase": "start", "minTurn": 1, "ops": [{ "op": "damage", "ref": "enemy.base.min", "scale": 1.5 }], "comment": "" }, { "key": "ucobach", "name": "ウコバク", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["defense"], "value": 3 }], "comment": "" }, { "key": "barachiel", "name": "バラキエル", "phase": "start", "minTurn": 1, "ops": [{ "op": "swap", "first": "enemy.defense", "second": "enemy.hp" }], "comment": "" }, { "key": "scathach", "name": "スカアハ", "phase": "start", "minTurn": 1, "ops": [{ "op": "swap", "first": "enemy.attack", "second": "enemy.magic" }], "comment": "" }, { "key": "dagon", "name": "ダゴン", "phase": "before", "minTurn": 2, "ops": [{ "op": "damage", "ref": "self.attack", "scale": 1 }], "comment": "" }, { "key": "andramalech", "name": "アンドラメレク", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "attack", "ref": "enemy.sum", "scale": 0.3 }], "comment": "" }, { "key": "ouroboros", "name": "ウロボロス", "phase": "start", "minTurn": 1, "ops": [{ "op": "attackTurnBoost", "scale": 0.75 }], "comment": "" }, { "key": "shemihazah", "name": "シェミハザ", "phase": "start", "minTurn": 1, "ops": [{ "op": "rotateEnemy" }], "comment": "" }, { "key": "dullahan", "name": "デュラハン", "phase": "before", "minTurn": 1, "ops": [{ "op": "sacrificeHp", "fraction": 0.95, "attackScale": 2 }], "comment": "" }, { "key": "knocker", "name": "ノッカー", "phase": "start", "minTurn": 1, "ops": [{ "op": "damage", "ref": "enemy.defense", "scale": 0.7 }, { "op": "set", "who": "self", "stat": "attack", "ref": "const.1", "scale": 1 }], "comment": "" }, { "key": "eurynome", "name": "エウリノーム", "phase": "start", "minTurn": 2, "ops": [{ "op": "set", "who": "self", "stat": "attack", "ref": "self.min", "scale": 3 }, { "op": "set", "who": "self", "stat": "defense", "ref": "self.min", "scale": 3 }, { "op": "set", "who": "self", "stat": "magic", "ref": "self.min", "scale": 3 }], "comment": "最小値は発動開始時点の値を固定して参照" }, { "key": "merrow", "name": "メロウ", "phase": "start", "minTurn": 1, "ops": [{ "op": "set", "who": "self", "stat": "hp", "ref": "self.initial.hp", "scale": 1 }, { "op": "add", "who": "self", "stat": "defense", "ref": "self.magic", "scale": 1 }], "comment": "" }, { "key": "haar_bell", "name": "ハール・ベル", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["defense"], "value": 1.3 }], "comment": "" }, { "key": "roggenmeme", "name": "ロッゲンメーメ", "phase": "start", "minTurn": 1, "ops": [{ "op": "subtract", "who": "enemy", "stat": "attack", "ref": "self.hp", "scale": 0.4 }, { "op": "subtract", "who": "enemy", "stat": "magic", "ref": "self.hp", "scale": 0.4 }], "comment": "" }, { "key": "sandmannchen", "name": "ザントメンヒェン", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "hp", "ref": "self.equipment.hp", "scale": 2 }], "comment": "" }, { "key": "nergal", "name": "ネルガル", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "attack", "ref": "self.magic", "scale": 1 }, { "op": "add", "who": "self", "stat": "attack", "ref": "self.hp", "scale": 1 }], "comment": "" }, { "key": "peryton", "name": "ペリュトン", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "attack", "ref": "self.initial.attack", "scale": 0.4 }, { "op": "add", "who": "self", "stat": "defense", "ref": "self.initial.defense", "scale": 0.4 }, { "op": "add", "who": "self", "stat": "hp", "ref": "self.initial.hp", "scale": 0.4 }], "comment": "" }, { "key": "apao", "name": "ア・パオ・ア・クゥー", "phase": "start", "minTurn": 1, "ops": [{ "op": "sharedMagicHit", "fraction": 0.3 }], "comment": "" }, { "key": "thunder_leraje", "name": "轟雷の矢を放つレライエ", "phase": "start", "minTurn": 1, "ops": [{ "op": "set", "who": "self", "stat": "attack", "ref": "self.magic", "scale": 2.5 }], "comment": "" }, { "key": "aoife", "name": "オイフェ", "phase": "start", "minTurn": 1, "ops": [{ "op": "swap", "first": "enemy.attack", "second": "enemy.defense" }], "comment": "" }, { "key": "cyclops", "name": "サイクロプス", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["hp"], "value": 2.5 }], "comment": "" }, { "key": "basilisk", "name": "バジリスク", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "enemy", "stats": ["attack", "defense", "hp", "magic"], "value": 0.6 }, { "op": "noAttack", "who": "self" }], "comment": "" }, { "key": "eir", "name": "エイル", "phase": "start", "minTurn": 1, "ops": [{ "op": "restoreIfBelow", "who": "self", "stats": ["attack", "defense", "hp", "magic"] }], "comment": "" }, { "key": "law_baphomet", "name": "法を改訂するバフォメット", "phase": "start", "minTurn": 1, "ops": [{ "op": "set", "who": "self", "stat": "attack", "ref": "enemy.magic", "scale": 2 }, { "op": "set", "who": "self", "stat": "hp", "ref": "enemy.magic", "scale": 2 }, { "op": "noAttack", "who": "self" }], "comment": "" }, { "key": "eternal_asmodeus", "name": "永遠を灯すアスモデウス", "phase": "start", "minTurn": 2, "ops": [{ "op": "set", "who": "self", "stat": "attack", "ref": "self.magic", "scale": 2.5 }, { "op": "set", "who": "self", "stat": "defense", "ref": "self.magic", "scale": 2.5 }], "comment": "" }, { "key": "night_swanir", "name": "夜空に羽撃くスワニール", "phase": "start", "minTurn": 1, "ops": [{ "op": "transferExcess", "who": "enemy", "fromStat": "magic", "toStat": "hp", "minRemain": 10 }], "comment": "" }, { "key": "summer_saleos", "name": "ひまわりワンピを着たサレオス", "phase": "start", "minTurn": 4, "ops": [{ "op": "multiply", "who": "self", "stats": ["attack", "defense"], "value": 3 }], "comment": "" }, { "key": "nicholas_remy", "name": "ニコラス・レミ", "phase": "start", "minTurn": 3, "ops": [{ "op": "destroyEnemy", "offset": 0 }, { "op": "destroyEnemy", "offset": 1 }, { "op": "set", "who": "enemy", "stat": "attack", "ref": "const.1", "scale": 1 }, { "op": "noAttack", "who": "self" }], "comment": "" }, { "key": "moromoro", "name": "モルモル", "phase": "start", "minTurn": 1, "ops": [{ "op": "magicToAttack", "multiplier": 3 }], "comment": "" }, { "key": "belona", "name": "ベローナ", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "attack", "ref": "self.magic", "scale": 0.5 }], "comment": "仕掛けた際のソウルストーン効果は戦闘結果外" }, { "key": "lifeguard_sabnack", "name": "ライフセーバー・サブナック", "phase": "start", "minTurn": 1, "ops": [{ "op": "set", "who": "self", "stat": "defense", "ref": "self.max", "scale": 2.5 }], "comment": "" }, { "key": "shax_pumpkin", "name": "かぼちゃを投げ落とすシャックス", "phase": "start", "minTurn": 1, "ops": [{ "op": "reset", "who": "self", "stats": ["attack", "defense", "magic"] }, { "op": "reset", "who": "enemy", "stats": ["attack", "defense", "magic"] }, { "op": "damage", "ref": "enemy.defense", "scale": 0.3 }], "comment": "" }, { "key": "henri_boguet", "name": "アンリ・ボゲ", "phase": "start", "minTurn": 2, "ops": [{ "op": "destroyEnemy", "offset": 2 }, { "op": "set", "who": "enemy", "stat": "defense", "ref": "const.1", "scale": 1 }, { "op": "noAttack", "who": "self" }], "comment": "" }, { "key": "easter_bunny", "name": "◎イースターバニー", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["attack", "defense", "hp", "magic"], "value": 2 }, { "op": "multiply", "who": "enemy", "stats": ["attack", "defense", "hp", "magic"], "value": 2 }, { "op": "noAttack", "who": "self" }, { "op": "noAttack", "who": "enemy" }], "comment": "" }, { "key": "sebek", "name": "セベク", "phase": "start", "minTurn": 1, "ops": [{ "op": "destroyEnemy", "offset": 2 }, { "op": "add", "who": "self", "stat": "attack", "ref": "self.magic", "scale": 0.3 }], "comment": "" }, { "key": "summer_fata", "name": "サマーバケーション・ファタ・モルガナ", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "attack", "ref": "self.defense", "scale": 1.5 }, { "op": "multiply", "who": "self", "stats": ["defense"], "value": 0.5 }], "comment": "" }, { "key": "balam_astaruiz", "name": "バラム・アスタルイズ", "phase": "start", "minTurn": 1, "ops": [{ "op": "destroyEnemy", "offset": 1 }, { "op": "multiply", "who": "self", "stats": ["defense"], "value": 2 }], "comment": "" }, { "key": "snowtra", "name": "スノトラ", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "self", "stats": ["attack"], "value": 3.5 }], "comment": "" }, { "key": "midnight_amy", "name": "夜へと誘うアミー", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "enemy", "stats": ["attack", "defense"], "value": 0.3 }], "comment": "" }, { "key": "vidofnir_cozette", "name": "ヴィドフニル＆コゼット", "phase": "start", "minTurn": 2, "ops": [{ "op": "swap", "first": "self.magic", "second": "enemy.attack" }], "comment": "" }, { "key": "island_vidofnir", "name": "四月島にいたヴィドフニル", "phase": "start", "minTurn": 1, "ops": [{ "op": "swap", "first": "self.hp", "second": "enemy.magic" }], "comment": "" }, { "key": "night_orias", "name": "夜に涼むオリアス", "phase": "start", "minTurn": 2, "ops": [{ "op": "swap", "first": "self.hp", "second": "enemy.hp" }], "comment": "" }, { "key": "bed_marchosias", "name": "ベッドに誘うマルコシアス", "phase": "start", "minTurn": 1, "ops": [{ "op": "multiply", "who": "enemy", "stats": ["defense"], "value": 0.1 }], "comment": "" }, { "key": "champagne_henri", "name": "シャンパンを開けるアンリ・ボゲ", "phase": "start", "minTurn": 1, "ops": [{ "op": "destroyEnemy", "offset": 2 }, { "op": "set", "who": "enemy", "stat": "defense", "ref": "const.1", "scale": 1 }, { "op": "noAttack", "who": "self" }], "comment": "" }, { "key": "guivre", "name": "ギーブル", "phase": "start", "minTurn": 1, "ops": [{ "op": "add", "who": "self", "stat": "hp", "ref": "self.magic", "scale": 0.7 }], "comment": "" }, { "key": "chef_nisroc", "name": "料理をするニスロク", "phase": "start", "minTurn": 1, "ops": [{ "op": "transfer", "who": "enemy", "to": "self", "stat": "hp", "scale": 0.6 }, { "op": "transfer", "who": "enemy", "to": "self", "stat": "attack", "scale": 0.6 }], "comment": "" }];
+    try {
+        for (var SOURCE_RULES_1 = __values(SOURCE_RULES), SOURCE_RULES_1_1 = SOURCE_RULES_1.next(); !SOURCE_RULES_1_1.done; SOURCE_RULES_1_1 = SOURCE_RULES_1.next()) {
+            var x = SOURCE_RULES_1_1.value;
+            D[x.key] = { name: x.name, phase: x.phase, model: true, tier: 'source-model', sourceId: x.key, minimumTurn: x.minTurn, notes: x.comment };
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (SOURCE_RULES_1_1 && !SOURCE_RULES_1_1.done && (_a = SOURCE_RULES_1.return)) _a.call(SOURCE_RULES_1);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    try {
+        for (var _c = __values(Object.values(D)), _d = _c.next(); !_d.done; _d = _c.next()) {
+            var x = _d.value;
+            if (x.model && !x.tier)
+                x.tier = 'legacy-preview';
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (_d && !_d.done && (_b = _c.return)) _b.call(_c);
+        }
+        finally { if (e_2) throw e_2.error; }
+    }
+    var KIJI3 = ['moloch', 'beleth', 'furcas', 'tsuma_naberius', 'lucifer', 'lady_almiraj'];
+    var integral = function (n) { return Math.trunc(n); };
+    var fstr = function (n) { return String(Math.round(Number(n) * 100) / 100).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+    var blank = function () { return ({ attack: 0, defense: 0, hp: 0, magic: 0 }); };
+    function stats(src) {
+        var e_3, _a;
+        var _b;
+        var s = blank();
+        try {
+            for (var STAT_1 = __values(STAT), STAT_1_1 = STAT_1.next(); !STAT_1_1.done; STAT_1_1 = STAT_1.next()) {
+                var k = STAT_1_1.value;
+                s[k] = Number((_b = src === null || src === void 0 ? void 0 : src[k]) !== null && _b !== void 0 ? _b : 0);
+                if (!Number.isFinite(s[k]))
+                    throw Error("".concat(LABEL[k], "\u306F\u6709\u9650\u306E\u6570\u5024\u306B\u3059\u308B\u3053\u3068"));
+            }
+        }
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        finally {
+            try {
+                if (STAT_1_1 && !STAT_1_1.done && (_a = STAT_1.return)) _a.call(STAT_1);
+            }
+            finally { if (e_3) throw e_3.error; }
+        }
+        return s;
+    }
+    function fighter(src, id) {
+        var e_4, _a;
+        var base = stats(src.base), assist = stats(src.assist), equipment = stats(src.equipment), initial = blank();
+        try {
+            for (var STAT_2 = __values(STAT), STAT_2_1 = STAT_2.next(); !STAT_2_1.done; STAT_2_1 = STAT_2.next()) {
+                var k = STAT_2_1.value;
+                initial[k] = base[k] + assist[k] + equipment[k];
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (STAT_2_1 && !STAT_2_1.done && (_a = STAT_2.return)) _a.call(STAT_2);
+            }
+            finally { if (e_4) throw e_4.error; }
+        }
+        return { id: id, name: src.name || (id === 'player' ? 'シロコ' : '対戦相手'), base: base, assist: assist, equipment: equipment, activeEquipment: __assign({}, equipment), initial: initial, current: __assign({}, initial) };
+    }
+    function pad(arr) {
+        var e_5, _a;
+        if (!Array.isArray(arr) || arr.length !== 6)
+            throw Error('デビルテーブルは6枠にすること');
+        try {
+            for (var arr_1 = __values(arr), arr_1_1 = arr_1.next(); !arr_1_1.done; arr_1_1 = arr_1.next()) {
+                var key = arr_1_1.value;
+                if (!key)
+                    continue;
+                if (D[key])
+                    continue;
+                var m = /^custom:(start|before|after|end):(.+)$/.exec(key);
+                if (!m)
+                    throw Error('未登録のデビルキー：' + key);
+                var name = void 0;
+                try {
+                    name = decodeURIComponent(m[2]);
+                }
+                catch (_b) {
+                    throw Error('デビル名を解釈できない');
+                }
+                if (!name || name.length > 100)
+                    throw Error('自由入力デビル名は1〜100文字で指定');
+                D[key] = { name: name, phase: m[1], model: false, custom: true };
+            }
+        }
+        catch (e_5_1) { e_5 = { error: e_5_1 }; }
+        finally {
+            try {
+                if (arr_1_1 && !arr_1_1.done && (_a = arr_1.return)) _a.call(arr_1);
+            }
+            finally { if (e_5) throw e_5.error; }
+        }
+        return __spreadArray([], __read(arr), false);
+    }
+    function config(src) {
+        var _a;
+        var s = { title: src.title || '自由実験', player: src.player, enemy: src.enemy,
+            playerDeck: pad(src.playerDeck || Array(6).fill(null)), enemyDeck: pad(src.enemyDeck || Array(6).fill(null)),
+            orders: (src.orders || Array(6).fill('player')).map(function (x) { return x === 'enemy' ? 'enemy' : 'player'; }),
+            laplaceTarget: Number(src.laplaceTarget || 1), randomSeed: Number((_a = src.randomSeed) !== null && _a !== void 0 ? _a : 20261112), mode: src.mode || 'full', damageMode: src.damageMode || 'estimate',
+            observedHits: src.observedHits || [], expected: src.expected || null };
+        if (s.orders.length !== 6)
+            throw Error('先攻は六ターン分必要');
+        if (!Number.isInteger(s.laplaceTarget) || s.laplaceTarget < 1 || s.laplaceTarget > 6)
+            throw Error('ラプラスの参照先は1〜6');
+        if (!Number.isInteger(s.randomSeed) || s.randomSeed < 0 || s.randomSeed > 4294967295)
+            throw Error('乱数シードは0〜4294967295の整数');
+        if (!['full', 'trace'].includes(s.mode))
+            throw Error('モード不正');
+        if (!['estimate', 'observed'].includes(s.damageMode))
+            throw Error('ダメージモード不正');
+        return s;
+    }
+    function createBattle(input) {
+        var e_6, _a;
+        var c = config(input);
+        try {
+            for (var _b = __values(['player', 'enemy']), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var side = _c.value;
+                for (var i = 0; i < 6; i++) {
+                    var k = c[side + 'Deck'][i], d = D[k];
+                    if ((d === null || d === void 0 ? void 0 : d.minimumTurn) && i + 1 < d.minimumTurn)
+                        throw Error("\u3010".concat(d.name, "\u3011\u306F").concat(d.minimumTurn, "T\u4EE5\u964D\u306B\u30BB\u30C3\u30C8\u53EF\u80FD\uFF08").concat(i + 1, "T\u306B\u306F\u7F6E\u3051\u306A\u3044\uFF09"));
+                }
+            }
+        }
+        catch (e_6_1) { e_6 = { error: e_6_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_6) throw e_6.error; }
+        }
+        return { config: c, turn: 0, complete: false, outcome: null, error: null,
+            fighters: { player: fighter(c.player, 'player'), enemy: fighter(c.enemy, 'enemy') },
+            original: { player: __spreadArray([], __read(c.playerDeck), false), enemy: __spreadArray([], __read(c.enemyDeck), false) }, tables: { player: __spreadArray([], __read(c.playerDeck), false), enemy: __spreadArray([], __read(c.enemyDeck), false) },
+            events: [], turns: [], warnings: [], pending: [], sustained: [], blockedDevils: { player: new Set(), enemy: new Set() },
+            blockedAttacks: { player: new Set(), enemy: new Set() }, blockedActivations: { player: new Set(), enemy: new Set() }, truncations: [], magicUntil: 0, rngState: c.randomSeed || 0x6d2b79f5 };
+    }
+    var opp = function (id) { return id === 'player' ? 'enemy' : 'player'; };
+    function roll(b) { var x = b.rngState >>> 0; x ^= x << 13; x ^= x >>> 17; x ^= x << 5; b.rngState = x >>> 0; return b.rngState / 4294967296; }
+    function round(b) {
+        var e_7, _a, e_8, _b, e_9, _c, e_10, _d;
+        if (b.complete)
+            return null;
+        b.turn++;
+        var t = b.turn;
+        var c = b.config, first = c.orders[t - 1], order = [first, opp(first)], events = [];
+        var fired = { player: [], enemy: [] }, disabled = new Set(), suppressed = new Set(), evading = new Set(), reflecting = new Set(), confused = new Set(), postAttackUvalFata = new Set();
+        var endTurn = false;
+        function emit(type, text, meta) {
+            if (meta === void 0) { meta = {}; }
+            var e = __assign({ turn: t, type: type, text: text }, meta);
+            b.events.push(e);
+            events.push(e);
+        }
+        function outcome() {
+            var e_11, _a;
+            if (c.mode === 'trace')
+                return false;
+            try {
+                for (var order_4 = __values(order), order_4_1 = order_4.next(); !order_4_1.done; order_4_1 = order_4.next()) {
+                    var s = order_4_1.value;
+                    if (b.fighters[s].current.hp <= 0) {
+                        b.outcome = "winner:".concat(opp(s));
+                        b.complete = true;
+                        emit('result', "".concat(b.fighters[opp(s)].name, "\u306E\u52DD\u5229\uFF08\u4F53\u529B0\u4EE5\u4E0B\uFF09"));
+                        return true;
+                    }
+                }
+            }
+            catch (e_11_1) { e_11 = { error: e_11_1 }; }
+            finally {
+                try {
+                    if (order_4_1 && !order_4_1.done && (_a = order_4.return)) _a.call(order_4);
+                }
+                finally { if (e_11) throw e_11.error; }
+            }
+            return false;
+        }
+        function unsupported(key) { var _a; var msg = "\u3010".concat(((_a = D[key]) === null || _a === void 0 ? void 0 : _a.name) || key, "\u3011\u306F\u6570\u5024\u80FD\u529B\u304C\u672A\u5B9F\u88C5\u3002\u52DD\u6557\u3092\u634F\u9020\u3057\u306A\u3044\u305F\u3081\u3001\u3053\u3053\u3067\u505C\u6B62"); b.error = msg; b.outcome = 'undetermined'; b.complete = true; emit('unknown', msg); }
+        var SOURCE_RULE_MAP = new Map(SOURCE_RULES.map(function (r) { return [r.key, r]; }));
+        function equipmentNeutralize(victim, label) {
+            var e_12, _a;
+            var changes = {};
+            try {
+                for (var STAT_3 = __values(STAT), STAT_3_1 = STAT_3.next(); !STAT_3_1.done; STAT_3_1 = STAT_3.next()) {
+                    var k = STAT_3_1.value;
+                    changes[k] = victim.activeEquipment[k];
+                    victim.current[k] -= changes[k];
+                    victim.activeEquipment[k] = 0;
+                }
+            }
+            catch (e_12_1) { e_12 = { error: e_12_1 }; }
+            finally {
+                try {
+                    if (STAT_3_1 && !STAT_3_1.done && (_a = STAT_3.return)) _a.call(STAT_3);
+                }
+                finally { if (e_12) throw e_12.error; }
+            }
+            emit('effect', "".concat(label, "\uFF1A").concat(victim.name, "\u306E\u6709\u52B9\u88C5\u5099\u88DC\u6B63\u3092\u7121\u52B9\u5316\uFF08").concat(STAT.map(function (k) { return LABEL[k] + '-' + fstr(changes[k]); }).join('、'), "\uFF09\u3002\u4ECA\u5F8C\u306E\u88C5\u5099\u53C2\u7167\u306F0"));
+            outcome();
+        }
+        function equipmentSubtract(victim, keys, label) {
+            var e_13, _a;
+            try {
+                for (var keys_1 = __values(keys), keys_1_1 = keys_1.next(); !keys_1_1.done; keys_1_1 = keys_1.next()) {
+                    var k = keys_1_1.value;
+                    victim.current[k] -= victim.equipment[k];
+                }
+            }
+            catch (e_13_1) { e_13 = { error: e_13_1 }; }
+            finally {
+                try {
+                    if (keys_1_1 && !keys_1_1.done && (_a = keys_1.return)) _a.call(keys_1);
+                }
+                finally { if (e_13) throw e_13.error; }
+            }
+            emit('effect', "".concat(label, "\uFF1A").concat(keys.map(function (k) { return LABEL[k] + '-' + fstr(victim.equipment[k]); }).join('、'), "\uFF08\u5143\u88C5\u5099\u5024\u3092\u518D\u6E1B\u7B97\u3001\u53C2\u7167\u5143\u306F\u7DAD\u6301\uFF09"));
+            outcome();
+        }
+        function fire(s, key, _a) {
+            var e_14, _b, e_15, _c, e_16, _d, e_17, _e, e_18, _f, e_19, _g, e_20, _h, e_21, _j, e_22, _k, e_23, _l;
+            var _m = _a === void 0 ? {} : _a, _o = _m.source, source = _o === void 0 ? 'table' : _o, _p = _m.depth, depth = _p === void 0 ? 0 : _p, _q = _m.sourceSlot, sourceSlot = _q === void 0 ? null : _q;
+            if (!key || b.complete || endTurn)
+                return;
+            var actor = b.fighters[s], target = b.fighters[opp(s)], dev = D[key];
+            if (depth > 15) {
+                b.error = '再発動連鎖が安全上限に達した（ゲームの真の上限ではない）';
+                b.complete = true;
+                b.outcome = 'undetermined';
+                emit('unknown', b.error);
+                return;
+            }
+            if (key === 'nemophila' && b.tables[opp(s)].includes('skuld')) {
+                emit('block', "".concat(actor.name, "\u306E\u3010\u30CD\u30E2\u30D5\u30A3\u30E9\u3011\u306F\u76F8\u624B\u306E\u30B9\u30AF\u30EB\u30C9\u306B\u3088\u3063\u3066\u767A\u52D5\u3092\u963B\u6B62\u3055\u308C\u305F"));
+                return;
+            }
+            if (source === 'table' && (suppressed.has(s) || b.blockedDevils[s].has(t))) {
+                b.blockedActivations[s].add("".concat(t, ":").concat(key));
+                emit('block', "".concat(actor.name, "\u306E\u3010").concat(dev.name, "\u3011\u306F\u767A\u52D5\u3092\u5C01\u3058\u3089\u308C\u305F"));
+                return;
+            }
+            if (source !== 'table' && sourceSlot !== null && b.tables[s][sourceSlot] === null) {
+                emit('block', "".concat(dev.name, "\uFF1A\u547C\u51FA\u5143\u306E\u67A0\u304C\u6D88\u6EC5\u3057\u305F\u305F\u3081\u4FDD\u7559\u52B9\u679C\u3092\u53D6\u6D88\uFF08\u66AB\u5B9A\u4ED5\u69D8\uFF09"));
+                return;
+            }
+            fired[s].push(key);
+            emit('devil', "".concat(actor.name, "\u306E\u30C7\u30D3\u30EB\u3010").concat(dev.name, "\u3011\u304C\u5B9F\u4F53\u5316").concat(source === 'table' ? '' : "\u3014\u518D\u767A\u52D5\uFF1A".concat(source, "\u3015")), { side: s, key: key, source: source });
+            if (c.mode === 'trace' && !['troll', 'beelzebub', 'laplace', 'vine', 'proserpina', 'brauna'].includes(key)) {
+                emit('caveat', "".concat(dev.name, "\u306E\u6570\u5024\u30FB\u59A8\u5BB3\u52B9\u679C\u306F\u8FFD\u8DE1\u30E2\u30FC\u30C9\u3067\u306F\u672A\u8A08\u7B97"));
+                return;
+            }
+            if (!dev.model) {
+                unsupported(key);
+                return;
+            }
+            function boost(k, delta) { actor.current[k] += delta; }
+            function harm(p, amount, desc) { p.current.hp -= amount; emit('effect', "".concat(desc, "\uFF1A").concat(fstr(amount), "\u3001\u6B8B\u308A\u4F53\u529B").concat(fstr(p.current.hp))); outcome(); }
+            if (SOURCE_RULE_MAP.has(key)) {
+                var rule = SOURCE_RULE_MAP.get(key), actors_1 = { self: actor, enemy: target };
+                var get_1 = function (value) {
+                    if (/^const\.-?\d+(?:\.\d+)?$/.test(value))
+                        return Number(value.slice(6));
+                    var _a = __read(value.split('.'), 3), who = _a[0], stat = _a[1], extra = _a[2];
+                    var f = actors_1[who];
+                    if (!f)
+                        throw Error('source rule: unknown target ' + value);
+                    if (stat === 'initial')
+                        return f.initial[extra];
+                    if (stat === 'base')
+                        return f.base[extra];
+                    if (stat === 'equipment')
+                        return f.activeEquipment[extra];
+                    if (stat === 'sum')
+                        return STAT.reduce(function (a, k) { return a + f.current[k]; }, 0);
+                    if (stat === 'max')
+                        return Math.max.apply(Math, __spreadArray([], __read(STAT.map(function (k) { return f.current[k]; })), false));
+                    if (stat === 'min')
+                        return Math.min.apply(Math, __spreadArray([], __read(STAT.map(function (k) { return f.current[k]; })), false));
+                    if (stat === 'attack' || stat === 'defense' || stat === 'hp' || stat === 'magic')
+                        return f.current[stat];
+                    throw Error('source rule: unknown ref ' + value);
+                };
+                function who(n) { return n === 'self' ? actor : target; }
+                var beforeRule_1 = { self: __assign({}, actor.current), enemy: __assign({}, target.current) };
+                function originalGet(value) {
+                    if (/\.(min|max)$/.test(value)) {
+                        var _a = __read(value.split('.'), 2), w_1 = _a[0], stat = _a[1];
+                        return stat === 'min' ? Math.min.apply(Math, __spreadArray([], __read(STAT.map(function (k) { return beforeRule_1[w_1][k]; })), false)) : Math.max.apply(Math, __spreadArray([], __read(STAT.map(function (k) { return beforeRule_1[w_1][k]; })), false));
+                    }
+                    return get_1(value);
+                }
+                try {
+                    for (var _r = __values(rule.ops), _s = _r.next(); !_s.done; _s = _r.next()) {
+                        var op = _s.value;
+                        if (b.complete || endTurn)
+                            break;
+                        var f = op.who ? who(op.who) : actor;
+                        switch (op.op) {
+                            case 'multiply':
+                                try {
+                                    for (var _t = (e_15 = void 0, __values(op.stats)), _u = _t.next(); !_u.done; _u = _t.next()) {
+                                        var st = _u.value;
+                                        f.current[st] = rule.key === 'marbas' ? integral(f.current[st] * op.value) : f.current[st] * op.value;
+                                    }
+                                }
+                                catch (e_15_1) { e_15 = { error: e_15_1 }; }
+                                finally {
+                                    try {
+                                        if (_u && !_u.done && (_c = _t.return)) _c.call(_t);
+                                    }
+                                    finally { if (e_15) throw e_15.error; }
+                                }
+                                break;
+                            case 'add':
+                                f.current[op.stat] += originalGet(op.ref) * op.scale;
+                                break;
+                            case 'subtract':
+                                f.current[op.stat] -= originalGet(op.ref) * op.scale;
+                                break;
+                            case 'set':
+                                f.current[op.stat] = originalGet(op.ref) * op.scale;
+                                break;
+                            case 'swap': {
+                                var _v = __read(op.first.split('.'), 2), x = _v[0], p = _v[1], _w = __read(op.second.split('.'), 2), y = _w[0], q = _w[1];
+                                var v = who(x).current[p];
+                                who(x).current[p] = who(y).current[q];
+                                who(y).current[q] = v;
+                                break;
+                            }
+                            case 'reset':
+                                try {
+                                    for (var _x = (e_16 = void 0, __values(op.stats)), _y = _x.next(); !_y.done; _y = _x.next()) {
+                                        var st = _y.value;
+                                        f.current[st] = f.initial[st];
+                                    }
+                                }
+                                catch (e_16_1) { e_16 = { error: e_16_1 }; }
+                                finally {
+                                    try {
+                                        if (_y && !_y.done && (_d = _x.return)) _d.call(_x);
+                                    }
+                                    finally { if (e_16) throw e_16.error; }
+                                }
+                                break;
+                            case 'noAttack':
+                                disabled.add(op.who === 'enemy' ? opp(s) : s);
+                                break;
+                            case 'blockDevil':
+                                if (t + op.offset <= 6)
+                                    b.blockedDevils[opp(s)].add(t + op.offset);
+                                break;
+                            case 'suppressEnemy':
+                                suppressed.add(opp(s));
+                                break;
+                            case 'destroyEnemy':
+                                if (t + op.offset <= 6)
+                                    b.tables[opp(s)][t + op.offset - 1] = null;
+                                break;
+                            case 'damage':
+                                target.current.hp -= originalGet(op.ref) * op.scale;
+                                break;
+                            case 'stopTurn':
+                                endTurn = true;
+                                break;
+                            case 'transfer': {
+                                var v = who(op.who).current[op.stat] * op.scale;
+                                who(op.who).current[op.stat] -= v;
+                                who(op.to).current[op.stat] += v;
+                                break;
+                            }
+                            case 'restoreIfBelow':
+                                try {
+                                    for (var _z = (e_17 = void 0, __values(op.stats)), _0 = _z.next(); !_0.done; _0 = _z.next()) {
+                                        var st = _0.value;
+                                        f.current[st] = Math.max(f.current[st], f.initial[st]);
+                                    }
+                                }
+                                catch (e_17_1) { e_17 = { error: e_17_1 }; }
+                                finally {
+                                    try {
+                                        if (_0 && !_0.done && (_e = _z.return)) _e.call(_z);
+                                    }
+                                    finally { if (e_17) throw e_17.error; }
+                                }
+                                break;
+                            case 'attackTurnBoost':
+                                actor.current.attack += actor.current.attack * t * op.scale;
+                                break;
+                            case 'rotateEnemy': {
+                                var q = __assign({}, target.current);
+                                target.current.attack = q.magic;
+                                target.current.defense = q.attack;
+                                target.current.hp = q.defense;
+                                target.current.magic = q.hp;
+                                break;
+                            }
+                            case 'sacrificeHp': {
+                                var loss = actor.current.hp * op.fraction;
+                                actor.current.hp -= loss;
+                                actor.current.attack += loss * op.attackScale;
+                                break;
+                            }
+                            case 'damageTakenBoost':
+                                actor.current.attack += (actor.initial.hp - actor.current.hp) * op.scale * t;
+                                break;
+                            case 'sharedMagicHit': {
+                                var val = (actor.current.magic + target.current.magic) * op.fraction;
+                                target.current.defense -= val;
+                                target.current.hp -= val;
+                                break;
+                            }
+                            case 'transferExcess': {
+                                var value = f.current[op.fromStat];
+                                if (value >= op.minRemain) {
+                                    var excess = value - op.minRemain;
+                                    f.current[op.fromStat] = op.minRemain;
+                                    f.current[op.toStat] += excess;
+                                }
+                                break;
+                            }
+                            case 'magicToAttack': {
+                                var delta = actor.current.magic - 1;
+                                actor.current.magic = 1;
+                                actor.current.attack += delta * op.multiplier;
+                                break;
+                            }
+                            default: throw Error('unhandled source operation ' + op.op);
+                        }
+                        if (outcome())
+                            break;
+                    }
+                }
+                catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                finally {
+                    try {
+                        if (_s && !_s.done && (_b = _r.return)) _b.call(_r);
+                    }
+                    finally { if (e_14) throw e_14.error; }
+                }
+                emit('effect', "".concat(dev.name, "\uFF1A\u56F3\u9451\u8A18\u8FF0\u306B\u57FA\u3065\u304F\u8A08\u7B97\u30E2\u30C7\u30EB\u3092\u9069\u7528\uFF08\u7AEF\u6570\u51E6\u7406\u30FB\u672A\u89B3\u6E2C\u6761\u4EF6\u306F\u672A\u78BA\u5B9A\uFF09"), { rule: key, sourceLevel: 'description' });
+                if (rule.comment)
+                    emit('caveat', "".concat(dev.name, "\uFF1A").concat(rule.comment));
+                return;
+            }
+            switch (key) {
+                case 'kamael': {
+                    var amount = integral(actor.current.magic * 0.5);
+                    boost('attack', amount);
+                    b.blockedDevils[opp(s)].add(t + 1);
+                    emit('effect', "\u30AB\u30DE\u30A8\u30EB\uFF1A\u653B\u6483\u529B+".concat(fstr(amount), "\u3001\u76F8\u624B").concat(t + 1, "T\u306E\u30C7\u30D3\u30EB\u767A\u52D5\u3092\u963B\u6B62"));
+                    break;
+                }
+                case 'balam': {
+                    var amount = actor.current.magic * 0.4;
+                    boost('defense', amount);
+                    b.blockedDevils[opp(s)].add(t + 1);
+                    emit('effect', "\u30D0\u30E9\u30E0\uFF1A\u5B88\u5099\u529B+".concat(fstr(amount), "\u3001\u76F8\u624B").concat(t + 1, "T\u306E\u30C7\u30D3\u30EB\u767A\u52D5\u3092\u963B\u6B62"));
+                    break;
+                }
+                case 'hexennacht': {
+                    var amount = integral(actor.current.magic * 0.5);
+                    boost('attack', amount);
+                    var perTurn = Math.floor(target.initial.hp * 0.3);
+                    var exists = b.sustained.some(function (e) { return e.source === s && e.target === opp(s) && e.key === key; });
+                    if (!exists)
+                        b.sustained.push({ source: s, target: opp(s), key: key, damage: perTurn, fromTurn: t });
+                    emit('effect', "\u30D8\u30AF\u30BB\u30F3\u30CA\u30CF\u30C8\uFF1A\u653B\u6483\u529B+".concat(fstr(amount), "\u3002\u6BCE\u30BF\u30FC\u30F3").concat(fstr(perTurn), "\u30C0\u30E1\u30FC\u30B8\uFF08").concat(exists ? '再発動でも継続効果は重複しない' : '継続効果を登録', "\uFF09"));
+                    break;
+                }
+                case 'eligos': {
+                    var amount = Math.floor(actor.current.attack * 1.5);
+                    boost('attack', amount);
+                    emit('effect', "\u30A8\u30EA\u30B4\u30B9\uFF1A\u653B\u6483\u529B+".concat(fstr(amount), "\uFF08\u73FE\u653B\u6483\u529B\u306E150\uFF05\u3001\u7AEF\u6570\u5207\u6368\u3066\u30FB\u5B9F\u6E2C1\u6761\u4EF6\uFF09"));
+                    break;
+                }
+                case 'skuld': {
+                    var difference = target.current.hp - target.initial.hp;
+                    if (difference > 0) {
+                        boost('defense', difference);
+                        emit('effect', "\u30B9\u30AF\u30EB\u30C9\uFF1A\u6575\u4F53\u529B\u5897\u52A0\u5206".concat(fstr(difference), "\u3092\u81EA\u8EAB\u306E\u5B88\u5099\u529B\u306B\u52A0\u7B97"));
+                    }
+                    else if (difference < 0) {
+                        var before = actor.current.hp;
+                        actor.current.hp = Math.ceil(before / 2);
+                        emit('effect', "\u30B9\u30AF\u30EB\u30C9\uFF1A\u6575\u4F53\u529B\u6E1B\u5C11\u306B\u3088\u308A\u81EA\u8EAB\u306E\u4F53\u529B\u3092\u534A\u6E1B\uFF08".concat(fstr(before), "\u2192").concat(fstr(actor.current.hp), "\uFF09\u3002\u30CD\u30E2\u30D5\u30A3\u30E9\u5E38\u99D0\u963B\u6B62\u306F\u672A\u5B9F\u88C5"));
+                        outcome();
+                    }
+                    else
+                        emit('effect', 'スクルド：敵体力が初期値と同一のため変化なし（ネモフィラ常駐阻止は未実装）');
+                    break;
+                }
+                case 'baal': {
+                    var up = actor.current.attack * 2;
+                    var down = Math.floor(target.current.defense * 0.3);
+                    boost('attack', up);
+                    target.current.defense -= down;
+                    emit('effect', "\u30D0\u30A2\u30EB\uFF1A\u81EA\u8EAB\u306E\u653B\u6483\u529B+".concat(fstr(up), "\u3001\u76F8\u624B\u306E\u5B88\u5099\u529B-").concat(fstr(down), "\uFF08\u5B9F\u6E2C\u6761\u4EF6\u306B\u57FA\u3065\u304F\u66AB\u5B9A\u5B9F\u88C5\uFF09"));
+                    break;
+                }
+                case 'troll': {
+                    var side = opp(s), prev_1 = __spreadArray([], __read(b.tables[side]), false);
+                    b.tables[side] = __spreadArray([null], __read(prev_1.slice(0, 5)), false);
+                    if (prev_1[5])
+                        b.truncations.push({ turn: t, side: side, devil: prev_1[5] });
+                    emit('effect', "\u30C8\u30ED\u30FC\u30EB\uFF1A".concat(b.fighters[side].name, "\u306E\u516D\u67A0\u30921\u30BF\u30FC\u30F3\u9045\u5EF6\uFF08\u62BC\u51FA\uFF1A").concat(prev_1[5] ? D[prev_1[5]].name : 'なし', "\uFF09"));
+                    break;
+                }
+                case 'beelzebub': {
+                    var side = opp(s);
+                    b.tables[side].reverse();
+                    emit('effect', "\u30D9\u30EB\u30BC\u30D6\u30D6\uFF1A".concat(b.fighters[side].name, "\u306E\u73FE\u5728\u306E\u516D\u67A0\u3092\u53CD\u8EE2"));
+                    break;
+                }
+                case 'laplace':
+                case 'vine': {
+                    var index = key === 'vine' ? t - 2 : c.laplaceTarget - 1;
+                    var recalled = index >= 0 ? b.tables[s][index] : null;
+                    if (key === 'vine' && recalled === 'brauna') {
+                        var msg = 'ヴィネ→ブラウナ再発動連鎖の内部参照は未確定。架空の再発動ログを防ぐため停止';
+                        if (c.mode === 'full') {
+                            b.error = msg;
+                            b.outcome = 'undetermined';
+                            b.complete = true;
+                            emit('unknown', msg);
+                            return;
+                        }
+                        emit('caveat', msg);
+                        return;
+                    }
+                    emit('effect', "".concat(dev.name, "\uFF1A").concat(index + 1, "T\u306E").concat(recalled ? D[recalled].name : '空欄', "\u3092\u53C2\u7167"));
+                    if (!recalled)
+                        break;
+                    var phase_1 = D[recalled].phase;
+                    if (phase_1 === 'start')
+                        fire(s, recalled, { source: dev.name, depth: depth + 1, sourceSlot: t - 1 });
+                    else {
+                        b.pending.push({ turn: t, side: s, key: recalled, phase: phase_1, sourceKey: key, sourceSlot: t - 1 });
+                        emit('effect', "".concat(D[recalled].name, "\u306E").concat(phase_1 === 'before' ? '攻撃前' : phase_1 === 'after' ? '攻撃後' : '終了時', "\u5B9F\u884C\u3092\u4E88\u7D04\uFF08\u53D6\u6D88\u6761\u4EF6\u306F\u4EEE\u8AAC\uFF09"));
+                    }
+                    break;
+                }
+                case 'rabbit': {
+                    try {
+                        for (var STAT_4 = __values(STAT), STAT_4_1 = STAT_4.next(); !STAT_4_1.done; STAT_4_1 = STAT_4.next()) {
+                            var k = STAT_4_1.value;
+                            boost(k, 2.5 * actor.base[k]);
+                        }
+                    }
+                    catch (e_18_1) { e_18 = { error: e_18_1 }; }
+                    finally {
+                        try {
+                            if (STAT_4_1 && !STAT_4_1.done && (_f = STAT_4.return)) _f.call(STAT_4);
+                        }
+                        finally { if (e_18) throw e_18.error; }
+                    }
+                    b.tables[opp(s)][t - 1] = null;
+                    emit('effect', "\u7D20\u30B9\u30C6\u30FC\u30BF\u30B9\u00D72.5\u3092\u56DB\u80FD\u529B\u3078\u52A0\u7B97\u3002\u76F8\u624B\u5F53\u30BF\u30FC\u30F3\u306E\u30C7\u30D3\u30EB\u3092\u6D88\u6EC5");
+                    break;
+                }
+                case 'narcissus': {
+                    try {
+                        for (var STAT_5 = __values(STAT), STAT_5_1 = STAT_5.next(); !STAT_5_1.done; STAT_5_1 = STAT_5.next()) {
+                            var k = STAT_5_1.value;
+                            boost(k, 2 * actor.base[k]);
+                        }
+                    }
+                    catch (e_19_1) { e_19 = { error: e_19_1 }; }
+                    finally {
+                        try {
+                            if (STAT_5_1 && !STAT_5_1.done && (_g = STAT_5.return)) _g.call(STAT_5);
+                        }
+                        finally { if (e_19) throw e_19.error; }
+                    }
+                    disabled.add(opp(s));
+                    emit('effect', "\u7D20\u30B9\u30C6\u30FC\u30BF\u30B9\u00D72\u3092\u56DB\u80FD\u529B\u3078\u52A0\u7B97\u3002\u76F8\u624B\u306E\u901A\u5E38\u653B\u6483\u3092\u5C01\u3058\u308B");
+                    break;
+                }
+                case 'chlorissa': {
+                    if ([s, opp(s)].some(function (id) { return STAT.some(function (k) { return b.fighters[id].activeEquipment[k] !== b.fighters[id].equipment[k]; }); })) {
+                        b.error = 'クロリッサ×ナパイア／ブランド系の装備無効化後リセットは実戦未確認。安全停止';
+                        b.outcome = 'undetermined';
+                        b.complete = true;
+                        emit('unknown', b.error);
+                        return;
+                    }
+                    try {
+                        for (var _1 = __values([s, opp(s)]), _2 = _1.next(); !_2.done; _2 = _1.next()) {
+                            var side = _2.value;
+                            try {
+                                for (var _3 = (e_21 = void 0, __values(['attack', 'defense', 'magic'])), _4 = _3.next(); !_4.done; _4 = _3.next()) {
+                                    var k = _4.value;
+                                    b.fighters[side].current[k] = b.fighters[side].initial[k];
+                                }
+                            }
+                            catch (e_21_1) { e_21 = { error: e_21_1 }; }
+                            finally {
+                                try {
+                                    if (_4 && !_4.done && (_j = _3.return)) _j.call(_3);
+                                }
+                                finally { if (e_21) throw e_21.error; }
+                            }
+                        }
+                    }
+                    catch (e_20_1) { e_20 = { error: e_20_1 }; }
+                    finally {
+                        try {
+                            if (_2 && !_2.done && (_h = _1.return)) _h.call(_1);
+                        }
+                        finally { if (e_20) throw e_20.error; }
+                    }
+                    endTurn = true;
+                    emit('effect', 'クロリッサ：両者の攻撃・守備・魔力を初期値へ。残りのターン処理を強制終了');
+                    break;
+                }
+                case 'kings_wind_gremory': {
+                    suppressed.add(opp(s));
+                    actor.current.attack = actor.current.magic * 2.5;
+                    emit('effect', "\u30B0\u30EC\u30E2\u30EA\u30FC\uFF1A\u6575\u306E\u5F53\u30BF\u30FC\u30F3\u767A\u52D5\u3092\u5C01\u3058\u3001\u653B\u6483\u529B\u3092".concat(fstr(actor.current.attack), "\u306B\u8A2D\u5B9A"));
+                    break;
+                }
+                case 'freya': {
+                    disabled.add(s);
+                    harm(target, Math.max(target.current.attack, target.current.magic), "".concat(target.name, "\u3078\u306E\u30D5\u30EC\u30A4\u30E4\u76F4\u63A5\u30C0\u30E1\u30FC\u30B8"));
+                    break;
+                }
+                case 'red_folter': {
+                    equipmentNeutralize(target, 'フォルター夫妻');
+                    if (!b.complete && t < 6) {
+                        b.tables[opp(s)][t] = null;
+                        emit('effect', "\u30D5\u30A9\u30EB\u30BF\u30FC\u592B\u59BB\uFF1A\u76F8\u624B".concat(t + 1, "T\u306E\u30C7\u30D3\u30EB\u67A0\u3092\u6D88\u53BB"));
+                    }
+                    break;
+                }
+                case 'odradek': {
+                    if (target.activeEquipment.magic <= 5000) {
+                        target.current.attack = 1;
+                        target.current.defense = 1;
+                        emit('effect', 'オドラデク：敵の攻撃力・守備力を1に設定');
+                    }
+                    else
+                        emit('block', "\u30AA\u30C9\u30E9\u30C7\u30AF\uFF1A\u6575\u306E\u9B54\u529B\u88C5\u5099".concat(fstr(target.activeEquipment.magic), "\u304C\u6761\u4EF6\u5916"));
+                    break;
+                }
+                case 'hagenti': {
+                    try {
+                        for (var STAT_6 = __values(STAT), STAT_6_1 = STAT_6.next(); !STAT_6_1.done; STAT_6_1 = STAT_6.next()) {
+                            var k = STAT_6_1.value;
+                            boost(k, actor.activeEquipment[k]);
+                        }
+                    }
+                    catch (e_22_1) { e_22 = { error: e_22_1 }; }
+                    finally {
+                        try {
+                            if (STAT_6_1 && !STAT_6_1.done && (_k = STAT_6.return)) _k.call(STAT_6);
+                        }
+                        finally { if (e_22) throw e_22.error; }
+                    }
+                    emit('effect', 'ハーゲンティ：現在有効な装備補正を追加（ウヴァル後は加算可、ナパイア／ブランド後は0）');
+                    break;
+                }
+                case 'sargatanas': {
+                    try {
+                        for (var STAT_7 = __values(STAT), STAT_7_1 = STAT_7.next(); !STAT_7_1.done; STAT_7_1 = STAT_7.next()) {
+                            var k = STAT_7_1.value;
+                            boost(k, target.activeEquipment[k]);
+                        }
+                    }
+                    catch (e_23_1) { e_23 = { error: e_23_1 }; }
+                    finally {
+                        try {
+                            if (STAT_7_1 && !STAT_7_1.done && (_l = STAT_7.return)) _l.call(STAT_7);
+                        }
+                        finally { if (e_23) throw e_23.error; }
+                    }
+                    emit('effect', 'サルガタナス：敵の装備補正の数値を四能力へ加算');
+                    break;
+                }
+                case 'furcas': {
+                    var side = opp(s);
+                    b.tables[side][t - 1] = null;
+                    if (t < 6)
+                        b.tables[side][t] = null;
+                    actor.current.defense -= Math.floor(actor.current.defense * 0.3);
+                    actor.current.hp -= Math.floor(actor.current.hp * 0.3);
+                    emit('effect', 'フルカス：敵の当ターン・次ターンの枠を消滅。自身の守備・現在体力を約30％減少');
+                    outcome();
+                    break;
+                }
+                case 'purson': {
+                    evading.add(s);
+                    b.blockedAttacks[opp(s)].add(t + 1);
+                    emit('effect', 'プルソン：本ターンの相手通常攻撃を回避（攻撃時デビルは別途発動）、相手の次ターン攻撃を禁止');
+                    break;
+                }
+                case 'baphomet': {
+                    actor.current.attack = target.current.magic * 2;
+                    actor.current.hp = target.current.magic;
+                    disabled.add(s);
+                    emit('effect', 'バフォメット：攻撃力を相手魔力×2、体力を相手魔力に設定。自身は攻撃不能');
+                    outcome();
+                    break;
+                }
+                case 'proserpina': {
+                    var src = b.tables[s][5], destination = b.tables[opp(s)][t];
+                    if (t >= 6 || !src || !destination) {
+                        emit('effect', 'プロセルピナ：自分6Tまたは敵次ターンが空枠のため変更なし');
+                        break;
+                    }
+                    b.tables[opp(s)][t] = src;
+                    emit('effect', "\u30D7\u30ED\u30BB\u30EB\u30D4\u30CA\uFF1A\u6575".concat(t + 1, "T\u306E").concat(D[destination].name, "\u3092\u3001\u81EA\u52066T\u306E").concat(D[src].name, "\u3078\u66F8\u304D\u63DB\u3048\uFF08\u518D\u767A\u52D5\u6642\u3082\u73FE\u5728\u30BF\u30FC\u30F3\u57FA\u6E96\uFF09"));
+                    break;
+                }
+                case 'uval': {
+                    equipmentSubtract(target, STAT, 'ウヴァル');
+                    break;
+                }
+                case 'uval_fata': {
+                    boost('attack', actor.current.defense);
+                    postAttackUvalFata.add(s);
+                    emit('effect', 'ウヴァル＆ファタ・モルガナ：自身の守備力を攻撃力へ加算。攻撃後に敵の攻撃・守備・魔力の元装備値を反復減算する予定');
+                    break;
+                }
+                case 'brand_folter': {
+                    equipmentNeutralize(target, 'ブランド・フォルター');
+                    break;
+                }
+                case 'secret_brand_folter': {
+                    equipmentNeutralize(target, '密かに微笑むブランド・フォルター');
+                    b.blockedAttacks[opp(s)].add(t + 1);
+                    break;
+                }
+                case 'napaiya': {
+                    equipmentNeutralize(actor, 'ナパイア（自己装備）');
+                    target.current.attack = 10;
+                    target.current.magic = 10;
+                    disabled.add(s);
+                    disabled.add(opp(s));
+                    suppressed.add(s);
+                    suppressed.add(opp(s));
+                    emit('effect', 'ナパイア：相手攻撃・魔力を10に設定、このターン双方行動禁止（後続デビルも阻止）');
+                    outcome();
+                    break;
+                }
+                case 'agaliarept': {
+                    var delta = integral(actor.current.magic * 0.5);
+                    boost('magic', delta);
+                    b.magicUntil = t + 2;
+                    emit('effect', "\u30A2\u30AC\u30EA\u30A2\u30EC\u30D7\u30C8\uFF1A\u9B54\u529B+".concat(fstr(delta), "\u3001").concat(t, "\uFF5E").concat(Math.min(6, t + 2), "T\u306E\u53CC\u65B9\u306E\u901A\u5E38\u653B\u6483\u3092\u9B54\u529B\u6226\u3078\u5909\u66F4\uFF08\u9B54\u529B\u30C0\u30E1\u30FC\u30B8\u5F0F\u306F\u66AB\u5B9A\uFF09"));
+                    break;
+                }
+                case 'jack_lore': {
+                    var r = roll(b);
+                    if (r < 0.5) {
+                        suppressed.add(opp(s));
+                        emit('effect', "\u30B8\u30E3\u30C3\u30AF\u30FB\u30ED\u30EC\uFF1A\u5206\u5C90\u2460 \u6575\u30C7\u30D3\u30EB\u767A\u52D5\u3092\u963B\u6B62\u3014\u4E71\u6570".concat(r.toFixed(4), "\u3015"));
+                    }
+                    else {
+                        disabled.add(opp(s));
+                        b.magicUntil = Math.max(b.magicUntil, t);
+                        emit('effect', "\u30B8\u30E3\u30C3\u30AF\u30FB\u30ED\u30EC\uFF1A\u5206\u5C90\u2461 \u6575\u306E\u901A\u5E38\u653B\u6483\u7981\u6B62\uFF0B\u5F53\u30BF\u30FC\u30F3\u9B54\u529B\u6226\u3014\u4E71\u6570".concat(r.toFixed(4), "\u3015"));
+                    }
+                    break;
+                }
+                case 'flauros_fleurety': {
+                    var stolen = Math.floor(target.current.hp * 0.3);
+                    target.current.hp -= stolen;
+                    actor.current.hp += stolen;
+                    confused.add(opp(s));
+                    disabled.add(s);
+                    emit('effect', "\u30D5\u30EB\u30FC\u30EC\u30C6\u30A3\uFF1A\u6575\u306E\u73FE\u5728\u4F53\u529B30\uFF05\uFF1D".concat(fstr(stolen), "\u3092\u5438\u53CE\u3002\u3053\u306E\u30BF\u30FC\u30F3\u76F8\u624B\u306F\u6DF7\u4E71\u3001\u81EA\u8EAB\u306F\u653B\u6483\u4E0D\u80FD"));
+                    outcome();
+                    break;
+                }
+                case 'brauna': {
+                    var index = t - 3, recalled = index >= 0 ? b.tables[s][index] : null;
+                    if (recalled === 'vine' || (recalled === 'proserpina' && b.blockedActivations[s].has("".concat(index + 1, ":proserpina")))) {
+                        var msg = 'ブラウナ：ヴィネとの連鎖または初回阻止されたプロセルピナの再発動は未確認。安全停止';
+                        if (c.mode === 'full') {
+                            b.error = msg;
+                            b.outcome = 'undetermined';
+                            b.complete = true;
+                            emit('unknown', msg);
+                            return;
+                        }
+                        emit('caveat', msg);
+                        return;
+                    }
+                    emit('effect', "\u30D6\u30E9\u30A6\u30CA\uFF1A".concat(index + 1, "T\u306E").concat(recalled ? D[recalled].name : '空欄', "\u3092\u53C2\u7167"));
+                    if (recalled)
+                        fire(s, recalled, { source: 'ブラウナ', depth: depth + 1, sourceSlot: t - 1 });
+                    break;
+                }
+                case 'shackled_magot': {
+                    var amount = integral(target.current.defense * 0.4);
+                    target.current.attack -= amount;
+                    target.current.hp -= amount;
+                    disabled.add(s);
+                    disabled.add(opp(s));
+                    emit('effect', "\u67B7\u304B\u3089\u89E3\u304D\u653E\u305F\u308C\u305F\u30DE\u30B4\u30C8\uFF1A\u6575\u306E\u653B\u6483\u529B\u30FB\u4F53\u529B\u3092\u5404".concat(fstr(amount), "\u6E1B\u7B97\u3001\u3053\u306E\u30BF\u30FC\u30F3\u53CC\u65B9\u653B\u6483\u4E0D\u80FD"));
+                    outcome();
+                    break;
+                }
+                case 'ondine': {
+                    if (actor.current.defense <= 50) {
+                        emit('effect', 'オンディーナ：守備力50以下のため反射条件不成立');
+                        break;
+                    }
+                    reflecting.add(s);
+                    disabled.add(s);
+                    emit('effect', 'オンディーナ：このターンの相手通常攻撃ダメージを反射、自身は攻撃不可（特殊攻撃との競合は未検証）');
+                    break;
+                }
+                case 'blood_krampus': {
+                    var loss = Math.floor(Math.max.apply(Math, __spreadArray([], __read(STAT.map(function (k) { return target.current[k]; })), false)) / 2);
+                    target.current.hp -= loss;
+                    actor.current.attack += actor.current.attack;
+                    emit('effect', "\u30AF\u30E9\u30F3\u30D7\u30B9\uFF1A\u76F8\u624B\u73FE\u5728\u4F53\u529B\u3092".concat(fstr(loss), "\u6E1B\u5C11\u3002\u81EA\u8EAB\u306E\u653B\u6483\u529B\u3092\u500D\u5897"));
+                    outcome();
+                    break;
+                }
+                default: unsupported(key);
+            }
+        }
+        function phase(s, p) {
+            var e_24, _a;
+            if (b.complete || endTurn)
+                return;
+            if ((p === 'before' || p === 'after') && (disabled.has(s) || b.blockedAttacks[s].has(t)))
+                return;
+            if (p === 'after' && postAttackUvalFata.has(s)) {
+                postAttackUvalFata.delete(s);
+                equipmentSubtract(b.fighters[opp(s)], ['attack', 'defense', 'magic'], 'ウヴァル＆ファタ・モルガナ（攻撃後）');
+                if (b.complete)
+                    return;
+            }
+            var current = b.tables[s][t - 1];
+            if (current && D[current].phase === p)
+                fire(s, current);
+            var matches = b.pending.filter(function (x) { return x.turn === t && x.side === s && x.phase === p; });
+            b.pending = b.pending.filter(function (x) { return !(x.turn === t && x.side === s && x.phase === p); });
+            try {
+                for (var matches_1 = __values(matches), matches_1_1 = matches_1.next(); !matches_1_1.done; matches_1_1 = matches_1.next()) {
+                    var x = matches_1_1.value;
+                    if (b.complete || endTurn)
+                        break;
+                    if (b.tables[s][x.sourceSlot] !== x.sourceKey) {
+                        emit('block', "".concat(D[x.key].name, "\uFF1A\u547C\u51FA\u5143").concat(D[x.sourceKey].name, "\u306E\u67A0\u6D88\u6EC5/\u5909\u66F4\u306B\u3088\u308A\u4E88\u7D04\u53D6\u6D88\uFF08\u66AB\u5B9A\u30E2\u30C7\u30EB\uFF09"));
+                        continue;
+                    }
+                    fire(s, x.key, { source: "".concat(D[x.sourceKey].name, "\u304B\u3089\u306E\u4E88\u7D04"), sourceSlot: x.sourceSlot });
+                }
+            }
+            catch (e_24_1) { e_24 = { error: e_24_1 }; }
+            finally {
+                try {
+                    if (matches_1_1 && !matches_1_1.done && (_a = matches_1.return)) _a.call(matches_1);
+                }
+                finally { if (e_24) throw e_24.error; }
+            }
+        }
+        emit('turn', "\u7B2C".concat(t, "\u30BF\u30FC\u30F3\uFF08").concat(b.fighters[first].name, "\u5148\u653B\uFF09"));
+        if (t <= b.magicUntil)
+            emit('effect', "\u9B54\u529B\u6226\u7D99\u7D9A\u4E2D\uFF08".concat(t, "T\uFF09\uFF0F\u4E21\u8005\u306B\u9069\u7528\u3002\u901A\u5E38\u30C0\u30E1\u30FC\u30B8\u5F0F\u306E\u6D41\u7528\u306F\u4EEE\u5F0F"));
+        try {
+            for (var order_1 = __values(order), order_1_1 = order_1.next(); !order_1_1.done; order_1_1 = order_1.next()) {
+                var s = order_1_1.value;
+                phase(s, 'start');
+            }
+        }
+        catch (e_7_1) { e_7 = { error: e_7_1 }; }
+        finally {
+            try {
+                if (order_1_1 && !order_1_1.done && (_a = order_1.return)) _a.call(order_1);
+            }
+            finally { if (e_7) throw e_7.error; }
+        }
+        if (!b.complete && !endTurn) {
+            var _loop_1 = function (s) {
+                phase(s, 'before');
+                if (b.complete || endTurn)
+                    return "break";
+                if (c.mode === 'trace') {
+                    emit('attack', "".concat(b.fighters[s].name, "\uFF1A\u901A\u5E38\u653B\u6483\u67A0\uFF08\u6570\u5024\u672A\u8A08\u7B97\uFF09"));
+                }
+                else if (disabled.has(s) || b.blockedAttacks[s].has(t))
+                    emit('block', "".concat(b.fighters[s].name, "\u306F\u653B\u6483\u3067\u304D\u306A\u3044\uFF08\u653B\u6483\u6642\u30FB\u653B\u6483\u5F8C\u30C7\u30D3\u30EB\u3082\u767A\u52D5\u3057\u306A\u3044\uFF09"));
+                else {
+                    var actor = b.fighters[s], target = b.fighters[opp(s)];
+                    var hit = void 0;
+                    var magical_1 = t <= b.magicUntil, attack_1 = magical_1 ? actor.current.magic : actor.current.attack, defense_1 = magical_1 ? target.current.magic : target.current.defense;
+                    if (evading.has(opp(s))) {
+                        emit('attack', "".concat(actor.name, "\u306E").concat(magical_1 ? '攻撃魔法' : '攻撃', "\uFF01 \u3057\u304B\u3057").concat(target.name, "\u306F\u653B\u6483\u3092\u56DE\u907F\u3057\u305F"));
+                    }
+                    else {
+                        if (c.damageMode === 'observed') {
+                            var found = c.observedHits.find(function (x) { return x.attacker === s && ((!magical_1 && (!x.kind || x.kind === 'physical')) || (magical_1 && x.kind === 'magic')) && Math.abs(x.attack - attack_1) < 1e-7 && Math.abs(x.defense - defense_1) < 1e-7; });
+                            hit = found ? { ok: true, damage: found.damage, confidence: '実測' } : { ok: false, reason: '一致する実測ダメージが登録されていない' };
+                        }
+                        else {
+                            hit = prev.estimateDamage(attack_1, defense_1);
+                            if (magical_1 && !b.warnings.includes('魔力戦の通常攻撃ダメージは、物理の経験式を魔力値に仮適用した未検証モデル'))
+                                b.warnings.push('魔力戦の通常攻撃ダメージは、物理の経験式を魔力値に仮適用した未検証モデル');
+                        }
+                        if (!(hit === null || hit === void 0 ? void 0 : hit.ok)) {
+                            b.error = "".concat(actor.name, "\u306E\u653B\u6483\u3092\u8A08\u7B97\u3067\u304D\u306A\u3044\uFF1A").concat((hit === null || hit === void 0 ? void 0 : hit.reason) || '計算式なし');
+                            b.outcome = 'undetermined';
+                            b.complete = true;
+                            emit('unknown', b.error);
+                            return "break";
+                        }
+                        var receiver = confused.has(s) ? actor : reflecting.has(opp(s)) ? actor : target;
+                        receiver.current.hp -= hit.damage;
+                        var suffix = confused.has(s) ? '〔混乱・自傷〕' : reflecting.has(opp(s)) ? '〔反射〕' : magical_1 ? '〔魔力戦・参照魔力／ダメージ式は仮式〕' : '';
+                        emit('attack', "".concat(actor.name, "\u306E").concat(magical_1 ? '攻撃魔法' : '攻撃', "\uFF01 ").concat(receiver.name, "\u306B").concat(fstr(hit.damage), "\u306E\u30C0\u30E1\u30FC\u30B8\u3014").concat(hit.confidence, "\u3015").concat(suffix));
+                        outcome();
+                    }
+                }
+                if (b.complete || endTurn)
+                    return "break";
+                if (!disabled.has(s) && !b.blockedAttacks[s].has(t))
+                    phase(s, 'after');
+            };
+            try {
+                for (var order_2 = __values(order), order_2_1 = order_2.next(); !order_2_1.done; order_2_1 = order_2.next()) {
+                    var s = order_2_1.value;
+                    var state_1 = _loop_1(s);
+                    if (state_1 === "break")
+                        break;
+                }
+            }
+            catch (e_8_1) { e_8 = { error: e_8_1 }; }
+            finally {
+                try {
+                    if (order_2_1 && !order_2_1.done && (_b = order_2.return)) _b.call(order_2);
+                }
+                finally { if (e_8) throw e_8.error; }
+            }
+        }
+        if (!b.complete && !endTurn)
+            try {
+                for (var order_3 = __values(order), order_3_1 = order_3.next(); !order_3_1.done; order_3_1 = order_3.next()) {
+                    var s = order_3_1.value;
+                    phase(s, 'end');
+                }
+            }
+            catch (e_9_1) { e_9 = { error: e_9_1 }; }
+            finally {
+                try {
+                    if (order_3_1 && !order_3_1.done && (_c = order_3.return)) _c.call(order_3);
+                }
+                finally { if (e_9) throw e_9.error; }
+            }
+        if (endTurn)
+            emit('effect', 'クロリッサにより当ターンを終了（後続の実体化・攻撃はなし）');
+        if (!b.complete) {
+            try {
+                for (var _e = __values(b.sustained), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    var effect = _f.value;
+                    if (b.complete)
+                        break;
+                    var receiver = b.fighters[effect.target];
+                    receiver.current.hp -= effect.damage;
+                    emit('sustain', "".concat(D[effect.key].name, "\u306E\u7D99\u7D9A\u52B9\u679C\uFF01 ").concat(receiver.name, "\u306B").concat(fstr(effect.damage), "\u306E\u30C0\u30E1\u30FC\u30B8\uFF08\u6B8B\u308A\u4F53\u529B").concat(fstr(receiver.current.hp), "\uFF09"), { side: effect.source, key: effect.key });
+                    outcome();
+                }
+            }
+            catch (e_10_1) { e_10 = { error: e_10_1 }; }
+            finally {
+                try {
+                    if (_f && !_f.done && (_d = _e.return)) _d.call(_e);
+                }
+                finally { if (e_10) throw e_10.error; }
+            }
+        }
+        if (!b.complete && t === 6) {
+            b.complete = true;
+            b.outcome = c.mode === 'trace' ? 'trace_complete' : 'draw';
+            emit('result', c.mode === 'trace' ? '6ターンの発動順追跡完了（勝敗は未計算）' : '6ターン終了。両者生存のため引き分け');
+        }
+        var snapshot = { turn: t, first: first, events: events, fired: fired, table: { player: __spreadArray([], __read(b.tables.player), false), enemy: __spreadArray([], __read(b.tables.enemy), false) },
+            fighters: { player: __assign({}, b.fighters.player.current), enemy: __assign({}, b.fighters.enemy.current) }, endTurn: endTurn, outcome: b.outcome };
+        b.turns.push(snapshot);
+        return snapshot;
+    }
+    function playAll(b) { while (!b.complete)
+        round(b); return b; }
+    function preset(name) {
+        if (name === void 0) { name = 'sho'; }
+        var empty = Array(6).fill(null), orders = ['player', 'enemy', 'player', 'player', 'enemy', 'player'];
+        if (name === 'free')
+            return {
+                title: '自由デビルテーブル編集', mode: 'trace', damageMode: 'estimate', orders: Array(6).fill('player'), laplaceTarget: 1,
+                player: { name: 'シロコ', base: { attack: 31, defense: 6203, hp: 100000, magic: 10000 } },
+                enemy: { name: '対戦相手', base: { attack: 2570, defense: 1560, hp: 100000, magic: 1580 } },
+                playerDeck: empty, enemyDeck: empty
+            };
+        if (name === 'fieldHexenVine')
+            return {
+                title: '実戦A2：ヘクセンナハト→ヴィネ（重複しない継続効果）', mode: 'full', damageMode: 'estimate', orders: Array(6).fill('player'),
+                player: { name: 'シロコ', base: { attack: 0, defense: 5000, hp: 200000, magic: 10443 } },
+                enemy: { name: '検証相手', base: { attack: 0, defense: 5000, hp: 100000, magic: 100 } },
+                playerDeck: ['hexennacht', 'vine', null, null, null, null], enemyDeck: empty
+            };
+        if (name === 'fieldProserpina')
+            return {
+                title: '実戦B3：プロセルピナ→ヴィネ（相手2Tと3Tを変更）', mode: 'full', damageMode: 'estimate', orders: Array(6).fill('player'),
+                player: { name: 'シロコ', base: { attack: 0, defense: 5000, hp: 250000, magic: 12463 } },
+                enemy: { name: '試験相手', base: { attack: 0, defense: 5000, hp: 250000, magic: 100 } },
+                playerDeck: ['proserpina', 'vine', null, null, null, 'paimon'], enemyDeck: [null, 'eligos', 'marbas', null, null, null]
+            };
+        if (name === 'fieldJackLore')
+            return {
+                title: '実戦C1：ジャック・ロレ→ラプラス（再発動ごと再抽選）', mode: 'full', damageMode: 'estimate', orders: Array(6).fill('player'),
+                player: { name: 'シロコ', base: { attack: 1000, defense: 5000, hp: 200000, magic: 10443 } },
+                enemy: { name: '試験相手', base: { attack: 1000, defense: 5000, hp: 200000, magic: 100 } },
+                playerDeck: ['jack_lore', null, null, 'laplace', null, null], enemyDeck: empty,
+                laplaceTarget: 1, randomSeed: 20261112
+            };
+        if (name === 'sho')
+            return {
+                title: 'ショウ・ルースソルト戦（統合エンジン検証）', mode: 'full', damageMode: 'observed',
+                orders: orders,
+                player: { name: 'シロコ', base: { attack: 1, defense: 1, hp: 23437, magic: 1 }, assist: { attack: 30, defense: 10, hp: 90, magic: 303 }, equipment: { attack: 5775, defense: 9812, hp: 10917, magic: 3050 } },
+                enemy: { name: 'ショウ・ルースソルト', base: { attack: 1500, defense: 8200, hp: 10700, magic: 80 }, assist: { attack: 13, defense: 0, hp: 18, magic: 0 }, equipment: { attack: 600, defense: 4910, hp: 6700, magic: 5230 } },
+                playerDeck: ['rabbit', 'chlorissa', 'kings_wind_gremory', null, null, null], enemyDeck: empty,
+                observedHits: [
+                    { attacker: 'player', attack: 5808.5, defense: 13110, damage: 1166 },
+                    { attacker: 'player', attack: 8385, defense: 13110, damage: 1684 },
+                    { attacker: 'enemy', attack: 2113, defense: 9825.5, damage: 424 },
+                    { attacker: 'enemy', attack: 2113, defense: 9823, damage: 424 }
+                ], expected: { playerHP: 90916.5, enemyHP: 9516, outcome: 'draw' }
+            };
+        if (name === 'kijiEnemy' || name === 'kijiPlayer')
+            return {
+                title: name === 'kijiEnemy' ? 'キジ③：2Tモロク先行（発動順追跡）' : 'キジ③：2Tベルゼブブ先行（発動順追跡）',
+                mode: 'trace', damageMode: 'estimate', orders: name === 'kijiEnemy' ? ['player', 'enemy', 'player', 'enemy', 'player', 'enemy'] : ['player', 'player', 'enemy', 'enemy', 'player', 'enemy'],
+                laplaceTarget: 1, player: { name: 'シロコ', base: { attack: 31, defense: 1003, hp: 46994, magic: 6458 } }, enemy: { name: 'キジ', base: { attack: 32600, defense: 15000, hp: 33420, magic: 115 } },
+                playerDeck: ['troll', 'beelzebub', 'sargatanas', null, 'laplace', null], enemyDeck: KIJI3
+            };
+        if (name === 'hexen')
+            return {
+                title: '継続効果検証：ヘクセンナハト→クロリッサ（終了時ダメージは残る）',
+                mode: 'full', damageMode: 'estimate', orders: Array(6).fill('player'),
+                player: { name: 'シロコ', base: { attack: 31, defense: 7000, hp: 150000, magic: 10000 } },
+                enemy: { name: '試験相手', base: { attack: 1100, defense: 8000, hp: 100000, magic: 2500 } },
+                playerDeck: ['hexennacht', null, 'chlorissa', null, null, null], enemyDeck: Array(6).fill(null)
+            };
+        if (name === 'kamael')
+            return {
+                title: '連続発動：カマエル→ヴィネで攻撃力を二度加算',
+                mode: 'full', damageMode: 'estimate', orders: Array(6).fill('player'),
+                player: { name: 'シロコ', base: { attack: 2031, defense: 2003, hp: 100000, magic: 11634 } },
+                enemy: { name: '龍王（試験条件）', base: { attack: 2570, defense: 1560, hp: 150000, magic: 1580 } },
+                playerDeck: ['kamael', 'vine', null, null, null, null], enemyDeck: Array(6).fill(null)
+            };
+        if (name === 'mixed')
+            return {
+                title: '統合テスト：表変更＋能力変更＋通常攻撃', mode: 'full', damageMode: 'estimate', orders: ['player', 'player', 'enemy', 'player', 'enemy', 'player'],
+                laplaceTarget: 1,
+                player: { name: 'シロコ', base: { attack: 31, defense: 6203, hp: 50000, magic: 10000 } },
+                enemy: { name: '試験相手', base: { attack: 1010, defense: 6133, hp: 90000, magic: 2000 } },
+                playerDeck: ['troll', 'beelzebub', 'rabbit', null, 'laplace', null],
+                enemyDeck: ['marbas', 'odradek', 'freya', 'kings_wind_gremory', 'chlorissa', 'red_folter']
+            };
+        throw Error('不明なプリセット：' + name);
+    }
+    return { D: D, SOURCE_RULES: SOURCE_RULES, KIJI3: KIJI3, STAT: STAT, LABEL: LABEL, fstr: fstr, config: config, createBattle: createBattle, round: round, playAll: playAll, preset: preset };
+});
+</script>
+<script>(function(){
+var E, battle=null, keys=['attack','defense','hp','magic'], labels=['攻撃','守備','体力','魔力'];
+function el(id){return document.getElementById(id);}
+function setText(target,txt){if(typeof target.textContent!=='undefined')target.textContent=String(txt);else target.innerText=String(txt);}
+function tell(message,isBad){var x=el('status');setText(x,message);x.className=isBad?'error':'ok';}
+function option(sel,text,value){var o=document.createElement('option');o.value=value;setText(o,text);sel.appendChild(o);}
+function clear(elm){while(elm.firstChild)elm.removeChild(elm.firstChild);}
+function idFor(side,kind,key){return side+'_'+kind+'_'+key;}
+function rows(side){var title=side==='player'?'自分':'相手',h='<h3>'+title+'のステータス</h3>';
+ h+='<div class="stats"><span class="hd"></span>';
+ for(var i=0;i<4;i++)h+='<span class="hd">'+labels[i]+'</span>';
+ h+='</div>';
+ for(var j=0;j<3;j++){var kind=['base','assist','equipment'][j],kl=['素','アシスト','装備'][j];h+='<div class="stats"><span class="statlabel">'+kl+'</span>';
+  for(var k=0;k<4;k++)h+='<input aria-label="'+title+kl+labels[k]+'" type="text" size="6" id="'+idFor(side,kind,keys[k])+'" value="0">';
+  h+='</div>';}
+ return h;
+}
+function build(){el('stats-player').innerHTML=rows('player');el('stats-enemy').innerHTML=rows('enemy');
+ var d=E.D, names=[];
+ for(var key in d)if(Object.prototype.hasOwnProperty.call(d,key))names.push({key:key,name:d[key].name,model:d[key].model,min:d[key].minimumTurn||1});
+ names.sort(function(a,b){return a.name.localeCompare(b.name);});
+ var panels=[{side:'player',title:'自分のデビル'},{side:'enemy',title:'相手のデビル'}];
+ for(var p=0;p<panels.length;p++){var pan=panels[p],wrap=el('deck-'+pan.side);clear(wrap);
+  for(var t=1;t<=6;t++){var line=document.createElement('div');line.className='deckline';var lab=document.createElement('label');setText(lab,t+'T');lab.htmlFor=pan.side+'deck'+t;line.appendChild(lab);
+   var select=document.createElement('select');select.id=pan.side+'deck'+t;option(select,'──── 空欄 ────','');
+   for(var i=0;i<names.length;i++){var n=names[i];var desc=n.name+(!n.model?'（未実装）':'')+(n.min>1?'／'+n.min+'T以降':'');option(select,desc,n.key);}
+   line.appendChild(select);wrap.appendChild(line);}
+ }
+ for(var t=1;t<=6;t++){var ord=el('order'+t);option(ord,'自分先攻','player');option(ord,'相手先攻','enemy');}
+}
+function fill(config){var sides=['player','enemy'];for(var si=0;si<sides.length;si++){
+ var side=sides[si],f=config[side]||{};el('name-'+side).value=f.name||'';
+ for(var t=0;t<3;t++){var kind=['base','assist','equipment'][t],v=f[kind]||{};
+  for(var i=0;i<4;i++)el(idFor(side,kind,keys[i])).value=typeof v[keys[i]]==='number'?String(v[keys[i]]):'0';}
+ var deck=config[side+'Deck']||[];for(var j=0;j<6;j++)el(side+'deck'+(j+1)).value=deck[j]||'';
+ }
+ for(var j=0;j<6;j++)el('order'+(j+1)).value=config.orders&&config.orders[j]==='enemy'?'enemy':'player';
+ el('mode').value=config.mode||'full';el('seed').value=String(config.randomSeed||20261112);
+ battle=null;clear(el('log'));tell('設定を読み込みました。計算を実行できます。',false);setText(el('result'),'未実行');}
+function getStats(side){var result={name:el('name-'+side).value||side};
+ for(var j=0;j<3;j++){var kind=['base','assist','equipment'][j],o={};for(var i=0;i<4;i++){
+  var v=el(idFor(side,kind,keys[i])).value,number=Number(v);
+  if(v===''||!isFinite(number))throw new Error(side+'の'+kind+'/'+keys[i]+'に数値を入力');o[keys[i]]=number;
+ }result[kind]=o;}
+ return result;
+}
+function getConfig(){var cfg={title:'旧端末互換版・自由対戦',mode:el('mode').value,damageMode:'estimate',randomSeed:Number(el('seed').value),orders:[],player:getStats('player'),enemy:getStats('enemy'),playerDeck:[],enemyDeck:[]};
+ for(var t=1;t<=6;t++){cfg.orders.push(el('order'+t).value);cfg.playerDeck.push(el('playerdeck'+t).value||null);cfg.enemyDeck.push(el('enemydeck'+t).value||null);}
+ return cfg;
+}
+function show(){if(!battle)return;var out=el('log');clear(out);
+ for(var i=0;i<battle.events.length;i++){var e=battle.events[i],div=document.createElement('div');div.className='event event-'+e.type;setText(div,'【'+e.turn+'T】 '+e.text);out.appendChild(div);}
+ var s='現在 '+battle.turn+'T／自分HP '+E.fstr(battle.fighters.player.current.hp)+'／相手HP '+E.fstr(battle.fighters.enemy.current.hp);
+ if(battle.complete){s+=' ／ ';if(battle.outcome==='winner:player')s+='自分の勝利';else if(battle.outcome==='winner:enemy')s+='相手の勝利';else if(battle.outcome==='draw')s+='引き分け';else if(battle.outcome==='undetermined')s+='判定不能（計算中断）';else s+='追跡完了';}
+ setText(el('result'),s);
+ if(battle.error)tell('計算停止：'+battle.error,true);else tell(battle.complete?'終了':'計算中。次のターンへ進めます。',false);
+}
+function run(all){try{if(!battle||battle.complete){battle=E.createBattle(getConfig());clear(el('log'));}if(all)E.playAll(battle);else E.round(battle);show();}catch(e){tell('実行エラー：'+(e.message||String(e)),true);}}
+function demo(){var c=E.preset('free');c.mode='full';c.title='パイモン対キジ例';c.orders=['player','enemy','player','enemy','player','enemy'];
+ c.player={name:'シロコ',base:{attack:1001,defense:1050,hp:11200,magic:10200},assist:{attack:30,defense:0,hp:90,magic:263},equipment:{attack:5150,defense:9950,hp:14017,magic:2000}};
+ c.enemy={name:'キジ',base:{attack:10000,defense:5200,hp:10000,magic:100},assist:{attack:0,defense:0,hp:20,magic:15},equipment:{attack:22600,defense:9800,hp:23400,magic:0}};
+ c.playerDeck=['paimon','freya',null,null,null,null];c.enemyDeck=[null,null,null,null,null,null];fill(c);}
+function init(){try{
+ E=window.KeiUnifiedEngineV45;if(!E)throw new Error('計算本体を読み込めません');
+ build();el('loadDemo').onclick=demo;el('loadSho').onclick=function(){fill(E.preset('sho'));};el('loadEmpty').onclick=function(){fill(E.preset('free'));};
+ el('runTurn').onclick=function(){run(false);};el('runAll').onclick=function(){run(true);};
+ demo();tell('JavaScript動作確認OK。旧形式のエンジンを読み込みました。',false);
+ }catch(e){tell('起動エラー：'+(e.message||String(e)),true);}}
+if(window.addEventListener)window.addEventListener('load',init,false);else if(window.attachEvent)window.attachEvent('onload',init);else window.onload=init;
+})();</script>
+</body></html>
