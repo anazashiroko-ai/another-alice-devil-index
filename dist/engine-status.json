@@ -4,12 +4,12 @@
   "source": "battle-engine/src/kei_unified_engine_v0_4_8.js",
   "note": "実装状況は研究エンジン由来。原作の能力説明を上書きしない。partialは未解明要素を含む。",
   "counts": {
+    "verified": 8,
+    "provisional": 5,
     "description": 104,
     "partial": 232,
-    "pending": 24,
     "legacy": 23,
-    "verified": 8,
-    "provisional": 5
+    "pending": 24
   },
   "devils": [
     {
