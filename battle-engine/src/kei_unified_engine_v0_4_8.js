@@ -126,6 +126,7 @@ function round(b){
  if(b.complete)return null;
  b.turn++;const t=b.turn;const c=b.config,first=b.forcedFirst[t]||c.orders[t-1],order=[first,opp(first)],events=[];
  const tempUndo=[],lastHits={player:0,enemy:0},turnReceived={player:0,enemy:0},duelHandled=new Set();
+ const sprigganSurvival=new Set();
  b.absorbing=new Set(); // Ostar absorption is only active during this turn.
   const fired={player:[],enemy:[]},disabled=new Set(),suppressed=new Set(),evading=new Set(),reflecting=new Set(),confused=new Set(),postAttackUvalFata=new Set();let endTurn=false;
  function emit(type,text,meta={}){const e={turn:t,type,text,...meta};b.events.push(e);events.push(e);}
@@ -161,7 +162,7 @@ function round(b){
   const actor=b.fighters[s],target=b.fighters[opp(s)],dev=D[key];
   if(depth>15){b.error='再発動連鎖が安全上限に達した（ゲームの真の上限ではない）';b.complete=true;b.outcome='undetermined';emit('unknown',b.error);return;}
   // スクルドは主能力が不発でも、テーブルに残っていればネモフィラを止める（実戦観測）。
-  if(key==='nemophila'&&b.tables[opp(s)].includes('skuld')){emit('block',`${actor.name}の【ネモフィラ】は相手のスクルドによって発動を阻止された`);return;}
+  if((key==='nemophila'||key==='catalog_221')&&b.tables[opp(s)].includes('skuld')){emit('block',`${actor.name}の【ネモフィラ】は相手のスクルドによって発動を阻止された`);return;}
   if(source==='table'&&(suppressed.has(s)||b.blockedDevils[s].has(t))){b.blockedActivations[s].add(`${t}:${key}`);emit('block',`${actor.name}の【${dev.name}】は発動を封じられた`);return;}
   if(source!=='table' && sourceSlot!==null && b.tables[s][sourceSlot]===null){emit('block',`${dev.name}：呼出元の枠が消滅したため保留効果を取消（暫定仕様）`);return;}
   fired[s].push(key);emit('devil',`${actor.name}のデビル【${dev.name}】が実体化${source==='table'?'':`〔再発動：${source}〕`}`,{side:s,key,source});
@@ -383,6 +384,26 @@ function round(b){
        if(!enemyKey){markUnknown('アロケル：相手デビル未配置時の属性判定は未検証');break;}
        if(getDevAttr(enemyKey)==='闇')actor.current.hp-=actor.current.hp*.8;
        else target.current.hp-=target.current.magic*.3;
+       break;
+     }
+     case 'sprigganGuard':{
+       if(roll(b)<op.probability)disabled.add(opp(s));
+       else sprigganSurvival.add(s);
+       break;
+     }
+     case 'nemophilaSwapNext':{
+       if(t>=6||!b.tables[s][t])break;
+       const tmp=b.tables[s][t];b.tables[s][t]=b.tables[opp(s)][t];b.tables[opp(s)][t]=tmp;
+       endTurn=true;emit('effect','ネモフィラ：当ターンの戦闘を停止し、次ターンの双方札を交換');
+       break;
+     }
+     case 'swapOtherSlots':{
+       if(ext.opponentIsAnother===false)break;
+       if(ext.opponentIsAnother===undefined){
+         const warning='マクスウェル：相手をアナザーと仮定。アナザー以外では効果なし';
+         if(!b.warnings.includes(warning))b.warnings.push(warning);
+       }
+       for(let i=0;i<6;i++){if(i===t-1)continue;const a=b.tables.player[i];b.tables.player[i]=b.tables.enemy[i];b.tables.enemy[i]=a;}
        break;
      }
      default:markUnknown('未対応の図鑑数値演算：'+op.op);
@@ -672,7 +693,11 @@ function round(b){
     const receiver=confused.has(s)?actor:reflecting.has(opp(s))?actor:target;
     const reduction=Math.max(0,...(b.damageReduction||[]).filter(x=>x.side===opp(s)&&x.from<=t&&x.until>=t).map(x=>x.fraction));
     hit.damage*=1-reduction;lastHits[s]=receiver===target?hit.damage:0;
-    if(receiver===target&&b.absorbing?.has(opp(s))){target.current.hp+=hit.damage;lastHits[s]=0;emit('effect',`${target.name}は通常攻撃を吸収し回復`);}
+    if(receiver===target&&sprigganSurvival.has(opp(s))&&hit.damage>0&&target.current.hp>hit.damage){
+     target.current.defense+=3*hit.damage;turnReceived[target.id]+=hit.damage;
+     emit('effect','スプリガン：受けた通常攻撃ダメージを回復し、守備力にその3倍を加算（即死時は不発）');
+    }
+    else if(receiver===target&&b.absorbing?.has(opp(s))){target.current.hp+=hit.damage;lastHits[s]=0;emit('effect',`${target.name}は通常攻撃を吸収し回復`);}
     else{receiver.current.hp-=hit.damage;turnReceived[receiver.id]+=hit.damage;}
     const suffix=confused.has(s)?'〔混乱・自傷〕':reflecting.has(opp(s))?'〔反射〕':magical?'〔魔力戦・参照魔力／ダメージ式は仮式〕':'';
     emit('attack',`${actor.name}の${magical?'攻撃魔法':'攻撃'}！ ${receiver.name}に${fstr(hit.damage)}のダメージ〔${hit.confidence}〕${suffix}`);
