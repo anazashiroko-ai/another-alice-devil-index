@@ -1,0 +1,46 @@
+name: Sync battle engine and catalog
+on:
+  push:
+    branches: [main]
+    paths:
+      - "battle-engine/src/**"
+      - "dist/devils.json"
+      - "dist/index.html"
+      - "battle-engine/index.html"
+      - "battle-engine/legacy.html"
+      - "scripts/sync-engine.cjs"
+      - ".github/workflows/engine-sync.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: engine-sync-main
+  cancel-in-progress: false
+jobs:
+  sync:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install transpiler for the legacy build
+        run: npm install --no-save --no-package-lock --ignore-scripts @babel/core@7 @babel/preset-env@7 core-js-bundle@3
+      - name: Sync all generated outputs from one engine source
+        run: node scripts/sync-engine.cjs
+      - name: Check generated artifacts are stable
+        run: node scripts/sync-engine.cjs --check
+      - name: Run batched ability regression suite
+        run: node battle-engine/tests/test_kei_0048_batch.js
+      - name: Commit synchronized catalog and browsers
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist/index.html dist/engine-status.json battle-engine/index.html battle-engine/legacy.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Sync catalog status and both battle frontends [skip ci]"
+            git push
+          fi
