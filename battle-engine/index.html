@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>四月島・仮想戦闘エンジン／試作機004.5</title>
+<title>四月島・仮想戦闘エンジン／試作機004.6</title>
 <style>
 :root{color-scheme:dark;--bg:#09131c;--surface:#172431;--panel:#1e2d3c;--line:#455766;--gold:#ebc488;--ink:#f0f0ec;--sub:#b3c3ca;--mint:#7ddac0;--rose:#f6a3a1;--violet:#d1b7ed}
 *{box-sizing:border-box}body{margin:0;color:var(--ink);background:radial-gradient(ellipse at 70% 0%,#243847 0%,transparent 52%),var(--bg);font-family:system-ui,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif;line-height:1.65}main{max-width:1110px;margin:auto;padding:24px 14px 80px}
@@ -43,12 +43,12 @@ label{display:block;color:var(--sub);font-size:12px;margin-bottom:5px}select,inp
 .audit-list .verified{color:#7ee8b8}.audit-list .provisional{color:#e9d2a0}</style></head>
 <body><main>
 <div class="kicker">SHIGATSUSHIMA / BATTLE RESEARCH</div>
-<h1>四月島・仮想戦闘エンジン <span style="color:var(--gold)">004.5</span></h1>
-<p class="intro">公開図鑑396体を監査対象に、記述から扱える能力82種類を追加。未実装の理由を別表にし、自由編成から戦闘実行できる。</p>
+<h1>四月島・仮想戦闘エンジン <span style="color:var(--gold)">004.6</span></h1>
+<p class="intro">公開図鑑396体を監査対象に、記述モデルと能力拡張を追加。未実装の理由を別表にし、自由編成から戦闘実行できる。</p>
 <section class="panel">
  <div class="grid3">
   <div><label for="preset">実験プリセット</label><select id="preset"><option value="free">自由編集・空テーブル（新規）</option><option value="fieldHexenVine">実戦A2：ヘクセンナハト→ヴィネ</option><option value="fieldProserpina">実戦B3：プロセルピナ→ヴィネ</option><option value="fieldJackLore">実戦C1：ジャック・ロレ再抽選</option><option value="sho">ショウ戦・6T完全照合</option><option value="kijiEnemy">キジ③・2Tモロク先行（配置追跡）</option><option value="kijiPlayer">キジ③・2Tベルゼブブ先行（配置追跡）</option><option value="mixed">配置操作＋数値計算・統合デモ</option><option value="hexen">ヘクセンナハト＋クロリッサ（継続ダメージ）</option><option value="kamael">カマエル→ヴィネ（再発動）</option></select></div>
-  <div><label for="engine-mode">シミュレーション方式</label><select id="engine-mode"><option value="full">数値＋発動順（未実装能力で停止）</option><option value="trace">発動順のみ（他能力を省略）</option></select></div>
+  <div><label for="engine-mode">シミュレーション方式</label><select id="engine-mode"><option value="full">数値＋発動順（未実装で停止、（仮）を含む）</option><option value="trace">発動順のみ（他能力を省略）</option></select></div>
   <div><label for="damage-mode">通常攻撃ダメージ</label><select id="damage-mode"><option value="estimate">経験式から計算（未検証領域あり）</option><option value="observed">登録済みの実測値で照合</option></select></div>
  </div>
  <p class="notice note"><b>ご注意：</b>図鑑から選択、またはデビル名を自由入力。<b>「記述モデル」は図鑑説明に基づく仮実装で、実戦数値と一致する保証はない。</b> <b>未実装デビルは「発動順のみ」で段階を指定して追跡できるが、実際の妨害・数値効果・勝敗は未計算</b>。完全戦闘では未実装能力が発動すると停止する。先攻順は手動指定。</p>
@@ -378,11 +378,16 @@ const D={
  baal:{name:'バアル',phase:'before',model:true},
  lilah:{name:'ライラ・ケプルス',phase:'end',model:false},
  moloch:{name:'虚の扉を開くモロク',phase:'start',model:false},
- beleth:{name:'党首の威光を放つベレト',phase:'start',model:false},
+ abundia:{name:'アブンディア',phase:'start',model:true,tier:'description-model'},
+ abaddon:{name:'アバドン',phase:'start',model:true,tier:'description-model'},
+ matthew_hopkins:{name:'マシュー・ホプキンス',phase:'start',model:true,tier:'description-model'},
+ newyear_ariel:{name:'謹賀新年・アリエル',phase:'start',model:true,tier:'description-model'},
+ diana:{name:'◎ディアーナ',phase:'before',model:true,minimumTurn:2,tier:'description-model'},
+ beleth:{name:'党首の威光を放つベレト',phase:'start',model:true,tier:'description-model'},
  tsuma_naberius:{name:'ツマ・ナベリウス',phase:'start',model:false},
- lucifer:{name:'雪崩を切り裂くルシファー',phase:'start',model:false},
+ lucifer:{name:'雪崩を切り裂くルシファー',phase:'start',model:true,tier:'explicit-provisional'},
  lady_almiraj:{name:'レディ・アルミラージ',phase:'start',model:false},
- spring_bridget:{name:'春を喜ぶブリギット',phase:'start',model:false},
+ spring_bridget:{name:'春を喜ぶブリギット',phase:'start',model:true,tier:'description-model'},
  nicholas:{name:'ニコラス・レミ',phase:'start',model:false},
  shemihaza:{name:'シャミハザ',phase:'start',model:false},
  proserpina:{name:'プロセルピナ',phase:'start',model:true,tier:'field-verified'},
@@ -444,13 +449,13 @@ function createBattle(input){const c=config(input);for(const side of ['player','
  fighters:{player:fighter(c.player,'player'),enemy:fighter(c.enemy,'enemy')},
  original:{player:[...c.playerDeck],enemy:[...c.enemyDeck]},tables:{player:[...c.playerDeck],enemy:[...c.enemyDeck]},
  events:[],turns:[],warnings:[],pending:[],sustained:[],blockedDevils:{player:new Set(),enemy:new Set()},
- blockedAttacks:{player:new Set(),enemy:new Set()},blockedActivations:{player:new Set(),enemy:new Set()},truncations:[],magicUntil:0,rngState:c.randomSeed||0x6d2b79f5};}
+ blockedAttacks:{player:new Set(),enemy:new Set()},blockedActivations:{player:new Set(),enemy:new Set()},truncations:[],forcedFirst:{},magicUntil:0,rngState:c.randomSeed||0x6d2b79f5};}
 const opp=id=>id==='player'?'enemy':'player';
 function roll(b){let x=b.rngState>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;b.rngState=x>>>0;return b.rngState/4294967296;}
 
 function round(b){
  if(b.complete)return null;
- b.turn++;const t=b.turn;const c=b.config,first=c.orders[t-1],order=[first,opp(first)],events=[];
+ b.turn++;const t=b.turn;const c=b.config,first=b.forcedFirst[t]||c.orders[t-1],order=[first,opp(first)],events=[];
  const fired={player:[],enemy:[]},disabled=new Set(),suppressed=new Set(),evading=new Set(),reflecting=new Set(),confused=new Set(),postAttackUvalFata=new Set();let endTurn=false;
  function emit(type,text,meta={}){const e={turn:t,type,text,...meta};b.events.push(e);events.push(e);}
  function outcome(){if(c.mode==='trace')return false;
@@ -652,6 +657,56 @@ function round(b){
    case 'purson':{
     evading.add(s);b.blockedAttacks[opp(s)].add(t+1);
     emit('effect','プルソン：本ターンの相手通常攻撃を回避（攻撃時デビルは別途発動）、相手の次ターン攻撃を禁止');break;
+   }
+   case 'abundia':{
+    const difference=actor.current.defense-target.current.magic;
+    if(difference>0)harm(target,difference,`アブンディア：敵の魔力との差による直接ダメージ`);
+    else if(difference<0)harm(actor,-difference,`アブンディア：自分の守備力が低いため反動ダメージ`);
+    else emit('effect','アブンディア：守備力と敵魔力が等しく、直接ダメージ0');
+    break;
+   }
+   case 'abaddon':{
+    const amount=actor.base.defense*0.4;
+    target.current.attack-=amount;target.current.defense-=amount;
+    emit('effect',`アバドン：素の守備力×40％＝${fstr(amount)}を敵攻撃力・守備力から減算（「元々」は素ステータスと解釈）`);break;
+   }
+   case 'matthew_hopkins':{
+    suppressed.add(opp(s));target.current.magic=1;
+    emit('effect','マシュー・ホプキンス：敵の魔力を1に設定。未発動の当ターン敵デビルを阻止（既発動は巻き戻さない）');break;
+   }
+   case 'beleth':{
+    target.current.defense=target.current.magic*0.3;suppressed.add(opp(s));
+    emit('effect',`党首ベレト：敵の守備力を現在魔力の30％＝${fstr(target.current.defense)}に設定。未発動の当ターン敵デビルを阻止`);break;
+   }
+   case 'spring_bridget':{
+    suppressed.add(opp(s));
+    if(t<6)b.forcedFirst[t+1]=s;
+    emit('effect',`春ブリギット：当ターン敵デビルを阻止${t<6?'、'+(t+1)+'Tの先攻を予約':'（6Tのため次ターン予約なし）'}。同ターン後発ブリギットは予約を上書き`);break;
+   }
+   case 'newyear_ariel':{
+    const v=target.current.magic;
+    target.current.magic=actor.current.defense;actor.current.defense=v;
+    if(t<6)b.blockedDevils[opp(s)].add(t+1);
+    emit('effect',`謹賀新年・アリエル：敵魔力と自分守備力を交換。敵${t+1}Tのデビルを阻止`);break;
+   }
+   case 'diana':{
+    const delta=actor.current.defense-target.current.defense;
+    if(delta>0)harm(target,delta,'ディアーナ：守備力の差分を敵に与える');
+    else if(delta<0)harm(actor,-delta,'ディアーナ：守備力の差分を自分が受ける');
+    else emit('effect','ディアーナ：双方の守備力が等しく差分0');
+    break;
+   }
+   case 'lucifer':{
+    // Explicitly provisional: correction base, rounding, and deletion timing lack a confirmed combat log.
+    const changes=[];
+    for(const stat of ['attack','defense','magic']){
+     const shortfall=Math.max(0,actor.initial[stat]-actor.current[stat]);
+     if(shortfall>0){actor.current[stat]=actor.initial[stat];target.current[stat]-=shortfall*3;changes.push(`${LABEL[stat]}回復${fstr(shortfall)}・敵-${fstr(shortfall*3)}`);}
+    }
+    const removed=b.tables[opp(s)][t-1];b.tables[opp(s)][t-1]=null;
+    emit('effect',`【仮】雪崩ルシファー：${changes.join('、')||'低下能力なし'}。敵の現在ターン枠${removed?'【'+D[removed].name+'】':'（空欄）'}を消去`);
+    emit('caveat','【仮実装】元値との差×3で反撃・現在枠を即消去と解釈。原作の端数処理、発動済み能力への遡及、連鎖時の再参照は未検証');
+    outcome();break;
    }
    case 'baphomet':{
     actor.current.attack=target.current.magic*2;actor.current.hp=target.current.magic;disabled.add(s);
@@ -864,7 +919,6 @@ function preset(name='sho'){
 }
 return {D,SOURCE_RULES,KIJI3,STAT,LABEL,fstr,config,createBattle,round,playAll,preset};
 });
-
 </script>
 <script>
 (()=>{'use strict';
@@ -902,7 +956,7 @@ function resolveDevil(text,phase){
 }
 function nameForKey(key){
  if(!key)return '';
- if(E.D[key])return E.D[key].name;
+ if(E.D[key])return E.D[key].name+(E.D[key].tier==='explicit-provisional'?'（仮）':'');
  const m=/^custom:(start|before|after|end):(.+)$/.exec(key);
  return m?decodeURIComponent(m[2]):key;
 }
@@ -917,7 +971,7 @@ function updateSupport(side,i,autoPhase=true){
  if(!value){status.textContent='空欄';status.className='support';phase.disabled=false;if(autoPhase)phase.value='';return;}
  const entry=catalogMatch(value);
  const original=entry?.name||value;
- if(key){const d=E.D[key];status.textContent=`${d.tier==='field-verified'?'実戦規則反映・部分確認':d.tier==='field-provisional'?'実戦対応・周辺仕様は暫定':d.tier==='source-model'?'記述モデル・要実戦照合':d.model?'旧試作・暫定':'数値未実装'} ／ ${phaseLabel[d.phase]}${d.minimumTurn>1?' ／ '+d.minimumTurn+'T以降':''}${entry?' ／ '+entry.dp+' '+entry.attr:''}`;status.className='support '+(d.model?'known':'unknown');phase.value=d.phase;phase.disabled=true;}
+ if(key){const d=E.D[key];status.textContent=`${d.tier==='field-verified'?'実戦規則反映・部分確認':d.tier==='field-provisional'?'実戦対応・周辺仕様は暫定':d.tier==='explicit-provisional'?'（仮）説明文の暫定解釈・要検証':d.tier==='description-model'?'図鑑記述に沿った実装・要実戦照合':d.tier==='source-model'?'記述モデル・要実戦照合':d.model?'旧試作・暫定':'数値未実装'} ／ ${phaseLabel[d.phase]}${d.minimumTurn>1?' ／ '+d.minimumTurn+'T以降':''}${entry?' ／ '+entry.dp+' '+entry.attr:''}`;status.className='support '+(d.model?'known':'unknown');phase.value=d.phase;phase.disabled=true;}
  else if(entry){
   const target=catalogPhase(entry);
   if(autoPhase)phase.value=target||'';
@@ -933,6 +987,8 @@ function auditRecord(entry){
  const txt=String(entry.ability||'');
  if(model?.tier==='field-verified')return {status:'verified',label:'実戦規則反映',reason:'実戦ログで確認した主処理を組込。全ての競合・数式は未検証'};
  if(model?.tier==='field-provisional')return {status:'provisional',label:'部分実装・暫定',reason:'実戦で確認した部分を実装。抽選・ダメージ式・競合順など未確認点が残る'};
+ if(model?.tier==='explicit-provisional')return {status:'provisional',label:'（仮）効果の解釈に未確認点あり',reason:'能力を仮計算。計算の前提・タイミング未検証、実戦一致は保証しない'};
+ if(model?.tier==='description-model')return {status:'source',label:'図鑑記述を実装',reason:'図鑑の主要効果を計算。未確認の端数・競合等は要照合'};
  if(model?.tier==='source-model')return {status:'source',label:'追加記述モデル',reason:'図鑑説明から操作を実装。実戦の端数処理・連鎖条件は未検証'};
  if(model?.model)return {status:'legacy',label:'先行試作',reason:'既存の計算処理。能力ごとの再検証が必要'};
  let reason='複合処理・端数規則・実戦検証が未完了';
