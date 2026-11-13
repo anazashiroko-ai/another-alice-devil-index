@@ -995,12 +995,14 @@ function auditRecord(entry){
  if(!catalogPhase(entry))reason='発動タイミングが図鑑から一意に決められない';
  else if(/詳細未記載|未記載|ただし…|さらに…|ただし……|特定の相手|特定相手/.test(txt))reason='隠し条件・例外の記載が不足';
  else if(/確率|ランダム|抽選|1\/3|１／３|クリティカル/.test(txt))reason='確率分岐・乱数処理が未検証';
- else if(/魔力戦|混乱|反射|回避|ダメージカット|軽減|吸収したダメージ/.test(txt))reason='特殊状態・ダメージ段階の処理が未完成';
+ else if(/魔力戦/.test(txt))reason='魔力戦の数値処理・判定順が未検証';
+ else if(/回避/.test(txt))reason='回避と攻撃判定の処理順が未検証';
+ else if(/混乱|反射|ダメージカット|軽減|吸収したダメージ/.test(txt))reason='特殊状態・ダメージ段階の処理が未検証';
  else if(/所持GOLD|ハーモニクス|レベル差|全アナザー順位|ウィッカ内|ソウルストーン|勝利数|アシスト数|装備した|ドール/.test(txt))reason='ゲーム外の値・装備条件をエンジンに入力できない';
  else if(/入れ替え|消去|消滅|セットしているデビル|先攻確定|次ターン|上書き/.test(txt))reason='デビル配置・上書き・発動順の組合せが未検証';
  else if(/このターンのみ|３ターン|3ターン|バトル終了まで|毎ターン/.test(txt))reason='継続期間・終了時・一時効果の処理が未確認';
- if(normalizedName(entry.name)==='グシオン')reason='当ターンのみの攻守補正と回避の複合効果。復元と回避判定順は未検証';
- if(['春風に舞うグシオン','王の風・グシオン'].includes(normalizedName(entry.name)))reason='属性数1種類300%・2種類50%は図鑑原文の数値。誤植か未確定、属性数計算も未実装';
+ if(normalizedName(entry.name)==='グシオン')reason='攻撃力4倍・相手守備力40%低下・当ターン回避の複合効果。補正の解除と回避判定順が未検証';
+ if(['春風に舞うグシオン','王の風・グシオン'].includes(normalizedName(entry.name)))reason='初期セットデビルの属性数に応じた能力値変化の処理が未実装';
  return {status:'pending',label:'保留',reason};
 }
 function auditRows(){return catalog.map(entry=>({...entry,...auditRecord(entry)}));}
