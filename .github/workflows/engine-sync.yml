@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - "battle-engine/src/**"
+      - "battle-engine/tests/**"
       - "dist/devils.json"
       - "dist/index.html"
       - "battle-engine/index.html"
