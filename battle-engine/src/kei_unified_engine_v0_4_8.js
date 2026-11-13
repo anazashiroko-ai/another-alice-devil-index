@@ -72,7 +72,8 @@ const SOURCE_RULES=[{"key":"vasago","name":"ウァサゴ","phase":"before","minT
 const BATCH_0048=(root&&root.KeiBatchRules0048)||(typeof require==='function'?require('./kei_batch_rules_0048.js'):[]);
 const BATCH_META=Object.fromEntries(BATCH_0048.map(x=>[x.key,x]));
 const META_LOOKUP=new Map((root?.KeiDevilMeta0048||[]).map(x=>[String(x.name).normalize('NFKC').replace(/^[○◎]+/,'').trim(),x]));
-SOURCE_RULES.push(...BATCH_0048);
+const BATCH_EXCLUDED_0048=new Set([6,38,94,102,215,294,309,340]); // Needs unresolved phases/effects: not counted as implemented.
+SOURCE_RULES.push(...BATCH_0048.filter(x=>!BATCH_EXCLUDED_0048.has(x.id)));
 for(const x of SOURCE_RULES)D[x.key]={name:x.name,phase:x.phase,model:true,tier:x.coverage==='partial'?'description-partial':'source-model',sourceId:x.key,minimumTurn:x.minTurn,notes:x.comment,coverage:x.coverage||'existing'};
 for(const d of Object.values(D)){const meta=META_LOOKUP.get(String(d.name).normalize('NFKC').replace(/^[○◎]+/,'').trim());if(meta){d.dp=meta.dp;d.attr=meta.attr;}}
 for(const x of Object.values(D))if(x.model&&!x.tier)x.tier='legacy-preview';
@@ -376,6 +377,7 @@ function round(b){
     if(outcome())break;
    }
    emit('effect',`${dev.name}：図鑑記述に基づく計算モデルを適用（端数処理・未観測条件は未確定）`,{rule:key,sourceLevel:'description'});
+   if(rule.coverage==='partial'){const warning=`${dev.name}：主効果のみの部分モデル。未実装の分岐・競合・端数処理を含む可能性あり。勝敗は原作一致未保証`;if(!b.warnings.includes(warning))b.warnings.push(warning);}
    if(rule.comment)emit('caveat',`${dev.name}：${rule.comment}`);
    return;
   }
