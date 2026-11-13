@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>四月島・仮想戦闘エンジン 004.5 旧端末向け軽量版</title>
+<title>四月島・仮想戦闘エンジン 004.6 旧端末向け軽量版</title>
 <style>
 body{margin:0;background:#f6f4ee;color:#202a35;font:15px/1.55 Arial,Meiryo,sans-serif;}
 #wrapper{max-width:680px;margin:0 auto;padding:12px 9px 45px;}h1{font-size:23px;color:#234b64;line-height:1.3}h2{font-size:18px;background:#e3ebef;padding:6px 9px;border-left:4px solid #286482;margin-top:24px}h3{font-size:15px;margin:9px 0 5px;}
@@ -13,8 +13,8 @@ label{font-size:13px;color:#425b6b}.block{display:block}.stats{width:100%;white-
 #log{background:#fff;border:1px solid #aeb8be;padding:8px;max-height:640px;overflow:auto}.event{padding:5px 2px;border-bottom:1px dotted #d5dadd;white-space:pre-wrap;word-wrap:break-word;font-size:13px}.event-devil{color:#583f83;font-weight:bold}.event-attack{color:#1f5572}.event-result{color:#196b46;font-weight:bold}.event-unknown{color:#ad2929;font-weight:bold}
 small,.muted{font-size:12px;color:#596971}noscript{color:#a32222;font-weight:bold}
 </style></head><body><div id="wrapper">
-<h1>四月島・仮想戦闘エンジン<br>004.5 旧端末向け軽量版</h1>
-<p class="note"><b>古いブラウザ用：</b>現行004.5の計算本体を古いJavaScript形式に変換。外部ライブラリ・通信・ログイン不要。<b>JavaScript自体が無効な場合は動作しません。</b> デビル索引のオンライン検索・JSON読込等は省略しました。研究用の暫定モデルなので公式の戦闘結果を保証しません。</p>
+<h1>四月島・仮想戦闘エンジン<br>004.6 旧端末向け軽量版</h1>
+<p class="note"><b>古いブラウザ用：</b>現行004.6の計算本体を古いJavaScript形式に変換。外部ライブラリ・通信・ログイン不要。<b>JavaScript自体が無効な場合は動作しません。</b> デビル索引のオンライン検索・JSON読込等は省略しました。研究用の暫定モデルなので公式の戦闘結果を保証しません。</p>
 <noscript><p>この端末ではJavaScriptが無効、または非対応です。ブラウザ設定で有効化してください。有効化できなければ、こちらの画面から戦闘計算はできません。</p></noscript>
 <div id="status" class="statusbar">読み込み中。ここが変わらなければJavaScriptが動作していないか、ブラウザが古すぎる可能性があります。</div>
 <div class="panel"><h2>最初に動作確認</h2>
@@ -32,7 +32,7 @@ small,.muted{font-size:12px;color:#596971}noscript{color:#a32222;font-weight:bol
 </div></div>
 <div class="panel"><h2>4. 実行</h2><button id="runTurn" type="button">1ターン進める</button><button id="runAll" type="button">6ターン一括実行</button>
 <div id="result">未実行</div><div id="log">戦闘ログがここに表示されます。</div></div>
-<p class="muted">四月島研究室／互換版試作。現行004.5と同じ暫定戦闘ロジックを使用。元のソースは変更しません。発動順・未知の効果・物理ダメージには未確定部分があります。</p>
+<p class="muted">四月島研究室／互換版試作。現行004.6と同じ暫定戦闘ロジックを使用。元のソースは変更しません。発動順・未知の効果・物理ダメージには未確定部分があります。</p>
 </div>
 <script>(function(){
 if(!Array.isArray)Array.isArray=function(x){return Object.prototype.toString.call(x)==='[object Array]';};
@@ -495,11 +495,16 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
         baal: { name: 'バアル', phase: 'before', model: true },
         lilah: { name: 'ライラ・ケプルス', phase: 'end', model: false },
         moloch: { name: '虚の扉を開くモロク', phase: 'start', model: false },
-        beleth: { name: '党首の威光を放つベレト', phase: 'start', model: false },
+        abundia: { name: 'アブンディア', phase: 'start', model: true, tier: 'description-model' },
+        abaddon: { name: 'アバドン', phase: 'start', model: true, tier: 'description-model' },
+        matthew_hopkins: { name: 'マシュー・ホプキンス', phase: 'start', model: true, tier: 'description-model' },
+        newyear_ariel: { name: '謹賀新年・アリエル', phase: 'start', model: true, tier: 'description-model' },
+        diana: { name: '◎ディアーナ', phase: 'before', model: true, minimumTurn: 2, tier: 'description-model' },
+        beleth: { name: '党首の威光を放つベレト', phase: 'start', model: true, tier: 'description-model' },
         tsuma_naberius: { name: 'ツマ・ナベリウス', phase: 'start', model: false },
-        lucifer: { name: '雪崩を切り裂くルシファー', phase: 'start', model: false },
+        lucifer: { name: '雪崩を切り裂くルシファー', phase: 'start', model: true, tier: 'explicit-provisional' },
         lady_almiraj: { name: 'レディ・アルミラージ', phase: 'start', model: false },
-        spring_bridget: { name: '春を喜ぶブリギット', phase: 'start', model: false },
+        spring_bridget: { name: '春を喜ぶブリギット', phase: 'start', model: true, tier: 'description-model' },
         nicholas: { name: 'ニコラス・レミ', phase: 'start', model: false },
         shemihaza: { name: 'シャミハザ', phase: 'start', model: false },
         proserpina: { name: 'プロセルピナ', phase: 'start', model: true, tier: 'field-verified' },
@@ -666,7 +671,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
             fighters: { player: fighter(c.player, 'player'), enemy: fighter(c.enemy, 'enemy') },
             original: { player: __spreadArray([], __read(c.playerDeck), false), enemy: __spreadArray([], __read(c.enemyDeck), false) }, tables: { player: __spreadArray([], __read(c.playerDeck), false), enemy: __spreadArray([], __read(c.enemyDeck), false) },
             events: [], turns: [], warnings: [], pending: [], sustained: [], blockedDevils: { player: new Set(), enemy: new Set() },
-            blockedAttacks: { player: new Set(), enemy: new Set() }, blockedActivations: { player: new Set(), enemy: new Set() }, truncations: [], magicUntil: 0, rngState: c.randomSeed || 0x6d2b79f5 };
+            blockedAttacks: { player: new Set(), enemy: new Set() }, blockedActivations: { player: new Set(), enemy: new Set() }, truncations: [], forcedFirst: {}, magicUntil: 0, rngState: c.randomSeed || 0x6d2b79f5 };
     }
     var opp = function (id) { return id === 'player' ? 'enemy' : 'player'; };
     function roll(b) { var x = b.rngState >>> 0; x ^= x << 13; x ^= x >>> 17; x ^= x << 5; b.rngState = x >>> 0; return b.rngState / 4294967296; }
@@ -676,7 +681,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
             return null;
         b.turn++;
         var t = b.turn;
-        var c = b.config, first = c.orders[t - 1], order = [first, opp(first)], events = [];
+        var c = b.config, first = b.forcedFirst[t] || c.orders[t - 1], order = [first, opp(first)], events = [];
         var fired = { player: [], enemy: [] }, disabled = new Set(), suppressed = new Set(), evading = new Set(), reflecting = new Set(), confused = new Set(), postAttackUvalFata = new Set();
         var endTurn = false;
         function emit(type, text, meta) {
@@ -751,8 +756,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
             outcome();
         }
         function fire(s, key, _a) {
-            var e_14, _b, e_15, _c, e_16, _d, e_17, _e, e_18, _f, e_19, _g, e_20, _h, e_21, _j, e_22, _k, e_23, _l;
-            var _m = _a === void 0 ? {} : _a, _o = _m.source, source = _o === void 0 ? 'table' : _o, _p = _m.depth, depth = _p === void 0 ? 0 : _p, _q = _m.sourceSlot, sourceSlot = _q === void 0 ? null : _q;
+            var e_14, _b, e_15, _c, e_16, _d, e_17, _e, e_18, _f, e_19, _g, e_20, _h, e_21, _j, e_22, _k, e_23, _l, e_24, _m;
+            var _o = _a === void 0 ? {} : _a, _p = _o.source, source = _p === void 0 ? 'table' : _p, _q = _o.depth, depth = _q === void 0 ? 0 : _q, _r = _o.sourceSlot, sourceSlot = _r === void 0 ? null : _r;
             if (!key || b.complete || endTurn)
                 return;
             var actor = b.fighters[s], target = b.fighters[opp(s)], dev = D[key];
@@ -823,23 +828,23 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
                     return get_1(value);
                 }
                 try {
-                    for (var _r = __values(rule.ops), _s = _r.next(); !_s.done; _s = _r.next()) {
-                        var op = _s.value;
+                    for (var _s = __values(rule.ops), _t = _s.next(); !_t.done; _t = _s.next()) {
+                        var op = _t.value;
                         if (b.complete || endTurn)
                             break;
                         var f = op.who ? who(op.who) : actor;
                         switch (op.op) {
                             case 'multiply':
                                 try {
-                                    for (var _t = (e_15 = void 0, __values(op.stats)), _u = _t.next(); !_u.done; _u = _t.next()) {
-                                        var st = _u.value;
+                                    for (var _u = (e_15 = void 0, __values(op.stats)), _v = _u.next(); !_v.done; _v = _u.next()) {
+                                        var st = _v.value;
                                         f.current[st] = rule.key === 'marbas' ? integral(f.current[st] * op.value) : f.current[st] * op.value;
                                     }
                                 }
                                 catch (e_15_1) { e_15 = { error: e_15_1 }; }
                                 finally {
                                     try {
-                                        if (_u && !_u.done && (_c = _t.return)) _c.call(_t);
+                                        if (_v && !_v.done && (_c = _u.return)) _c.call(_u);
                                     }
                                     finally { if (e_15) throw e_15.error; }
                                 }
@@ -854,7 +859,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
                                 f.current[op.stat] = originalGet(op.ref) * op.scale;
                                 break;
                             case 'swap': {
-                                var _v = __read(op.first.split('.'), 2), x = _v[0], p = _v[1], _w = __read(op.second.split('.'), 2), y = _w[0], q = _w[1];
+                                var _w = __read(op.first.split('.'), 2), x = _w[0], p = _w[1], _x = __read(op.second.split('.'), 2), y = _x[0], q = _x[1];
                                 var v = who(x).current[p];
                                 who(x).current[p] = who(y).current[q];
                                 who(y).current[q] = v;
@@ -862,15 +867,15 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
                             }
                             case 'reset':
                                 try {
-                                    for (var _x = (e_16 = void 0, __values(op.stats)), _y = _x.next(); !_y.done; _y = _x.next()) {
-                                        var st = _y.value;
+                                    for (var _y = (e_16 = void 0, __values(op.stats)), _z = _y.next(); !_z.done; _z = _y.next()) {
+                                        var st = _z.value;
                                         f.current[st] = f.initial[st];
                                     }
                                 }
                                 catch (e_16_1) { e_16 = { error: e_16_1 }; }
                                 finally {
                                     try {
-                                        if (_y && !_y.done && (_d = _x.return)) _d.call(_x);
+                                        if (_z && !_z.done && (_d = _y.return)) _d.call(_y);
                                     }
                                     finally { if (e_16) throw e_16.error; }
                                 }
@@ -903,15 +908,15 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
                             }
                             case 'restoreIfBelow':
                                 try {
-                                    for (var _z = (e_17 = void 0, __values(op.stats)), _0 = _z.next(); !_0.done; _0 = _z.next()) {
-                                        var st = _0.value;
+                                    for (var _0 = (e_17 = void 0, __values(op.stats)), _1 = _0.next(); !_1.done; _1 = _0.next()) {
+                                        var st = _1.value;
                                         f.current[st] = Math.max(f.current[st], f.initial[st]);
                                     }
                                 }
                                 catch (e_17_1) { e_17 = { error: e_17_1 }; }
                                 finally {
                                     try {
-                                        if (_0 && !_0.done && (_e = _z.return)) _e.call(_z);
+                                        if (_1 && !_1.done && (_e = _0.return)) _e.call(_0);
                                     }
                                     finally { if (e_17) throw e_17.error; }
                                 }
@@ -966,7 +971,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
                 catch (e_14_1) { e_14 = { error: e_14_1 }; }
                 finally {
                     try {
-                        if (_s && !_s.done && (_b = _r.return)) _b.call(_r);
+                        if (_t && !_t.done && (_b = _s.return)) _b.call(_s);
                     }
                     finally { if (e_14) throw e_14.error; }
                 }
@@ -1117,18 +1122,18 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
                         return;
                     }
                     try {
-                        for (var _1 = __values([s, opp(s)]), _2 = _1.next(); !_2.done; _2 = _1.next()) {
-                            var side = _2.value;
+                        for (var _2 = __values([s, opp(s)]), _3 = _2.next(); !_3.done; _3 = _2.next()) {
+                            var side = _3.value;
                             try {
-                                for (var _3 = (e_21 = void 0, __values(['attack', 'defense', 'magic'])), _4 = _3.next(); !_4.done; _4 = _3.next()) {
-                                    var k = _4.value;
+                                for (var _4 = (e_21 = void 0, __values(['attack', 'defense', 'magic'])), _5 = _4.next(); !_5.done; _5 = _4.next()) {
+                                    var k = _5.value;
                                     b.fighters[side].current[k] = b.fighters[side].initial[k];
                                 }
                             }
                             catch (e_21_1) { e_21 = { error: e_21_1 }; }
                             finally {
                                 try {
-                                    if (_4 && !_4.done && (_j = _3.return)) _j.call(_3);
+                                    if (_5 && !_5.done && (_j = _4.return)) _j.call(_4);
                                 }
                                 finally { if (e_21) throw e_21.error; }
                             }
@@ -1137,7 +1142,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
                     catch (e_20_1) { e_20 = { error: e_20_1 }; }
                     finally {
                         try {
-                            if (_2 && !_2.done && (_h = _1.return)) _h.call(_1);
+                            if (_3 && !_3.done && (_h = _2.return)) _h.call(_2);
                         }
                         finally { if (e_20) throw e_20.error; }
                     }
@@ -1223,6 +1228,88 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
                     evading.add(s);
                     b.blockedAttacks[opp(s)].add(t + 1);
                     emit('effect', 'プルソン：本ターンの相手通常攻撃を回避（攻撃時デビルは別途発動）、相手の次ターン攻撃を禁止');
+                    break;
+                }
+                case 'abundia': {
+                    var difference = actor.current.defense - target.current.magic;
+                    if (difference > 0)
+                        harm(target, difference, "\u30A2\u30D6\u30F3\u30C7\u30A3\u30A2\uFF1A\u6575\u306E\u9B54\u529B\u3068\u306E\u5DEE\u306B\u3088\u308B\u76F4\u63A5\u30C0\u30E1\u30FC\u30B8");
+                    else if (difference < 0)
+                        harm(actor, -difference, "\u30A2\u30D6\u30F3\u30C7\u30A3\u30A2\uFF1A\u81EA\u5206\u306E\u5B88\u5099\u529B\u304C\u4F4E\u3044\u305F\u3081\u53CD\u52D5\u30C0\u30E1\u30FC\u30B8");
+                    else
+                        emit('effect', 'アブンディア：守備力と敵魔力が等しく、直接ダメージ0');
+                    break;
+                }
+                case 'abaddon': {
+                    var amount = actor.base.defense * 0.4;
+                    target.current.attack -= amount;
+                    target.current.defense -= amount;
+                    emit('effect', "\u30A2\u30D0\u30C9\u30F3\uFF1A\u7D20\u306E\u5B88\u5099\u529B\u00D740\uFF05\uFF1D".concat(fstr(amount), "\u3092\u6575\u653B\u6483\u529B\u30FB\u5B88\u5099\u529B\u304B\u3089\u6E1B\u7B97\uFF08\u300C\u5143\u3005\u300D\u306F\u7D20\u30B9\u30C6\u30FC\u30BF\u30B9\u3068\u89E3\u91C8\uFF09"));
+                    break;
+                }
+                case 'matthew_hopkins': {
+                    suppressed.add(opp(s));
+                    target.current.magic = 1;
+                    emit('effect', 'マシュー・ホプキンス：敵の魔力を1に設定。未発動の当ターン敵デビルを阻止（既発動は巻き戻さない）');
+                    break;
+                }
+                case 'beleth': {
+                    target.current.defense = target.current.magic * 0.3;
+                    suppressed.add(opp(s));
+                    emit('effect', "\u515A\u9996\u30D9\u30EC\u30C8\uFF1A\u6575\u306E\u5B88\u5099\u529B\u3092\u73FE\u5728\u9B54\u529B\u306E30\uFF05\uFF1D".concat(fstr(target.current.defense), "\u306B\u8A2D\u5B9A\u3002\u672A\u767A\u52D5\u306E\u5F53\u30BF\u30FC\u30F3\u6575\u30C7\u30D3\u30EB\u3092\u963B\u6B62"));
+                    break;
+                }
+                case 'spring_bridget': {
+                    suppressed.add(opp(s));
+                    if (t < 6)
+                        b.forcedFirst[t + 1] = s;
+                    emit('effect', "\u6625\u30D6\u30EA\u30AE\u30C3\u30C8\uFF1A\u5F53\u30BF\u30FC\u30F3\u6575\u30C7\u30D3\u30EB\u3092\u963B\u6B62".concat(t < 6 ? '、' + (t + 1) + 'Tの先攻を予約' : '（6Tのため次ターン予約なし）', "\u3002\u540C\u30BF\u30FC\u30F3\u5F8C\u767A\u30D6\u30EA\u30AE\u30C3\u30C8\u306F\u4E88\u7D04\u3092\u4E0A\u66F8\u304D"));
+                    break;
+                }
+                case 'newyear_ariel': {
+                    var v = target.current.magic;
+                    target.current.magic = actor.current.defense;
+                    actor.current.defense = v;
+                    if (t < 6)
+                        b.blockedDevils[opp(s)].add(t + 1);
+                    emit('effect', "\u8B39\u8CC0\u65B0\u5E74\u30FB\u30A2\u30EA\u30A8\u30EB\uFF1A\u6575\u9B54\u529B\u3068\u81EA\u5206\u5B88\u5099\u529B\u3092\u4EA4\u63DB\u3002\u6575".concat(t + 1, "T\u306E\u30C7\u30D3\u30EB\u3092\u963B\u6B62"));
+                    break;
+                }
+                case 'diana': {
+                    var delta = actor.current.defense - target.current.defense;
+                    if (delta > 0)
+                        harm(target, delta, 'ディアーナ：守備力の差分を敵に与える');
+                    else if (delta < 0)
+                        harm(actor, -delta, 'ディアーナ：守備力の差分を自分が受ける');
+                    else
+                        emit('effect', 'ディアーナ：双方の守備力が等しく差分0');
+                    break;
+                }
+                case 'lucifer': {
+                    var changes = [];
+                    try {
+                        for (var _6 = __values(['attack', 'defense', 'magic']), _7 = _6.next(); !_7.done; _7 = _6.next()) {
+                            var stat = _7.value;
+                            var shortfall = Math.max(0, actor.initial[stat] - actor.current[stat]);
+                            if (shortfall > 0) {
+                                actor.current[stat] = actor.initial[stat];
+                                target.current[stat] -= shortfall * 3;
+                                changes.push("".concat(LABEL[stat], "\u56DE\u5FA9").concat(fstr(shortfall), "\u30FB\u6575-").concat(fstr(shortfall * 3)));
+                            }
+                        }
+                    }
+                    catch (e_24_1) { e_24 = { error: e_24_1 }; }
+                    finally {
+                        try {
+                            if (_7 && !_7.done && (_m = _6.return)) _m.call(_6);
+                        }
+                        finally { if (e_24) throw e_24.error; }
+                    }
+                    var removed = b.tables[opp(s)][t - 1];
+                    b.tables[opp(s)][t - 1] = null;
+                    emit('effect', "\u3010\u4EEE\u3011\u96EA\u5D29\u30EB\u30B7\u30D5\u30A1\u30FC\uFF1A".concat(changes.join('、') || '低下能力なし', "\u3002\u6575\u306E\u73FE\u5728\u30BF\u30FC\u30F3\u67A0").concat(removed ? '【' + D[removed].name + '】' : '（空欄）', "\u3092\u6D88\u53BB"));
+                    emit('caveat', '【仮実装】元値との差×3で反撃・現在枠を即消去と解釈。原作の端数処理、発動済み能力への遡及、連鎖時の再参照は未検証');
+                    outcome();
                     break;
                 }
                 case 'baphomet': {
@@ -1355,7 +1442,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
             }
         }
         function phase(s, p) {
-            var e_24, _a;
+            var e_25, _a;
             if (b.complete || endTurn)
                 return;
             if ((p === 'before' || p === 'after') && (disabled.has(s) || b.blockedAttacks[s].has(t)))
@@ -1383,12 +1470,12 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
                     fire(s, x.key, { source: "".concat(D[x.sourceKey].name, "\u304B\u3089\u306E\u4E88\u7D04"), sourceSlot: x.sourceSlot });
                 }
             }
-            catch (e_24_1) { e_24 = { error: e_24_1 }; }
+            catch (e_25_1) { e_25 = { error: e_25_1 }; }
             finally {
                 try {
                     if (matches_1_1 && !matches_1_1.done && (_a = matches_1.return)) _a.call(matches_1);
                 }
-                finally { if (e_24) throw e_24.error; }
+                finally { if (e_25) throw e_25.error; }
             }
         }
         emit('turn', "\u7B2C".concat(t, "\u30BF\u30FC\u30F3\uFF08").concat(b.fighters[first].name, "\u5148\u653B\uFF09"));
@@ -1625,7 +1712,7 @@ function build(){el('stats-player').innerHTML=rows('player');el('stats-enemy').i
  for(var p=0;p<panels.length;p++){var pan=panels[p],wrap=el('deck-'+pan.side);clear(wrap);
   for(var t=1;t<=6;t++){var line=document.createElement('div');line.className='deckline';var lab=document.createElement('label');setText(lab,t+'T');lab.htmlFor=pan.side+'deck'+t;line.appendChild(lab);
    var select=document.createElement('select');select.id=pan.side+'deck'+t;option(select,'──── 空欄 ────','');
-   for(var i=0;i<names.length;i++){var n=names[i];var desc=n.name+(!n.model?'（未実装）':'')+(n.min>1?'／'+n.min+'T以降':'');option(select,desc,n.key);}
+   for(var i=0;i<names.length;i++){var n=names[i];var desc=n.name+(n.key==='lucifer'?'（仮）':(!n.model?'（未実装）':''))+(n.min>1?'／'+n.min+'T以降':'');option(select,desc,n.key);}
    line.appendChild(select);wrap.appendChild(line);}
  }
  for(var t=1;t<=6;t++){var ord=el('order'+t);option(ord,'自分先攻','player');option(ord,'相手先攻','enemy');}
