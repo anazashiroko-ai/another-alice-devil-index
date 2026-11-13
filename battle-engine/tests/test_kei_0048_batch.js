@@ -19,13 +19,13 @@ function battle(key,turn=1,enemyFirst='vasago'){
 let tests=0;
 function check(name,fn){fn();tests++;console.log('PASS',name);}
 const partial=E.SOURCE_RULES.filter(x=>x.coverage==='partial');
-check('004.8部分モデル232体、既存記述モデル97件（重複なし）',()=>{
- assert.equal(partial.length,232);
+check('004.8部分モデル240体、既存記述モデル97件（重複なし）',()=>{
+ assert.equal(partial.length,240);
  assert.equal(new Set(partial.map(x=>x.name)).size,232);
- assert.equal(E.SOURCE_RULES.length,329);
+ assert.equal(E.SOURCE_RULES.length,337);
 });
-check('能力未確定の8候補はモデル計上しない',()=>{
- for(const id of [6,38,94,102,215,294,309,340])assert.ok(!E.D['catalog_'+id]?.model,'#'+id);
+check('未対応の3候補はモデル計上しない',()=>{
+ for(const id of [94,215,309])assert.ok(!E.D['catalog_'+id]?.model,'#'+id);
 });
 for(const r of partial)check('004.8 '+r.id+' '+r.name,()=>{
  const b=battle(r.key,r.minTurn||1);
@@ -67,5 +67,30 @@ check('ジェントルマン：123456→456123、後半3札を削除しない',(
  const p=blank(),e=['vasago','marbas','sitri','amon','paimon','shax'];p[0]='catalog_316';
  const b=E.createBattle(config(p,e));E.round(b);
  assert.deepEqual(b.tables.enemy,['amon','paimon','shax','vasago','marbas','sitri']);
+});
+check('ブエル：攻撃前と攻撃後の２段階で発動する',()=>{
+ const p=blank(),e=blank();p[0]='catalog_6';e[0]='vasago';const b=E.createBattle(config(p,e));b.fighters.player.current.hp=100000;E.round(b);
+ assert.equal(b.turns[0].fired.player.filter(k=>k==='catalog_6').length,2);
+ assert.ok(b.fighters.enemy.current.hp<6e9,'敵HP30%分が減っていない');
+});
+check('ルナ・スピアーナ：通常攻撃停止と終了時追撃',()=>{
+ const p=blank();p[0]='catalog_294';const b=E.createBattle(config(p,blank()));E.round(b);
+ assert.ok(b.turns[0].events.some(x=>x.text.includes('終了時追撃')));
+ assert.equal(b.turns[0].fired.player.filter(k=>k==='catalog_294').length,2);
+});
+check('アロケル：開始・攻撃前・攻撃後の三段処理',()=>{
+ const p=blank(),e=blank();p[0]='catalog_48';e[0]='sitri';const b=E.createBattle(config(p,e));E.round(b);
+ assert.equal(b.turns[0].fired.player.filter(k=>k==='catalog_48').length,3);
+ assert.ok(b.fighters.enemy.current.hp<9.99e9);
+});
+check('ジャックフロスト：火属性相手に70%の追ダメージ',()=>{
+ const p=blank(),e=blank();p[0]='catalog_151';e[0]='sitri';const b=E.createBattle(config(p,e));E.round(b);
+ assert.ok(b.fighters.enemy.current.hp<5e9);
+});
+check('ドリドルム：相手攻撃を1残して自攻撃を当ターンのみ加算',()=>{
+ const p=blank(),e=blank();p[0]='catalog_157';e[0]='vasago';const b=E.createBattle(config(p,e));
+ const before=b.fighters.player.current.attack;E.round(b);
+ assert.equal(b.fighters.enemy.current.attack,1);
+ assert.equal(b.fighters.player.current.attack,before);
 });
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
