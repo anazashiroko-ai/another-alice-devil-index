@@ -79,9 +79,9 @@ check('ルナ・スピアーナ：通常攻撃停止と終了時追撃',()=>{
  assert.equal(b.turns[0].fired.player.filter(k=>k==='catalog_294').length,2);
 });
 check('アロケル：開始・攻撃前・攻撃後の三段処理',()=>{
- const p=blank(),e=blank();p[0]='catalog_48';e[0]='sitri';const b=E.createBattle(config(p,e));E.round(b);
+ const p=blank(),e=blank();p[0]='catalog_48';e[0]='sitri';const b=E.createBattle(config(p,e));const hp=b.fighters.enemy.current.hp;E.round(b);
  assert.equal(b.turns[0].fired.player.filter(k=>k==='catalog_48').length,3);
- assert.ok(b.fighters.enemy.current.hp<9.99e9);
+ assert.ok(b.fighters.enemy.current.hp<=hp-330);
 });
 check('ジャックフロスト：火属性相手に70%の追ダメージ',()=>{
  const p=blank(),e=blank();p[0]='catalog_151';e[0]='sitri';const b=E.createBattle(config(p,e));E.round(b);
