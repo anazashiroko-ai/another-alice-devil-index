@@ -1,0 +1,23 @@
+'use strict';
+const assert=require('node:assert/strict');
+const E=require('../src/kei_unified_engine_v0_4_6.js');
+const empty=()=>Array(6).fill(null);
+const deck=(key,t=1)=>{const d=empty();d[t-1]=key;return d;};
+const stats=(attack=0,defense=5000,hp=200000,magic=1000)=>({attack,defense,hp,magic});
+const battle=(p,e=empty(),x={})=>E.createBattle({title:'004.6',mode:'full',damageMode:'estimate',orders:empty().map(()=> 'player'),player:{base:stats()},enemy:{base:stats()},playerDeck:p,enemyDeck:e,...x});
+let passed=0;function test(name,fn){try{fn();console.log('PASS',name);passed++;}catch(e){console.error('FAIL',name,e.stack);process.exitCode=1;}}
+test('8 models added; Nemophila remains pending',()=>{for(const k of ['abundia','abaddon','matthew_hopkins','beleth','spring_bridget','newyear_ariel','diana','lucifer'])assert.equal(E.D[k].model,true);assert.equal(E.D.nemophila.model,false);assert.equal(E.D.lucifer.tier,'explicit-provisional');});
+test('Abundia direct damage',()=>{const b=battle(deck('abundia'));E.round(b);assert.equal(b.fighters.enemy.current.hp,196000);});
+test('Abundia recoil',()=>{const b=battle(deck('abundia'),empty(),{player:{base:stats(0,100)}});E.round(b);assert.equal(b.fighters.player.current.hp,199100);});
+test('Abaddon references base defense, not equipment',()=>{const b=battle(deck('abaddon'),empty(),{player:{base:stats(0,1000),equipment:{defense:14000}},enemy:{base:stats(5000,9000)}});E.round(b);assert.equal(b.fighters.enemy.current.attack,4600);assert.equal(b.fighters.enemy.current.defense,8600);});
+test('Matthew blocks following enemy activation',()=>{const b=battle(deck('matthew_hopkins'),deck('paimon'));E.round(b);assert.equal(b.fighters.enemy.current.magic,1);assert.deepEqual(b.turns[0].fired.enemy,[]);});
+test('Matthew cannot undo enemy already activated',()=>{const b=battle(deck('matthew_hopkins'),deck('paimon'),{orders:empty().map(()=> 'enemy')});E.round(b);assert.deepEqual(b.turns[0].fired.enemy,['paimon']);});
+test('Beleth changes defense and suppresses the enemy',()=>{const b=battle(deck('beleth'),deck('paimon'));E.round(b);assert.equal(b.fighters.enemy.current.defense,300);assert.deepEqual(b.turns[0].fired.enemy,[]);});
+test('Spring Brigitte changes following-turn initiative',()=>{const b=battle(deck('spring_bridget'),empty(),{orders:['player','enemy','enemy','enemy','enemy','enemy']});E.round(b);E.round(b);assert.equal(b.turns[1].first,'player');});
+test('New Year Ariel swaps magic and defense; blocks next turn',()=>{const b=battle(deck('newyear_ariel'),deck('marbas',2),{enemy:{base:stats(0,5000,200000,3456)}});E.round(b);assert.equal(b.fighters.player.current.defense,3456);assert.equal(b.fighters.enemy.current.magic,5000);E.round(b);assert.deepEqual(b.turns[1].fired.enemy,[]);});
+test('Diana begins on turn 2 and deals difference damage',()=>{assert.throws(()=>battle(deck('diana')),/2T以降/);const b=battle(deck('diana',2),empty(),{player:{base:stats(0,15000)}});E.round(b);E.round(b);assert.equal(b.fighters.enemy.current.hp,190000);});
+test('Lucifer provisional deficit calculation and current-slot deletion',()=>{const b=battle(deck('lucifer',2),deck('paimon',2),{player:{base:stats(500,8000,200000,1000)},enemy:{base:stats(10000,10000,200000,2000)}});E.round(b);b.fighters.player.current.attack-=100;b.fighters.player.current.defense-=200;b.fighters.player.current.magic-=300;E.round(b);assert.equal(b.fighters.enemy.current.attack,9700);assert.equal(b.tables.enemy[1],null);assert.ok(b.events.some(e=>e.text.includes('【仮】')));});
+test('Nemophila continues to stop a full numeric simulation',()=>{const b=battle(deck('nemophila'));E.round(b);assert.equal(b.outcome,'undetermined');});
+test('Earlier minimum turn restrictions remain in effect',()=>{for(const k of ['freya','odradek','red_folter'])assert.throws(()=>battle(deck(k)),/2T以降/);});
+console.log(passed+' / 13 addition tests passed');
+if(process.exitCode)process.exit(process.exitCode);
