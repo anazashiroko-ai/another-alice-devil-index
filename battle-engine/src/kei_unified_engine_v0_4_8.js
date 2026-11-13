@@ -71,8 +71,10 @@ const SOURCE_RULES=[{"key":"vasago","name":"ウァサゴ","phase":"before","minT
 
 const BATCH_0048=(root&&root.KeiBatchRules0048)||(typeof require==='function'?require('./kei_batch_rules_0048.js'):[]);
 const BATCH_META=Object.fromEntries(BATCH_0048.map(x=>[x.key,x]));
+const META_LOOKUP=new Map((root?.KeiDevilMeta0048||[]).map(x=>[String(x.name).normalize('NFKC').replace(/^[○◎]+/,'').trim(),x]));
 SOURCE_RULES.push(...BATCH_0048);
-for(const x of SOURCE_RULES)D[x.key]={name:x.name,phase:x.phase,model:true,tier:'source-model',sourceId:x.key,minimumTurn:x.minTurn,notes:x.comment,coverage:x.coverage||'existing'};
+for(const x of SOURCE_RULES)D[x.key]={name:x.name,phase:x.phase,model:true,tier:x.coverage==='partial'?'description-partial':'source-model',sourceId:x.key,minimumTurn:x.minTurn,notes:x.comment,coverage:x.coverage||'existing'};
+for(const d of Object.values(D)){const meta=META_LOOKUP.get(String(d.name).normalize('NFKC').replace(/^[○◎]+/,'').trim());if(meta){d.dp=meta.dp;d.attr=meta.attr;}}
 for(const x of Object.values(D))if(x.model&&!x.tier)x.tier='legacy-preview';
 const KIJI3=['moloch','beleth','furcas','tsuma_naberius','lucifer','lady_almiraj'];
 const integral=n=>Math.trunc(n); // 実戦で確認した増減に限って適用する
@@ -122,7 +124,7 @@ function roll(b){let x=b.rngState>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;b.rngState=x>>>
 function round(b){
  if(b.complete)return null;
  b.turn++;const t=b.turn;const c=b.config,first=b.forcedFirst[t]||c.orders[t-1],order=[first,opp(first)],events=[];
- const tempUndo=[],lastHits={player:0,enemy:0};
+ const tempUndo=[],lastHits={player:0,enemy:0},turnReceived={player:0,enemy:0};
   const fired={player:[],enemy:[]},disabled=new Set(),suppressed=new Set(),evading=new Set(),reflecting=new Set(),confused=new Set(),postAttackUvalFata=new Set();let endTurn=false;
  function emit(type,text,meta={}){const e={turn:t,type,text,...meta};b.events.push(e);events.push(e);}
  function outcome(){if(c.mode==='trace')return false;
@@ -196,6 +198,12 @@ function round(b){
     else if(sub.op==='subtract')side.current[sub.stat]-=originalGet(sub.ref)*sub.scale;
     else if(sub.op==='set')side.current[sub.stat]=originalGet(sub.ref)*sub.scale;
     else if(sub.op==='confuse')confused.add(opp(s));
+    else if(sub.op==='suppressEnemy')suppressed.add(opp(s));
+    else if(sub.op==='noAttack')disabled.add(sub.who==='enemy'?opp(s):s);
+    else if(sub.op==='damage')target.current.hp-=originalGet(sub.ref)*sub.scale;
+    else if(sub.op==='destroyEnemy')if(t+sub.offset<=6)b.tables[opp(s)][t+sub.offset-1]=null;
+    else if(sub.op==='cancelMagic')b.magicUntil=t-1;
+    else if(sub.op==='destroyBothDevilsForTurns')for(let i=t-1;i<Math.min(6,t-1+sub.turns);i++){b.tables.player[i]=null;b.tables.enemy[i]=null;}
     else if(sub.op==='transfer'){const p=sub.who==='enemy'?target:actor,q=sub.to==='enemy'?target:actor,v=p.current[sub.stat]*sub.scale;p.current[sub.stat]-=v;q.current[sub.stat]+=v;}
     else markUnknown('未対応の条件付き演算：'+sub.op);
    }}
@@ -275,6 +283,76 @@ function round(b){
      case 'coppeliaDoll':{const isLatest=externalBool(s,'dollLatest');if(b.complete)break;if(isLatest){for(const st of ['attack','defense'])actor.current[st]+=actor.activeEquipment[st]*2;}else{const stolen=target.current.attack*.3;target.current.attack-=stolen;actor.current.attack+=stolen;}break;}
      case 'stealNextDevil':markUnknown('デビル奪取・再発動の仕様が未検証');break;
      case 'fenrirRandomAttack':markUnknown('10匹出現時の追加攻撃倍率が未記載');break;
+
+     case 'chanceSwap':if(roll(b)<op.p){const [wa,sa]=op.first.split('.'),[wb,sb]=op.second.split('.'),p=who(wa),q=who(wb),v=p.current[sa];p.current[sa]=q.current[sb];q.current[sb]=v;}break;
+     case 'magicHit':{const h=prev.estimateDamage(actor.current.magic,target.current.magic);if(!h.ok){markUnknown('魔力攻撃の式を計算できない');break;}target.current.hp-=h.damage;emit('attack',`${dev.name}の魔力攻撃：${fstr(h.damage)}ダメージ〔仮式〕`);break;}
+     case 'assistThreshold':{const n=externalNumber(s,'assistTotal');if(b.complete)break;if(n>=501)target.current.attack=externalNumber(s,'assistAttack');else actor.current.hp*=.1;break;}
+     case 'chanceMagic':if(roll(b)<op.p)b.magicUntil=Math.max(b.magicUntil,t+op.turns-1);break;
+     case 'whenEnemyAttr':if(op.attrs.includes(getDevAttr(b.tables[opp(s)][t-1])))simpleSubops(op.ops);break;
+     case 'ifPreviousDevil':{const k=t>1?b.original[s][t-2]:null;simpleSubops(k&&D[k].name.replace(/^[○◎]/,'')===op.name?op.then:op.otherwise);break;}
+     case 'orderHighestBuff':{const top=Math.max(...STAT.map(k=>target.current[k]));if(first===s)actor.current.defense=top*2;else actor.current.attack=top*2;break;}
+     case 'magicCompareSwapHp':if(actor.current.magic>target.current.magic){const v=actor.current.hp;actor.current.hp=target.current.hp;target.current.hp=v;}else if(actor.current.magic<target.current.magic)actor.current.hp*=.7;else markUnknown('同魔力時オリアス挙動不明');break;
+     case 'cancelMagic':b.magicUntil=t-1;break;
+     case 'whenSelfGreater':if(actor.current[op.stat]>target.current[op.stat])simpleSubops(op.ops);break;
+     case 'selfMinToEnemyMax':{let st=STAT[0];for(const k of STAT)if(actor.current[k]<actor.current[st])st=k;actor.current[st]=Math.max(...STAT.map(k=>target.current[k]));break;}
+     case 'destroyAllEnemyAttr':{let n=0;for(let i=0;i<6;i++){const k=b.tables[opp(s)][i];if(k&&op.attrs.includes(getDevAttr(k))){b.tables[opp(s)][i]=null;n++;}}if(n&&op.noAttackIfSuccess)disabled.add(s);break;}
+     case 'absorbNormalAttack':b.absorbing??=new Set();b.absorbing.add(s);break;
+     case 'chanceBlockEnemyAttack':if(roll(b)<op.p)disabled.add(opp(s));break;
+     case 'baseDefenseCompareAbsorb':if(actor.base.defense>target.base.defense){b.absorbing??=new Set();b.absorbing.add(s);}break;
+     case 'swapSelfMinEnemyMax':{let lo=STAT[0],hi=STAT[0];for(const k of STAT){if(actor.current[k]<actor.current[lo])lo=k;if(target.current[k]>target.current[hi])hi=k;}const v=actor.current[lo];actor.current[lo]=target.current[hi];target.current[hi]=v;break;}
+     case 'incubusStatChange':{const a=Math.min(...STAT.map(k=>actor.current[k])),z=Math.min(...STAT.map(k=>target.current[k]));if(a===z){markUnknown('最低ステータス同値の処理未確認');break;}const w=a<z?actor:target;let k=STAT[0];for(const st of STAT)if(w.current[st]>w.current[k])k=st;w.current[k]=Math.min(...STAT.map(st=>w.current[st]));break;}
+     case 'genderConditional':{const a=ext[s]?.gender,z=ext[opp(s)]?.gender;if(!a||!z){markUnknown('性別入力が必要');break;}if(a===z)actor.current.attack+=actor.current.defense*2;else disabled.add(opp(s));break;}
+     case 'stealAssistStats':for(const st of STAT){const v=externalNumber(opp(s),'assist_'+st);if(b.complete)break;target.current[st]-=v;actor.current[st]+=v;}break;
+     case 'tsumaNaberius':if(actor.current.hp<actor.initial.hp)target.current.hp-=(actor.initial.hp-actor.current.hp);else if(actor.current.hp>actor.initial.hp)actor.current.hp*=.1;break;
+     case 'cheshireCat':{const who=ext.initiator;if(who===undefined){markUnknown('仕掛けた側を外部入力');break;}if(who===s){disabled.add(s);disabled.add(opp(s));if(t<6){b.tables[s][t]=null;b.tables[opp(s)][t]=null;}}else{const p={...actor.current},q={...target.current};for(const st of ['attack','defense','magic']){const v=Math.floor((p[st]+q[st])*.5);actor.current[st]=v;target.current[st]=v;}}break;}
+     case 'farinishMagicBoost':for(const side of [s,opp(s)])if(b.original[side].some(k=>k&&D[k].name.replace(/^[○◎]/,'')==='ファリニシュ'))actor.current.magic*=1.5;break;
+     case 'titaniaWaterFire':{const a=b.original[s].filter(k=>k&&D[k].name!=='タイタニア'&&getDevAttr(k)==='水').length,z=b.original[opp(s)].filter(k=>k&&getDevAttr(k)==='火').length;actor.current.hp+=a*500;target.current.hp-=z*500;break;}
+     case 'oberonTime':{const hour=externalNumber(s,'startHour'),init=ext.initiator;if(b.complete)break;if(init===undefined){markUnknown('仕掛けた側を設定');break;}if(init===s&&(hour===8||hour===15))for(const st of STAT)actor.current[st]*=2.5;break;}
+     case 'catSidhe':{target.current.hp-=Math.min(...STAT.map(k=>actor.base[k]))*1.5;const i=b.tables[opp(s)].findIndex(k=>k&&D[k].name==='マウ・ビート');if(i>=0){b.tables[opp(s)][i]=null;for(const st of STAT){const v=target.current[st]/3;target.current[st]-=v;actor.current[st]+=v;}}break;}
+     case 'mastimaBeelzebub':if(b.tables[opp(s)].some(k=>k&&D[k].name==='ベルゼブブ')){b.tables[opp(s)]=b.tables[opp(s)].map(k=>k&&D[k].name==='ベルゼブブ'?null:k);b.tables[s]=[...b.original[s]];}break;
+     case 'enemyAttackToHp':if(target.current.attack>=op.minRemain){const v=target.current.attack-op.minRemain;target.current.attack=op.minRemain;target.current.hp+=v;}break;
+     case 'randomEnemyBaseToHp':{const st=STAT[Math.floor(roll(b)*4)],v=target.base[st];actor.current.hp+=v;target.current[st]-=v;break;}
+     case 'secondLowestDebuff':{const values=STAT.map(k=>actor.current[k]).sort((a,b)=>a-b),v=values[1];for(const st of ['attack','defense','magic'])target.current[st]-=v;break;}
+     case 'mandragoraFirstSecond':if(first===s)actor.current.defense*=2;else{b.tables[opp(s)][t-1]=null;actor.current.defense*=4;}break;
+     case 'setEnemyInitialMagic':target.initial.magic=op.value;break;
+     case 'destroyBothDevilsForTurns':for(let i=t-1;i<Math.min(6,t-1+op.turns);i++){b.tables.player[i]=null;b.tables.enemy[i]=null;}break;
+     case 'addOwnTotalDpToStat':actor.current[op.stat]+=deckDpTotal(s)*op.multiplier;break;
+     case 'externalLvDpDamage':{const lv=externalNumber(s,'level');if(!b.complete)target.current.hp-=lv*deckDpTotal(s)*t/3;break;}
+     case 'cureReflectConfuse':if(reflecting.has(opp(s))&&confused.has(s)){reflecting.delete(opp(s));confused.delete(s);}break;
+     case 'ifMagicActiveThen':if(t<=b.magicUntil)simpleSubops(op.ops);break;
+     case 'stealEquipmentHalf':for(const st of STAT){const v=target.activeEquipment[st]*.5;target.activeEquipment[st]-=v;target.current[st]-=v;actor.current[st]+=v;}break;
+     case 'magicRatioForceFirst':if(actor.current.magic>target.current.magic&&target.current.magic>0){const n=Math.min(6-t,Math.floor(actor.current.magic/target.current.magic));for(let i=1;i<=n;i++)b.forcedFirst[t+i]=s;}break;
+     case 'deckCountAttackBoost':{let n=0;for(const side of op.sides==='both'?[s,opp(s)]:[s])n+=b.original[side].filter(k=>k&&getDevAttr(k)===op.attr).length;actor.current.attack*=1+n*op.scale;break;}
+     case 'shamshelDp':{const dp=deckDp(opp(s),t-1);if(b.complete)break;if(dp>=2)b.tables[opp(s)][t-1]=null;if(dp>=3)actor.current.attack*=dp===3?1.5:2;if(dp>=5&&t<6)b.tables[opp(s)][t]=null;break;}
+     case 'copyEnemyPositiveBoosts':for(const st of STAT)actor.current[st]+=Math.max(0,target.current[st]-target.initial[st]);break;
+     case 'enemyTotalDpDamage':target.current.hp-=deckDpTotal(opp(s))*op.scale;break;
+     case 'restoreRemovedDevils':for(let i=0;i<6;i++)if(!b.tables[s][i]&&b.original[s][i])b.tables[s][i]=b.original[s][i];break;
+     case 'deckCountDamage':{const side=op.side==='enemy'?opp(s):s;target.current.hp-=b.original[side].filter(k=>k&&getDevAttr(k)===op.attr).length*op.scale;break;}
+     case 'setTwoLowestSelf':{const v=STAT.map(k=>({k,n:actor.current[k]})).sort((a,b)=>a.n-b.n);actor.current[v[0].k]=op.value;actor.current[v[1].k]=op.value;break;}
+     case 'nanaAttrDestroyDamage':{let n=0;for(let i=0;i<6;i++)if(b.tables[opp(s)][i]&&getDevAttr(b.tables[opp(s)][i])==='火'){b.tables[opp(s)][i]=null;n++;}const a=b.original[s].filter(k=>k&&getDevAttr(k)==='水').length;target.current.hp-=(n+a)*1000;break;}
+     case 'attackHalfToEnemyAndConfuse':{const v=actor.current.attack*.5;actor.current.attack-=v;target.current.attack+=v;confused.add(opp(s));break;}
+     case 'swapEquipmentStats':for(const st of STAT){const a=actor.activeEquipment[st],z=target.activeEquipment[st];actor.activeEquipment[st]=z;target.activeEquipment[st]=a;actor.current[st]+=z-a;target.current[st]+=a-z;}break;
+     case 'harmonicsComparison':{const a=externalNumber(s,'harmonics'),z=externalNumber(opp(s),'harmonics');if(b.complete)break;if(a>z)actor.current.attack+=(a-z)*100;else actor.current.attack*=1.5;break;}
+     case 'nameLengthCompare':{const a=b.original[s][0],z=b.original[opp(s)][0];if(!a||!z){markUnknown('双方の1Tデビル名が必要');break;}const al=Array.from(D[a].name).length,zl=Array.from(D[z].name).length;for(const person of al>=zl?[actor]:[actor,target])for(const st of STAT)person.current[st]*=al>=zl?3:2;break;}
+     case 'goldCompareBuff':{const a=externalNumber(s,'gold'),z=externalNumber(opp(s),'gold');if(b.complete)break;if(a>=z){const v=STAT.map(k=>({k,n:actor.current[k]})).sort((x,y)=>y.n-x.n);for(const x of v.slice(0,2))actor.current[x.k]*=2;}else for(const st of ['attack','defense','magic'])actor.current[st]=actor.initial[st];break;}
+     case 'magicHalfAllStats':{const v=actor.current.magic*.5;for(const st of STAT)actor.current[st]+=v;break;}
+     case 'assistCompareDestroyNext':{const a=externalNumber(s,'assistTotal'),z=externalNumber(opp(s),'assistTotal');if(!b.complete&&a>z&&t<6)b.tables[opp(s)][t]=null;break;}
+     case 'clearEnemyForcedFirst':for(const k of Object.keys(b.forcedFirst))if(Number(k)>t&&b.forcedFirst[k]===opp(s))delete b.forcedFirst[k];break;
+     case 'damageThisTurnDouble':target.current.hp-=turnReceived[s]*2;break;
+     case 'stealHpToAttack':{const v=target.current.hp*op.fraction;target.current.hp-=v;actor.current.attack+=v;break;}
+     case 'externalScaledAdd':actor.current[op.stat]+=externalNumber(s,op.key)*op.scale;break;
+     case 'externalRankBoost':actor.current[op.stat]+=Math.max(0,op.origin-externalNumber(s,op.key));break;
+     case 'multiplyEquipmentBonus':{const v=actor.activeEquipment[op.stat]*(op.factor-1);actor.activeEquipment[op.stat]*=op.factor;actor.current[op.stat]+=v;break;}
+     case 'highestStealToHp':{let k=STAT[0];for(const st of STAT)if(target.current[st]>target.current[k])k=st;const v=target.current[k]*op.fraction;target.current[k]-=v;actor.current.hp+=v;break;}
+     case 'mandragoraEarth':{let n=0;for(let i=0;i<6;i++)if(b.tables[opp(s)][i]&&getDevAttr(b.tables[opp(s)][i])==='土'){b.tables[opp(s)][i]=null;n++;}if(n)actor.current.defense*=3;else actor.current.hp*=.6;break;}
+     case 'shamshelVariantDp':{const dp=deckDp(opp(s),t-1);if(b.complete)break;if(dp===3)b.tables[opp(s)][t-1]=null;else if(dp===4){target.current.defense=target.current.magic*.5;actor.current.attack*=3;}else if(dp>=5){b.tables[opp(s)][t-1]=null;if(t<6)b.tables[opp(s)][t]=null;actor.current.attack*=3;}break;}
+     case 'ifEnemyAttrSteal':if(op.attrs.includes(getDevAttr(b.tables[opp(s)][t-1])))for(const st of op.stats){const v=target.current[st]*op.fraction;target.current[st]-=v;actor.current[st]+=v;}break;
+     case 'stealEnemyAllToAttack':{let sum=0;for(const st of STAT){const v=target.current[st]*op.fraction;target.current[st]-=v;sum+=v;}actor.current.attack+=sum;break;}
+     case 'stealEnemyAllToHp':{let sum=0;for(const st of STAT){const v=target.current[st]*op.fraction;target.current[st]-=v;sum+=v;}actor.current.hp+=sum;break;}
+     case 'dpBasedHpBoost':actor.current.hp+=actor.current.attack*deckDpTotal(opp(s))*.1;break;
+     case 'stealEnemyMagicToHp':{const v=target.current.magic*op.fraction;target.current.magic-=v;actor.current.hp+=v;break;}
+     case 'startMagic':b.magicUntil=Math.max(b.magicUntil,t+op.turns-1);break;
+     case 'ifSelfMagicBelow':if(actor.current.magic<op.limit)simpleSubops(op.ops);break;
      default:markUnknown('未対応の図鑑数値演算：'+op.op);
     }
     if(outcome())break;
@@ -560,7 +638,8 @@ function round(b){
     const receiver=confused.has(s)?actor:reflecting.has(opp(s))?actor:target;
     const reduction=Math.max(0,...(b.damageReduction||[]).filter(x=>x.side===opp(s)&&x.from<=t&&x.until>=t).map(x=>x.fraction));
     hit.damage*=1-reduction;lastHits[s]=receiver===target?hit.damage:0;
-    receiver.current.hp-=hit.damage;
+    if(receiver===target&&b.absorbing?.has(opp(s))){target.current.hp+=hit.damage;lastHits[s]=0;emit('effect',`${target.name}は通常攻撃を吸収し回復`);}
+    else{receiver.current.hp-=hit.damage;turnReceived[receiver.id]+=hit.damage;}
     const suffix=confused.has(s)?'〔混乱・自傷〕':reflecting.has(opp(s))?'〔反射〕':magical?'〔魔力戦・参照魔力／ダメージ式は仮式〕':'';
     emit('attack',`${actor.name}の${magical?'攻撃魔法':'攻撃'}！ ${receiver.name}に${fstr(hit.damage)}のダメージ〔${hit.confidence}〕${suffix}`);
     outcome();
