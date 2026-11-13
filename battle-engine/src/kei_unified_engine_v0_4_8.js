@@ -124,7 +124,7 @@ function roll(b){let x=b.rngState>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;b.rngState=x>>>
 function round(b){
  if(b.complete)return null;
  b.turn++;const t=b.turn;const c=b.config,first=b.forcedFirst[t]||c.orders[t-1],order=[first,opp(first)],events=[];
- const tempUndo=[],lastHits={player:0,enemy:0},turnReceived={player:0,enemy:0};
+ const tempUndo=[],lastHits={player:0,enemy:0},turnReceived={player:0,enemy:0},duelHandled=new Set();
   const fired={player:[],enemy:[]},disabled=new Set(),suppressed=new Set(),evading=new Set(),reflecting=new Set(),confused=new Set(),postAttackUvalFata=new Set();let endTurn=false;
  function emit(type,text,meta={}){const e={turn:t,type,text,...meta};b.events.push(e);events.push(e);}
  function outcome(){if(c.mode==='trace')return false;
@@ -353,6 +353,24 @@ function round(b){
      case 'stealEnemyMagicToHp':{const v=target.current.magic*op.fraction;target.current.magic-=v;actor.current.hp+=v;break;}
      case 'startMagic':b.magicUntil=Math.max(b.magicUntil,t+op.turns-1);break;
      case 'ifSelfMagicBelow':if(actor.current.magic<op.limit)simpleSubops(op.ops);break;
+
+     case 'libraLevel':{const a=externalNumber(s,'level'),z=externalNumber(opp(s),'level');if(b.complete)break;const v=(z-a)*400+3000,preferred=ext[opp(s)]?.preferredAssistStat;if(preferred&&STAT.includes(preferred))target.current[preferred]+=v;else{let st=STAT[0];for(const k of STAT)if(actor.current[k]>actor.current[st])st=k;actor.current[st]+=v;}break;}
+     case 'ojiNaberius':{const v=Math.max(...STAT.map(k=>target.current[k]))*.5,preferred=ext[s]?.preferredAssistStat;if(preferred&&STAT.includes(preferred))actor.current[preferred]+=v;else{let st=STAT[0];for(const k of STAT)if(actor.current[k]>actor.current[st])st=k;actor.current[st]+=v;}break;}
+     case 'scheduleDeathCurse':{b.deathCurses??=[];b.deathCurses.push({due:t+op.offset,target:opp(s),source:s});break;}
+     case 'nemissaHarmonics':{const v=externalNumber(s,'harmonics');if(b.complete)break;if(ext.initiator!==s){markUnknown('ネミッサ：仕掛けた側の外部設定が必要');break;}target.current.hp-=Math.max(0,v-100)*4;break;}
+     case 'deletedDevilCountBoost':{let count=0;for(const side of ['player','enemy'])for(let i=0;i<6;i++)if(b.original[side][i]&&!b.tables[side][i])count++;if(count){actor.current.attack*=1+count;actor.current.magic*=1+count;}break;}
+     case 'cureStatuses':confused.delete(s);reflecting.delete(opp(s));b.sustained=b.sustained.filter(e=>e.target!==s);break;
+     case 'registerEnemyAllStatDrain':{const amount=actor.current.magic*op.fraction;b.statGrowth??=[];for(const st of STAT)b.statGrowth.push({source:s,target:opp(s),stat:st,amount:-amount,from:t});break;}
+     case 'moiraConditional':{let found=false;for(let i=0;i<6;i++){const k=b.tables[opp(s)][i];if(k&&['死','ガミジン','デコラ・フォルター'].includes(D[k].name.replace(/^[○◎]/,''))){b.tables[opp(s)][i]=null;found=true;}}if(found){if(roll(b)<.5)target.current.hp=0;}else actor.current.magic*=1.5;break;}
+     case 'kikimora':for(const st of ['attack','defense','magic']){const extra=Math.max(0,target.current[st]-target.initial[st]),missing=Math.max(0,actor.initial[st]-actor.current[st]);actor.current[st]+=extra;target.current[st]-=missing;}break;
+     case 'destroyByAttrAndBoost':{let count=0;for(let i=0;i<6;i++){const k=b.tables[opp(s)][i];if(k&&getDevAttr(k)===op.attr){b.tables[opp(s)][i]=null;count++;}}actor.current.attack*=1+count*op.scale;break;}
+     case 'swapSelfMinEnemyStat':{let st=STAT[0];for(const k of STAT)if(actor.current[k]<actor.current[st])st=k;const v=actor.current[st];actor.current[st]=target.current[op.stat];target.current[op.stat]=v;break;}
+     case 'assistMultiplier':for(const side of [s,opp(s)]){const p=b.fighters[side],factor=side===s?op.self:op.enemy;for(const st of STAT){const v=p.assist[st]*(factor-1);p.assist[st]*=factor;p.current[st]+=v;}}break;
+     case 'nightstalkDeck':{const dark=b.original[s].filter(k=>k&&getDevAttr(k)==='闇').length,light=b.original[opp(s)].filter(k=>k&&getDevAttr(k)==='光').length;actor.current.attack*=1+dark*.5;actor.current.defense*=1+light*.5;break;}
+     case 'nightmareOwnRemoveDp':{let total=0;for(let i=0;i<6;i++){const k=b.tables[s][i];if(k&&k!==key){total+=Number(D[k].dp||0);b.tables[s][i]=null;}}actor.current.attack*=1+total;break;}
+     case 'gentlemanRotate':{const k=b.tables[opp(s)][t-1];if(k&&D[k].name===dev.name){if(!duelHandled.has(dev.name)){duelHandled.add(dev.name);if(op.variant==='normal'){disabled.add(s);disabled.add(opp(s));actor.current.hp+=500;target.current.hp+=500;}else{disabled.add(s);disabled.add(opp(s));actor.current.attack+=5000;target.current.attack+=5000;}}}else{const old=[...b.tables[opp(s)]];b.tables[opp(s)]=[...old.slice(3),...old.slice(0,3)];if(op.variant==='sword'){const g=ext[opp(s)]?.gender;if(g==='male')actor.current.attack*=1.5;else if(g==='female')target.current.defense*=1.5;else markUnknown('剣ジェントルマン：相手性別入力が必要');}}break;}
+     case 'icarusExternal':{const floor=externalNumber(s,'maxFloor');if(b.complete)break;const fire=getDevAttr(b.tables[opp(s)][t-1])==='火';for(const st of STAT)actor.current[st]+=floor*(fire?-15:30);break;}
+     case 'johnGoalSpecial':{const enemyKey=b.tables[opp(s)][t-1],special=enemyKey&&D[enemyKey].name==='マシュー・ホプキンス';if(special||actor.current.magic<10){const k=special?3:2;for(const st of ['attack','defense','magic'])target.current[st]-=actor.base.magic*k;}break;}
      default:markUnknown('未対応の図鑑数値演算：'+op.op);
     }
     if(outcome())break;
@@ -615,6 +633,7 @@ function round(b){
    fire(s,x.key,{source:`${D[x.sourceKey].name}からの予約`,sourceSlot:x.sourceSlot});
   }
  }
+ if(b.deathCurses)for(const curse of b.deathCurses)if(curse.due===t){b.fighters[curse.target].current.hp=0;emit('effect','死の宣告が発動');outcome();}
  emit('turn',`第${t}ターン（${b.fighters[first].name}先攻）`);
  if(t<=b.magicUntil)emit('effect',`魔力戦継続中（${t}T）／両者に適用。通常ダメージ式の流用は仮式`);
  for(const s of order)phase(s,'start');
@@ -663,6 +682,7 @@ function round(b){
   }
  }
  if(!b.complete&&b.statGrowth)for(const e of b.statGrowth){if(e.from<=t)b.fighters[e.target].current[e.stat]+=e.amount;}
+ if(!b.complete&&b.statGrowth)for(const growth of b.statGrowth)if(growth.from<=t)b.fighters[growth.target].current[growth.stat]+=growth.amount;
  if(!b.complete&&t===6){b.complete=true;b.outcome=c.mode==='trace'?'trace_complete':'draw';emit('result',c.mode==='trace'?'6ターンの発動順追跡完了（勝敗は未計算）':'6ターン終了。両者生存のため引き分け');}
  const snapshot={turn:t,first,events,fired,table:{player:[...b.tables.player],enemy:[...b.tables.enemy]},
   fighters:{player:{...b.fighters.player.current},enemy:{...b.fighters.enemy.current}},endTurn,outcome:b.outcome};
