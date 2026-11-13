@@ -7,9 +7,9 @@
     "verified": 8,
     "provisional": 5,
     "description": 104,
-    "partial": 240,
+    "partial": 244,
     "legacy": 23,
-    "pending": 16
+    "pending": 12
   },
   "devils": [
     {
@@ -1527,10 +1527,10 @@
     {
       "id": 190,
       "name": "スプリガン",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_190",
+      "notes": "50％で敵を当ターン攻撃不能。失敗して通常攻撃で生存した場合、受けたダメージを回復し守備力に3倍分加算。即死した場合は復活しない。"
     },
     {
       "id": 191,
@@ -1775,10 +1775,10 @@
     {
       "id": 221,
       "name": "ネモフィラ",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_221",
+      "notes": "このターン戦闘を停止し、次ターンの双方デビル枠を交換。自次ターン枠が空欄なら不発。スクルド対面等の実戦規則は既存特例を再利用。"
     },
     {
       "id": 222,
@@ -2455,10 +2455,10 @@
     {
       "id": 306,
       "name": "マクスウェル",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_306",
+      "notes": "当ターン以外のデビル枠を全交換。相手がアナザー以外の場合は不発。特殊な同時発動時の挙動未検証。"
     },
     {
       "id": 307,
@@ -3135,10 +3135,10 @@
     {
       "id": 391,
       "name": "原初の光・マクスウェル",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_391",
+      "notes": "当ターン以外の双方のデビル枠を全交換。相手がアナザー以外の場合は不発。"
     },
     {
       "id": 392,
