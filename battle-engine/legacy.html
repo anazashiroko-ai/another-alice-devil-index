@@ -14,7 +14,7 @@ label{font-size:13px;color:#425b6b}.block{display:block}.stats{width:100%;white-
 small,.muted{font-size:12px;color:#596971}noscript{color:#a32222;font-weight:bold}
 </style></head><body><div id="wrapper">
 <h1>四月島・仮想戦闘エンジン<br>004.7 旧端末向け軽量版</h1>
-<p class="note"><b>古いブラウザ用：</b>現行004.7の計算本体を古いJavaScript形式に変換。外部ライブラリ・通信・ログイン不要。<b>JavaScript自体が無効な場合は動作しません。</b> デビル索引のオンライン検索・JSON読込等は省略しました。研究用の暫定モデルなので公式の戦闘結果を保証しません。</p>
+<p class="note"><b>古いブラウザ用：</b>通常版と共通の計算ソースを旧形式に自動変換。外部ライブラリ・通信・ログイン不要。<b>JavaScript自体が無効な場合は動作しません。</b> デビル索引のオンライン検索・JSON読込等は省略しました。研究用の暫定モデルなので公式の戦闘結果を保証しません。</p>
 <noscript><p>この端末ではJavaScriptが無効、または非対応です。ブラウザ設定で有効化してください。有効化できなければ、こちらの画面から戦闘計算はできません。</p></noscript>
 <div id="status" class="statusbar">読み込み中。ここが変わらなければJavaScriptが動作していないか、ブラウザが古すぎる可能性があります。</div>
 <div class="panel"><h2>最初に動作確認</h2>
@@ -30,9 +30,10 @@ small,.muted{font-size:12px;color:#596971}noscript{color:#a32222;font-weight:bol
 <div id="orders">
 <span class="order">1T <select id="order1"></select></span><span class="order">2T <select id="order2"></select></span><span class="order">3T <select id="order3"></select></span><span class="order">4T <select id="order4"></select></span><span class="order">5T <select id="order5"></select></span><span class="order">6T <select id="order6"></select></span>
 </div></div>
+<div class="panel"><h2>追加条件（004.8以降）</h2><p class="muted">順位・GOLD・性別・アシスト人数等を必要とするデビル用。未指定は推測せず判定不能にする。</p><textarea id="external-json" rows="5" style="width:98%">{}</textarea></div>
 <div class="panel"><h2>4. 実行</h2><button id="runTurn" type="button">1ターン進める</button><button id="runAll" type="button">6ターン一括実行</button>
 <div id="result">未実行</div><div id="log">戦闘ログがここに表示されます。</div></div>
-<p class="muted">四月島研究室／互換版試作。現行004.7と同じ暫定戦闘ロジックを使用。元のソースは変更しません。発動順・未知の効果・物理ダメージには未確定部分があります。</p>
+<p class="muted">四月島研究室／互換版試作。通常版と同じソースを自動変換。元のソースは変更しません。発動順・未知の効果・物理ダメージには未確定部分があります。</p>
 </div>
 <script>(function(){
 if(!Array.isArray)Array.isArray=function(x){return Object.prototype.toString.call(x)==='[object Array]';};
@@ -1734,6 +1735,7 @@ function getStats(side){var result={name:el('name-'+side).value||side};
  return result;
 }
 function getConfig(){var cfg={title:'旧端末互換版・自由対戦',mode:el('mode').value,damageMode:'estimate',randomSeed:Number(el('seed').value),orders:[],player:getStats('player'),enemy:getStats('enemy'),playerDeck:[],enemyDeck:[]};
+ try{cfg.external=JSON.parse(el('external-json').value||'{}');}catch(e){throw new Error('追加条件JSONが不正: '+e.message);}
  for(var t=1;t<=6;t++){cfg.orders.push(el('order'+t).value);cfg.playerDeck.push(el('playerdeck'+t).value||null);cfg.enemyDeck.push(el('enemydeck'+t).value||null);}
  return cfg;
 }
