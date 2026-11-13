@@ -41,7 +41,7 @@ check('バアル：攻撃31→93、敵守備5010→3507',()=>{const b=fixture(['
 check('スクルド：相手HP増分を守備に加算',()=>{const b=fixture(['skuld',null,null,null,null,null],empty,{enemy:{base:base(0,1000,100000,100)}});b.fighters.enemy.current.hp+=20000;E.round(b);assert.equal(b.fighters.player.current.defense,21000);});
 check('スクルド：相手HP減少時に自分HP半減（奇数切上げ）',()=>{const b=fixture(['skuld',null,null,null,null,null],empty,{player:{base:base(20,1000,86839,100)},enemy:{base:base(0,1000,100000,100)}});b.fighters.enemy.current.hp-=100;E.round(b);assert.equal(b.fighters.player.current.hp,43420);});
 check('従来の追跡モードと初期装備値の分離が維持',()=>{const b=E.createBattle(E.preset('kijiEnemy'));E.playAll(b);assert.equal(b.outcome,'trace_complete');assert.equal(b.fighters.enemy.initial.attack,32600);});
-console.log(`${passed}/30 tests passed`);
+console.log(`途中経過: ${passed} tests passed`);
 // 004.2: custom textual devils are phase-aware placeholders, never fake numerical abilities.
 check('004.3 自由入力デビル：追跡モードで攻撃後にのみ出現',()=>{
  const custom='custom:after:'+encodeURIComponent('自由入力・攻撃後試験');
@@ -62,7 +62,7 @@ check('004.3 自由入力プリセットは六枠空欄',()=>{
  const p=E.preset('free');assert.deepEqual(p.playerDeck,empty);assert.deepEqual(p.enemyDeck,empty);
  assert.equal(p.mode,'trace');
 });
-console.log(`${passed} total tests passed`);
+console.log(`途中経過: ${passed} tests passed`);
 
 let newTests=0;
 const deep=(x)=>JSON.stringify(x);
@@ -249,3 +249,4 @@ check('新しい実戦プリセット3種類はどれも実行可能',()=>{
   const b=E.createBattle(E.preset(key));E.playAll(b);assert.notEqual(b.outcome,'undetermined',key+' '+b.error);
  }
 });
+console.log(`${passed} total tests passed`);
