@@ -683,8 +683,7 @@ function round(b){
    outcome();
   }
  }
- if(!b.complete&&b.statGrowth)for(const e of b.statGrowth){if(e.from<=t)b.fighters[e.target].current[e.stat]+=e.amount;}
- if(!b.complete&&b.statGrowth)for(const growth of b.statGrowth)if(growth.from<=t)b.fighters[growth.target].current[growth.stat]+=growth.amount;
+ if(!b.complete&&b.statGrowth)for(const e of b.statGrowth)if(e.from<=t)b.fighters[e.target].current[e.stat]+=e.amount;
  if(!b.complete&&t===6){b.complete=true;b.outcome=c.mode==='trace'?'trace_complete':'draw';emit('result',c.mode==='trace'?'6ターンの発動順追跡完了（勝敗は未計算）':'6ターン終了。両者生存のため引き分け');}
  const snapshot={turn:t,first,events,fired,table:{player:[...b.tables.player],enemy:[...b.tables.enemy]},
   fighters:{player:{...b.fighters.player.current},enemy:{...b.fighters.enemy.current}},endTurn,outcome:b.outcome};
