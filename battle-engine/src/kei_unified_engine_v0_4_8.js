@@ -72,9 +72,9 @@ const SOURCE_RULES=[{"key":"vasago","name":"ウァサゴ","phase":"before","minT
 const BATCH_0048=(root&&root.KeiBatchRules0048)||(typeof require==='function'?require('./kei_batch_rules_0048.js'):[]);
 const BATCH_META=Object.fromEntries(BATCH_0048.map(x=>[x.key,x]));
 const META_LOOKUP=new Map((root?.KeiDevilMeta0048||[]).map(x=>[String(x.name).normalize('NFKC').replace(/^[○◎]+/,'').trim(),x]));
-const BATCH_EXCLUDED_0048=new Set([6,38,94,102,215,294,309,340]); // Needs unresolved phases/effects: not counted as implemented.
+const BATCH_EXCLUDED_0048=new Set([94,215,309]); // Needs unresolved phases/effects: not counted as implemented.
 SOURCE_RULES.push(...BATCH_0048.filter(x=>!BATCH_EXCLUDED_0048.has(x.id)));
-for(const x of SOURCE_RULES)D[x.key]={name:x.name,phase:x.phase,model:true,tier:x.coverage==='partial'?'description-partial':'source-model',sourceId:x.key,minimumTurn:x.minTurn,notes:x.comment,coverage:x.coverage||'existing'};
+for(const x of SOURCE_RULES)D[x.key]={name:x.name,phase:x.phase,model:true,tier:x.coverage==='partial'?'description-partial':'source-model',sourceId:x.key,minimumTurn:x.minTurn,notes:x.comment,coverage:x.coverage||'existing',phases:x.stages||[x.phase]};
 for(const d of Object.values(D)){const meta=META_LOOKUP.get(String(d.name).normalize('NFKC').replace(/^[○◎]+/,'').trim());if(meta){d.dp=meta.dp;d.attr=meta.attr;}}
 for(const x of Object.values(D))if(x.model&&!x.tier)x.tier='legacy-preview';
 const KIJI3=['moloch','beleth','furcas','tsuma_naberius','lucifer','lady_almiraj'];
@@ -126,6 +126,7 @@ function round(b){
  if(b.complete)return null;
  b.turn++;const t=b.turn;const c=b.config,first=b.forcedFirst[t]||c.orders[t-1],order=[first,opp(first)],events=[];
  const tempUndo=[],lastHits={player:0,enemy:0},turnReceived={player:0,enemy:0},duelHandled=new Set();
+ b.absorbing=new Set(); // Ostar absorption is only active during this turn.
   const fired={player:[],enemy:[]},disabled=new Set(),suppressed=new Set(),evading=new Set(),reflecting=new Set(),confused=new Set(),postAttackUvalFata=new Set();let endTurn=false;
  function emit(type,text,meta={}){const e={turn:t,type,text,...meta};b.events.push(e);events.push(e);}
  function outcome(){if(c.mode==='trace')return false;
@@ -155,7 +156,7 @@ function round(b){
   outcome();
  }
 
- function fire(s,key,{source='table',depth=0,sourceSlot=null}={}){
+ function fire(s,key,{source='table',depth=0,sourceSlot=null,stage=null}={}){
   if(!key||b.complete||endTurn)return;
   const actor=b.fighters[s],target=b.fighters[opp(s)],dev=D[key];
   if(depth>15){b.error='再発動連鎖が安全上限に達した（ゲームの真の上限ではない）';b.complete=true;b.outcome='undetermined';emit('unknown',b.error);return;}
@@ -171,7 +172,7 @@ function round(b){
   function boost(k,delta){actor.current[k]+=delta;}
   function harm(p,amount,desc){p.current.hp-=amount;emit('effect',`${desc}：${fstr(amount)}、残り体力${fstr(p.current.hp)}`);outcome();}
   if(SOURCE_RULE_MAP.has(key)){
-   const rule=SOURCE_RULE_MAP.get(key), actors={self:actor,enemy:target};
+   const rule=SOURCE_RULE_MAP.get(key), actors={self:actor,enemy:target},activePhase=stage||dev.phase;
    // Freeze all referenced values per operation. Fixed-base references never mutate.
    const get=value=>{
     if(/^const\.-?\d+(?:\.\d+)?$/.test(value))return Number(value.slice(6));
@@ -209,6 +210,7 @@ function round(b){
     else markUnknown('未対応の条件付き演算：'+sub.op);
    }}
    for(const op of rule.ops){
+    if(op.phase&&op.phase!==activePhase)continue;
     if(b.complete||endTurn)break;
     const f=op.who?who(op.who):actor;
     switch(op.op){
@@ -372,6 +374,17 @@ function round(b){
      case 'gentlemanRotate':{const k=b.tables[opp(s)][t-1];if(k&&D[k].name===dev.name){if(!duelHandled.has(dev.name)){duelHandled.add(dev.name);if(op.variant==='normal'){disabled.add(s);disabled.add(opp(s));actor.current.hp+=500;target.current.hp+=500;}else{disabled.add(s);disabled.add(opp(s));actor.current.attack+=5000;target.current.attack+=5000;}}}else{const old=[...b.tables[opp(s)]];b.tables[opp(s)]=[...old.slice(3),...old.slice(0,3)];if(op.variant==='sword'){const g=ext[opp(s)]?.gender;if(g==='male')actor.current.attack*=1.5;else if(g==='female')target.current.defense*=1.5;else markUnknown('剣ジェントルマン：相手性別入力が必要');}}break;}
      case 'icarusExternal':{const floor=externalNumber(s,'maxFloor');if(b.complete)break;const fire=getDevAttr(b.tables[opp(s)][t-1])==='火';for(const st of STAT)actor.current[st]+=floor*(fire?-15:30);break;}
      case 'johnGoalSpecial':{const enemyKey=b.tables[opp(s)][t-1],special=enemyKey&&D[enemyKey].name==='マシュー・ホプキンス';if(special||actor.current.magic<10){const k=special?3:2;for(const st of ['attack','defense','magic'])target.current[st]-=actor.base.magic*k;}break;}
+     case 'stealAttackLeaveOne':{
+       const stolen=target.current.attack-1;target.current.attack=1;
+       actor.current.attack+=stolen;tempUndo.push({f:actor,st:'attack',delta:stolen});break;
+     }
+     case 'allocesAfter':{
+       const enemyKey=b.tables[opp(s)][t-1];
+       if(!enemyKey){markUnknown('アロケル：相手デビル未配置時の属性判定は未検証');break;}
+       if(getDevAttr(enemyKey)==='闇')actor.current.hp-=actor.current.hp*.8;
+       else target.current.hp-=target.current.magic*.3;
+       break;
+     }
      default:markUnknown('未対応の図鑑数値演算：'+op.op);
     }
     if(outcome())break;
@@ -625,14 +638,14 @@ function round(b){
   }
   // Original slot is re-read at phase time: mutations earlier in the turn matter.
   const current=b.tables[s][t-1];
-  if(current&&D[current].phase===p)fire(s,current);
+  if(current&&(D[current].phases||[D[current].phase]).includes(p))fire(s,current,{stage:p});
   // The pending queue represents an explicit recall; it is not an extra set-slot.
   const matches=b.pending.filter(x=>x.turn===t&&x.side===s&&x.phase===p);
   b.pending=b.pending.filter(x=>!(x.turn===t&&x.side===s&&x.phase===p));
   for(const x of matches){
    if(b.complete||endTurn)break;
    if(b.tables[s][x.sourceSlot]!==x.sourceKey){emit('block',`${D[x.key].name}：呼出元${D[x.sourceKey].name}の枠消滅/変更により予約取消（暫定モデル）`);continue;}
-   fire(s,x.key,{source:`${D[x.sourceKey].name}からの予約`,sourceSlot:x.sourceSlot});
+   fire(s,x.key,{source:`${D[x.sourceKey].name}からの予約`,sourceSlot:x.sourceSlot,stage:p});
   }
  }
  if(b.deathCurses)for(const curse of b.deathCurses)if(curse.due===t){b.fighters[curse.target].current.hp=0;emit('effect','死の宣告が発動');outcome();}
