@@ -14,9 +14,18 @@ const $=id=>document.getElementById(id);
 const clean=x=>String(x||'').normalize('NFKC').trim().replace(/^[○◎]+/,'').trim();
 const partialnames=new Set([...PARTIAL].map(clean)),dnames=new Set([...DESCRIPTION].map(clean)),anames=new Set([...EXPLICIT_PROVISIONAL].map(clean));
 const snames=new Set([...SOURCE].map(clean)),lnames=new Set([...LEGACY].map(clean)),vnames=new Set([...VERIFIED].map(clean)),pnames=new Set([...PROVISIONAL].map(clean));
-let catalog=[];
+let catalog=[];let engineStatus=null;
 const phase=x=>{const raw=x?.timing||[];return Array.isArray(raw)&&raw.length===1&&['ターン開始時','攻撃時','攻撃後','ターン終了時'].includes(raw[0]);};
 function classify(x){const k=clean(x.name),s=String(x.ability||'');
+ if(engineStatus){
+  const r=engineStatus[x.id];
+  if(!r||clean(r.name)!==k)return ['pending','データ不整合','エンジンの状態表と図鑑が同期していない。判定を保留'];
+  const labels={verified:'実戦規則反映',provisional:'部分暫定',description:'記述モデル',partial:'主効果・部分実装',legacy:'旧試作モデル',pending:'未実装'};
+  const reasons={partial:'主な効果はモデル化。ただし未解明の例外・タイミング・競合がある',description:'記述ベースの数値・状態モデル。原作完全一致未保証',verified:'主要な実戦規則を反映（全条件の保証ではない）',provisional:'確認済みの主効果のみ実装',legacy:'旧試作・再検証が必要',pending:'数値能力の実装なし'};
+  if(!labels[r.status])return ['pending','分類不能','エンジン状態表の分類が不明'];
+  return [r.status,labels[r.status],reasons[r.status]];
+ }
+
  if(anames.has(k))return ['provisional','（仮）計算','雪崩ルシファーの低下差分×3・初期値への復元・当ターン札消去を仮定。実戦未照合'];
  if(dnames.has(k))return ['source','記述どおり実装','能力説明の主要効果をコード化した。端数処理・例外・特殊な競合は実戦未照合'];
  if(vnames.has(k))return ['verified','実戦規則反映','今回の実戦ログで主処理を照合。未観測の競合・境界は残る'];
@@ -50,17 +59,34 @@ function render(){const target=$('entries');target.replaceChildren();if(!catalog
 }
 function register(data,origin){if(!Array.isArray(data)||data.length<10)throw Error('配列のデビル図鑑データを指定してくれ');
  catalog=data.filter(x=>x&&typeof x.name==='string'&&Number.isInteger(x.id));
- const all=rows(),src=all.filter(x=>x.decision[0]==='source').length,leg=all.filter(x=>x.decision[0]==='legacy').length,ver=all.filter(x=>x.decision[0]==='verified').length,pro=all.filter(x=>x.decision[0]==='provisional').length,pending=all.length-src-leg-ver-pro;
- $('status').textContent=`${origin}：${catalog.length}体 読込済み / 実戦規則反映 ${ver}体 / 部分暫定 ${pro}体 / 記述モデル ${src}体 / 旧試作 ${leg}体 / 保留 ${pending}体`;
+ const all=rows(),src=all.filter(x=>x.decision[0]==='source').length,leg=all.filter(x=>x.decision[0]==='legacy').length,ver=all.filter(x=>x.decision[0]==='verified').length,pro=all.filter(x=>x.decision[0]==='provisional').length,part=all.filter(x=>x.decision[0]==='partial').length,pending=all.length-src-leg-ver-pro-part;
+ $('status').textContent=`${origin}：${catalog.length}体 読込済み / 実戦規則反映 ${ver}体 / 部分暫定 ${pro}体 / 記述モデル ${src}体 / 主効果・部分モデル ${part}体 / 旧試作 ${leg}体 / 保留 ${pending}体`;
  render();}
 async function refresh(){let errors=[];for(const url of ['https://anazashiroko-ai.github.io/another-alice-devil-index/dist/devils.json','https://raw.githubusercontent.com/anazashiroko-ai/another-alice-devil-index/main/dist/devils.json']){
  try{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),9500);const r=await fetch(url,{cache:'no-store',signal:controller.signal});clearTimeout(timer);if(!r.ok)throw Error('HTTP '+r.status);register(await r.json(),'公開図鑑');return;}catch(e){errors.push(String(e.message));}}
  $('status').textContent='公開図鑑の読み込みに失敗。JSONを手動で読み込んでくれ。';}
+async function refreshModelStatus(){
+ try{
+  const url='../dist/engine-status.json';
+  const response=await fetch(url,{cache:'no-store'});
+  if(!response.ok)throw Error('HTTP '+response.status);
+  const obj=await response.json();
+  if(!Array.isArray(obj.devils)||obj.devils.length!==396)throw Error('実装表の件数不整合');
+  const result={};
+  for(const row of obj.devils)result[row.id]=row;
+  if(catalog.length&&catalog.some(x=>!result[x.id]||result[x.id].name!==x.name))throw Error('図鑑データとモデル表の版が一致しない');
+  engineStatus=result;
+  if(catalog.length)register(catalog,'公開図鑑＋エンジン'+obj.engineVersion);
+ }catch(e){
+  engineStatus=null;
+  if(catalog.length)register(catalog,'図鑑（実装表取得失敗・静的分類で暫定表示）');
+ }
+}
 function download(){if(!catalog.length){$('status').textContent='図鑑読み込み後にCSVを保存できる';return;}
  const lines=[['ID','名前','属性','DP','発動段階','分類','保留理由','図鑑能力説明'],...rows().map(x=>[x.data.id,x.data.name,x.data.attr||'',x.data.dp||'',(x.data.timing||[]).join('/'),x.decision[1],x.decision[2],x.data.ability||''])];
  const csv='\ufeff'+lines.map(r=>r.map(c=>'"'+String(c??'').replaceAll('"','""')+'"').join(',')).join('\r\n');
  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='四月島_デビル能力監査_全396体.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
-$('refresh').addEventListener('click',refresh);$('file').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{register(JSON.parse(await f.text()),'手元のJSON');}catch(e){$('status').textContent='読み込みエラー：'+e.message;}});$('filter').addEventListener('change',render);$('query').addEventListener('input',render);$('export').addEventListener('click',download);refresh();
+$('refresh').addEventListener('click',refresh);$('file').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{register(JSON.parse(await f.text()),'手元のJSON');}catch(e){$('status').textContent='読み込みエラー：'+e.message;}});$('filter').addEventListener('change',render);$('query').addEventListener('input',render);$('export').addEventListener('click',download);refresh().then(refreshModelStatus);
 })();
 </script></body></html>
