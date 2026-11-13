@@ -19,13 +19,13 @@ function battle(key,turn=1,enemyFirst='vasago'){
 let tests=0;
 function check(name,fn){fn();tests++;console.log('PASS',name);}
 const partial=E.SOURCE_RULES.filter(x=>x.coverage==='partial');
-check('004.8部分モデル244体、既存記述モデル97件（重複なし）',()=>{
- assert.equal(partial.length,244);
- assert.equal(new Set(partial.map(x=>x.name)).size,244);
- assert.equal(E.SOURCE_RULES.length,341);
+check('004.8部分モデル246体、既存記述モデル97件（重複なし）',()=>{
+ assert.equal(partial.length,246);
+ assert.equal(new Set(partial.map(x=>x.name)).size,246);
+ assert.equal(E.SOURCE_RULES.length,343);
 });
-check('未対応の3候補はモデル計上しない',()=>{
- for(const id of [94,215,309])assert.ok(!E.D['catalog_'+id]?.model,'#'+id);
+check('未対応の2候補はモデル計上しない',()=>{
+ for(const id of [94,309])assert.ok(!E.D['catalog_'+id]?.model,'#'+id);
 });
 for(const r of partial)check('004.8 '+r.id+' '+r.name,()=>{
  const b=battle(r.key,r.minTurn||1);
@@ -113,5 +113,17 @@ check('スプリガン：即死に至らないダメージは回復し守備を�
  assert.ok(!b.error);
  assert.equal(b.fighters.player.current.hp,oldHP);
  assert.ok(b.fighters.player.current.defense>4000);
+});
+check('◎死と再生：当ターンの敵デビルを奪い自身で発動',()=>{
+ const p=blank(),e=blank();p[1]='catalog_83';e[1]='marbas';
+ const b=E.createBattle(config(p,e));E.round(b);E.round(b);
+ assert.equal(b.tables.enemy[1],null);
+ assert.ok(b.turns[1].fired.player.includes('marbas'));
+});
+check('◎誕生と消滅：予約した次ターンの敵デビルを奪って発動',()=>{
+ const p=blank(),e=blank();p[0]='catalog_215';e[1]='marbas';
+ const b=E.createBattle(config(p,e));E.round(b);E.round(b);
+ assert.equal(b.tables.enemy[1],null);
+ assert.ok(b.turns[1].fired.player.includes('marbas'));
 });
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
