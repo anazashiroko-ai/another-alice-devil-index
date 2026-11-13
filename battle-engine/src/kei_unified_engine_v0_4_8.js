@@ -72,7 +72,7 @@ const SOURCE_RULES=[{"key":"vasago","name":"ウァサゴ","phase":"before","minT
 const BATCH_0048=(root&&root.KeiBatchRules0048)||(typeof require==='function'?require('./kei_batch_rules_0048.js'):[]);
 const BATCH_META=Object.fromEntries(BATCH_0048.map(x=>[x.key,x]));
 const META_LOOKUP=new Map((root?.KeiDevilMeta0048||[]).map(x=>[String(x.name).normalize('NFKC').replace(/^[○◎]+/,'').trim(),x]));
-const BATCH_EXCLUDED_0048=new Set([94,215,309]); // Needs unresolved phases/effects: not counted as implemented.
+const BATCH_EXCLUDED_0048=new Set([94,309]); // Needs unresolved phases/effects: not counted as implemented.
 SOURCE_RULES.push(...BATCH_0048.filter(x=>!BATCH_EXCLUDED_0048.has(x.id)));
 for(const x of SOURCE_RULES)D[x.key]={name:x.name,phase:x.phase,model:true,tier:x.coverage==='partial'?'description-partial':'source-model',sourceId:x.key,minimumTurn:x.minTurn,notes:x.comment,coverage:x.coverage||'existing',phases:x.stages||[x.phase]};
 for(const d of Object.values(D)){const meta=META_LOOKUP.get(String(d.name).normalize('NFKC').replace(/^[○◎]+/,'').trim());if(meta){d.dp=meta.dp;d.attr=meta.attr;}}
@@ -406,6 +406,11 @@ function round(b){
        for(let i=0;i<6;i++){if(i===t-1)continue;const a=b.tables.player[i];b.tables.player[i]=b.tables.enemy[i];b.tables.enemy[i]=a;}
        break;
      }
+     case 'stealEnemyDevilNow':stealEnemyThisTurn(s,key,t-1,'死と再生の奪取',depth);break;
+     case 'scheduleStealNextEnemy':{
+       if(t<6){b.stealNext??=[];b.stealNext.push({turn:t+1,side:s,sourceKey:key,sourceSlot:t-1});}
+       break;
+     }
      default:markUnknown('未対応の図鑑数値演算：'+op.op);
     }
     if(outcome())break;
@@ -649,8 +654,27 @@ function round(b){
    default:unsupported(key);
   }
  }
+ function stealEnemyThisTurn(side,sourceKey,sourceSlot,label,depth=0){
+  const enemy=opp(side),stolen=b.tables[enemy][t-1];if(!stolen)return;
+  if(fired[enemy].includes(stolen)){
+   const msg='奪取対象がすでに発動した後の再発動順は原作未検証';
+   if(!b.warnings.includes(msg))b.warnings.push(msg);
+  }
+  b.tables[enemy][t-1]=null;
+  const stages=D[stolen].phases||[D[stolen].phase];
+  for(const stage of stages){
+   if(stage==='start')fire(side,stolen,{source:label,depth:depth+1,stage:stage});
+   else b.pending.push({turn:t,side,key:stolen,phase:stage,sourceKey,sourceSlot});
+  }
+  emit('effect',`${label}：相手の【${D[stolen].name}】を奪い、自分のデビルとして発動予約`);
+ }
  function phase(s,p){
   if(b.complete||endTurn)return;
+  if(p==='start'&&b.stealNext){
+   const due=b.stealNext.filter(x=>x.side===s&&x.turn===t);
+   b.stealNext=b.stealNext.filter(x=>!(x.side===s&&x.turn===t));
+   for(const event of due)stealEnemyThisTurn(s,event.sourceKey,event.sourceSlot,'誕生と消滅の次ターン奪取');
+  }
   if((p==='before'||p==='after')&&(disabled.has(s)||b.blockedAttacks[s].has(t)))return;
   if(p==='after'&&postAttackUvalFata.has(s)){
    postAttackUvalFata.delete(s);
