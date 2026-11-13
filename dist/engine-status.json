@@ -1,0 +1,3184 @@
+{
+  "schemaVersion": 1,
+  "engineVersion": "004.8",
+  "source": "battle-engine/src/kei_unified_engine_v0_4_8.js",
+  "note": "実装状況は研究エンジン由来。原作の能力説明を上書きしない。partialは未解明要素を含む。",
+  "counts": {
+    "description": 104,
+    "partial": 232,
+    "pending": 24,
+    "legacy": 23,
+    "verified": 8,
+    "provisional": 5
+  },
+  "devils": [
+    {
+      "id": 1,
+      "name": "ウァサゴ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "vasago",
+      "notes": null
+    },
+    {
+      "id": 2,
+      "name": "ガミジン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_2",
+      "notes": "3T以降20%即死、通常攻撃停止。"
+    },
+    {
+      "id": 3,
+      "name": "マルバス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "marbas",
+      "notes": null
+    },
+    {
+      "id": 4,
+      "name": "ウァレフォル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_4",
+      "notes": "通常攻撃を置換せず追加ダメージ。"
+    },
+    {
+      "id": 5,
+      "name": "バルバトス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "barbatos",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 6,
+      "name": "ブエル",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 7,
+      "name": "グシオン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_7",
+      "notes": "攻撃・防御の当ターン補正は終了時に解除。回避は相手の通常攻撃のみ。"
+    },
+    {
+      "id": 8,
+      "name": "シトリー",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "sitri",
+      "notes": null
+    },
+    {
+      "id": 9,
+      "name": "ベレト",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_9",
+      "notes": "当ターンのみ敵守備を魔力の60%に設定。"
+    },
+    {
+      "id": 10,
+      "name": "レライエ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_10",
+      "notes": "当ターンのみ自攻撃を魔力の1.5倍に設定。"
+    },
+    {
+      "id": 11,
+      "name": "バティン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "batin",
+      "notes": null
+    },
+    {
+      "id": 12,
+      "name": "サレオス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "saleos",
+      "notes": null
+    },
+    {
+      "id": 13,
+      "name": "プルソン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_13",
+      "notes": "50%の回避判定をシード付き乱数で暫定再現。"
+    },
+    {
+      "id": 14,
+      "name": "モラクス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_14",
+      "notes": "自己攻撃は当ターンのみ、敵攻撃30%低下は持続。"
+    },
+    {
+      "id": 15,
+      "name": "アイム",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "aim",
+      "notes": null
+    },
+    {
+      "id": 16,
+      "name": "ナベリウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_16",
+      "notes": "敵現デビル消滅・HP30%減・自通常攻撃停止。"
+    },
+    {
+      "id": 17,
+      "name": "アスモデウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_17",
+      "notes": "このターン攻撃不可、永続攻防=魔力×2。"
+    },
+    {
+      "id": 18,
+      "name": "ガープ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_18",
+      "notes": "80%で双方攻撃力を交換。"
+    },
+    {
+      "id": 19,
+      "name": "フルフル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_19",
+      "notes": "物理攻撃に追加40%ダメージ。"
+    },
+    {
+      "id": 20,
+      "name": "マルコシアス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "marchosias",
+      "notes": null
+    },
+    {
+      "id": 21,
+      "name": "ストラス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_21",
+      "notes": "物理攻撃に敵攻撃力の50%ダメージを追加。"
+    },
+    {
+      "id": 22,
+      "name": "フェニックス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_22",
+      "notes": "自魔力2倍で魔力攻撃。攻撃式は暫定。"
+    },
+    {
+      "id": 23,
+      "name": "ハルファス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "halphas",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 24,
+      "name": "マルファス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "malphas",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 25,
+      "name": "ラウム",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "raum",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 26,
+      "name": "フォカロル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_26",
+      "notes": "攻撃後、敵守備力40％分の追加ダメージ。"
+    },
+    {
+      "id": 27,
+      "name": "ウェパル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_27",
+      "notes": "攻撃時HP初期値まで回復と敵HP半分の直接ダメージ。"
+    },
+    {
+      "id": 28,
+      "name": "シャックス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "shax",
+      "notes": null
+    },
+    {
+      "id": 29,
+      "name": "ビフロンス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_29",
+      "notes": "通常攻撃の実ダメージの1.3倍を追加で与える。"
+    },
+    {
+      "id": 30,
+      "name": "クロケル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "crocell",
+      "notes": null
+    },
+    {
+      "id": 31,
+      "name": "フルカス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "furcas_basic",
+      "notes": null
+    },
+    {
+      "id": 32,
+      "name": "オロバス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_32",
+      "notes": "現在HPの20%を回復する暫定解釈。"
+    },
+    {
+      "id": 33,
+      "name": "グレモリー",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "gremory",
+      "notes": null
+    },
+    {
+      "id": 34,
+      "name": "オセ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "ose",
+      "notes": null
+    },
+    {
+      "id": 35,
+      "name": "ウァプラ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "vapula",
+      "notes": null
+    },
+    {
+      "id": 36,
+      "name": "アンドラス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_36",
+      "notes": "全アシスト合計501以上なら敵攻撃力をアシスト分へ設定、不足なら自HP90％減。"
+    },
+    {
+      "id": 37,
+      "name": "ベリアル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "belial",
+      "notes": null
+    },
+    {
+      "id": 38,
+      "name": "デカラビア",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 39,
+      "name": "ダンタリオン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_39",
+      "notes": "80%で3ターン魔力戦。ダメージ式は仮。"
+    },
+    {
+      "id": 40,
+      "name": "パイモン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "paimon",
+      "notes": null
+    },
+    {
+      "id": 41,
+      "name": "エリゴス",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "eligos",
+      "notes": null
+    },
+    {
+      "id": 42,
+      "name": "ゼパル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_42",
+      "notes": "当ターン敵属性による阻止と自魔力3倍。"
+    },
+    {
+      "id": 43,
+      "name": "ボティス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_43",
+      "notes": "当ターン敵デビル発動阻止。最も高い数値の同値判定は暫定。"
+    },
+    {
+      "id": 44,
+      "name": "グラシャ＝ラボラス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_44",
+      "notes": "土属性条件時の追撃は未モデル。"
+    },
+    {
+      "id": 45,
+      "name": "サブナック",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_45",
+      "notes": "敵札の属性条件で自最大能力×2へ攻撃力設定。"
+    },
+    {
+      "id": 46,
+      "name": "ウヴァル",
+      "status": "verified",
+      "tier": "field-verified",
+      "engineKey": "uval",
+      "notes": null
+    },
+    {
+      "id": 47,
+      "name": "バラム",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "balam",
+      "notes": null
+    },
+    {
+      "id": 48,
+      "name": "アロケル",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 49,
+      "name": "カイム",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "caim",
+      "notes": null
+    },
+    {
+      "id": 50,
+      "name": "ザガン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "zagan",
+      "notes": null
+    },
+    {
+      "id": 51,
+      "name": "ウァラク",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_51",
+      "notes": "前ターンザガンとの組合せ、なければ守備力50%回復。"
+    },
+    {
+      "id": 52,
+      "name": "フラウロス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_52",
+      "notes": "前ターンフォカロルなら敵守備80%分直接ダメージ。"
+    },
+    {
+      "id": 53,
+      "name": "アムドゥスキアス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_53",
+      "notes": "自魔力2倍の魔力攻撃、敵が土属性なら追加。"
+    },
+    {
+      "id": 54,
+      "name": "サキュバス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_54",
+      "notes": "先攻なら守備、後攻なら攻撃を敵最大能力×2に設定。"
+    },
+    {
+      "id": 55,
+      "name": "ベリト",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_55",
+      "notes": "奪った魔力をHPへ加える、魔力戦は未対応：主効果一部のみ。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 56,
+      "name": "ハーゲンティ",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "hagenti",
+      "notes": null
+    },
+    {
+      "id": 57,
+      "name": "キマリス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "cimejes",
+      "notes": null
+    },
+    {
+      "id": 58,
+      "name": "アスタロト",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_58",
+      "notes": "95%で3ターン魔力戦、敵が火／土属性なら追加効果。"
+    },
+    {
+      "id": 59,
+      "name": "バアル",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "baal",
+      "notes": null
+    },
+    {
+      "id": 60,
+      "name": "アモン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "amon",
+      "notes": "自分の魔力の50％を先に固定し、同値を三能力へ減算"
+    },
+    {
+      "id": 61,
+      "name": "アンドロマリウス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "andromalius",
+      "notes": null
+    },
+    {
+      "id": 62,
+      "name": "アミー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_62",
+      "notes": "攻撃時の当ターンデバフ。"
+    },
+    {
+      "id": 63,
+      "name": "ブネ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "bune",
+      "notes": null
+    },
+    {
+      "id": 64,
+      "name": "ヴィネ",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "vine",
+      "notes": null
+    },
+    {
+      "id": 65,
+      "name": "オリアス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_65",
+      "notes": "自魔力が上回ればHP交換、低ければHP30%減。同値未確認。"
+    },
+    {
+      "id": 66,
+      "name": "ムルムル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "murmur",
+      "notes": null
+    },
+    {
+      "id": 67,
+      "name": "ノロウェ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_67",
+      "notes": "魔力戦を解除し攻守60%上昇（当ターン）。"
+    },
+    {
+      "id": 68,
+      "name": "アガレス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "agares",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 69,
+      "name": "クロネコ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_69",
+      "notes": "前ターンにシロネコ配置という発動条件は未判定。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 70,
+      "name": "シロネコ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_70",
+      "notes": "前ターンにクロネコ配置という発動条件は未判定。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 71,
+      "name": "フォルネウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_71",
+      "notes": "敵アモン消去の条件分岐は未モデル。"
+    },
+    {
+      "id": 72,
+      "name": "シルフェ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "sylphe",
+      "notes": null
+    },
+    {
+      "id": 73,
+      "name": "イボス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_73",
+      "notes": "自守備が敵より高い時、相手行動停止・次Tデビル禁止。"
+    },
+    {
+      "id": 74,
+      "name": "ラナリル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "ranaril",
+      "notes": null
+    },
+    {
+      "id": 75,
+      "name": "サロメ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_75",
+      "notes": "通常攻撃は不能、敵魔力60%の直接ダメージ。"
+    },
+    {
+      "id": 76,
+      "name": "セエレ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "seere",
+      "notes": "最高能力にはHPも含む説明文解釈。実戦未照合。"
+    },
+    {
+      "id": 77,
+      "name": "○ファリニシュ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_77",
+      "notes": "当ターン敵札消滅と自己体力20%増。"
+    },
+    {
+      "id": 78,
+      "name": "マリア・グァッゾ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "maria_guazzo",
+      "notes": null
+    },
+    {
+      "id": 79,
+      "name": "アンドレアルフス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "andrealphus",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 80,
+      "name": "レヴィアタン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "leviathan",
+      "notes": null
+    },
+    {
+      "id": 81,
+      "name": "○死",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_81",
+      "notes": "30%即死、3T以降、ただし以降の隠し能力は未知。"
+    },
+    {
+      "id": 82,
+      "name": "○再生",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "regeneration",
+      "notes": null
+    },
+    {
+      "id": 83,
+      "name": "◎死と再生",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 84,
+      "name": "ベルフェゴール",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "belphegor",
+      "notes": null
+    },
+    {
+      "id": 85,
+      "name": "モロク",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_85",
+      "notes": "敵最大能力を1、自己攻撃不能。"
+    },
+    {
+      "id": 86,
+      "name": "ジャックオランタン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_86",
+      "notes": "自最低能力を敵最大値に設定。"
+    },
+    {
+      "id": 87,
+      "name": "◎アリサ・ウィッチハート",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_87",
+      "notes": "敵火属性デビルを消滅、成功時自己攻撃不能。"
+    },
+    {
+      "id": 88,
+      "name": "ルキフグス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_88",
+      "notes": "敵風属性デビルと現札を消滅、成功時攻撃不能。"
+    },
+    {
+      "id": 89,
+      "name": "ルシファー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_89",
+      "notes": "自身の能力復元部分。敵デバフは未モデル。"
+    },
+    {
+      "id": 90,
+      "name": "オンディーナ",
+      "status": "provisional",
+      "tier": "field-provisional",
+      "engineKey": "ondine",
+      "notes": null
+    },
+    {
+      "id": 91,
+      "name": "○クランプス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_91",
+      "notes": "敵最高能力値40%の直接ダメージ。"
+    },
+    {
+      "id": 92,
+      "name": "サマエル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_92",
+      "notes": "敵水属性デビルを消滅。"
+    },
+    {
+      "id": 93,
+      "name": "フォラス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_93",
+      "notes": "当ターン通常攻撃ダメージを回復へ反転、自己攻撃不能。"
+    },
+    {
+      "id": 94,
+      "name": "アラストル",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 95,
+      "name": "トミドゥコロ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_95",
+      "notes": "50%で敵の通常攻撃不能。"
+    },
+    {
+      "id": 96,
+      "name": "◎コ・ナベリウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_96",
+      "notes": "前ターンナベリウス時に敵闇札消滅。"
+    },
+    {
+      "id": 97,
+      "name": "バフォメット",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "baphomet",
+      "notes": null
+    },
+    {
+      "id": 98,
+      "name": "○ブリギット",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_98",
+      "notes": "次ターンの先攻予約と後からの上書きを再現する暫定処理。"
+    },
+    {
+      "id": 99,
+      "name": "シュプレンゲル＆クラメル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "sprenger_kramer",
+      "notes": null
+    },
+    {
+      "id": 100,
+      "name": "ブラウナ",
+      "status": "provisional",
+      "tier": "field-provisional",
+      "engineKey": "brauna",
+      "notes": null
+    },
+    {
+      "id": 101,
+      "name": "アウリス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "aulis",
+      "notes": null
+    },
+    {
+      "id": 102,
+      "name": "○オスタル",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 103,
+      "name": "◎命を宿すオスタル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_103",
+      "notes": "自最低能力と敵最大能力を入れ替える。"
+    },
+    {
+      "id": 104,
+      "name": "サルガタナス",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "sargatanas",
+      "notes": null
+    },
+    {
+      "id": 105,
+      "name": "インキュバス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_105",
+      "notes": "双方の最低値比較、低い方の最高能力を最低値へ変更。"
+    },
+    {
+      "id": 106,
+      "name": "ベヒーモス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_106",
+      "notes": "同性なら自守備×2を攻撃力加算、異性なら敵攻撃不能。"
+    },
+    {
+      "id": 107,
+      "name": "◎ヘクセンナハト",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "hexennacht",
+      "notes": null
+    },
+    {
+      "id": 108,
+      "name": "黒い雌鶏",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_108",
+      "notes": "外部入力の相手アシスト数値を奪取して自分四能力へ加算。"
+    },
+    {
+      "id": 109,
+      "name": "◎ツマ・ナベリウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_109",
+      "notes": "自HPが初期より少なければ差分ダメージ、多ければHPを1/10。翌T家族変化は保留。"
+    },
+    {
+      "id": 110,
+      "name": "ファタ・モルガナ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "fata_morgana",
+      "notes": null
+    },
+    {
+      "id": 111,
+      "name": "チェシャ猫",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_111",
+      "notes": "仕掛け側の攻撃停止と翌Tの両札消滅、受け側は双方能力合計50%へ変更。"
+    },
+    {
+      "id": 112,
+      "name": "ニスロク",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "nisroc",
+      "notes": null
+    },
+    {
+      "id": 113,
+      "name": "マウ・ビート",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_113",
+      "notes": "3000以上の能力値を666にする。攻撃不能。"
+    },
+    {
+      "id": 114,
+      "name": "クラリッサ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_114",
+      "notes": "双方攻撃力10、双方通常攻撃不可。"
+    },
+    {
+      "id": 115,
+      "name": "クロリッサ",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "chlorissa",
+      "notes": null
+    },
+    {
+      "id": 116,
+      "name": "○ラマンダラ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_116",
+      "notes": "敵土札消滅、成功時自攻撃不能。"
+    },
+    {
+      "id": 117,
+      "name": "アザゼル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_117",
+      "notes": "双方の現在最大と最小を交換。同値時未検証。"
+    },
+    {
+      "id": 118,
+      "name": "マンモン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_118",
+      "notes": "発動条件はJST0〜3時の時間帯・開始から終了までを暫定扱い。"
+    },
+    {
+      "id": 119,
+      "name": "ベルゼブブ",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "beelzebub",
+      "notes": null
+    },
+    {
+      "id": 120,
+      "name": "◎隠された長腕のルー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_120",
+      "notes": "味方・敵ファリニシュ各1.5倍を追加し魔力攻撃。"
+    },
+    {
+      "id": 121,
+      "name": "タイタニア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_121",
+      "notes": "自デッキ水札数×500HP回復、敵火札数×500直接ダメージ。"
+    },
+    {
+      "id": 122,
+      "name": "オベロン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_122",
+      "notes": "仕掛け側・8〜9時／15〜16時の時間帯限定で全能力2.5倍。"
+    },
+    {
+      "id": 123,
+      "name": "ケット・シー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_123",
+      "notes": "自素能力の最低値×1.5ダメージ、敵マウ・ビート消滅時は追加能力吸収。"
+    },
+    {
+      "id": 124,
+      "name": "アリトン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_124",
+      "notes": "全デビル水属性化は未実装。"
+    },
+    {
+      "id": 125,
+      "name": "ジャック・ロレ",
+      "status": "verified",
+      "tier": "field-verified",
+      "engineKey": "jack_lore",
+      "notes": null
+    },
+    {
+      "id": 126,
+      "name": "オリエンス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_126",
+      "notes": "2ターン後の先攻予約と70%の当ターン敵攻撃停止。"
+    },
+    {
+      "id": 127,
+      "name": "アグライア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_127",
+      "notes": "通常アグライアの復活、原文のただし以降は不明。"
+    },
+    {
+      "id": 128,
+      "name": "サリエル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_128",
+      "notes": "敵闇札を消滅、成功時自己攻撃不能。"
+    },
+    {
+      "id": 129,
+      "name": "マスティマ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_129",
+      "notes": "自身攻撃力+魔力半分。ベルゼブブの敵札消滅と味方札復元条件は暫定。"
+    },
+    {
+      "id": 130,
+      "name": "スワニール",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_130",
+      "notes": "敵攻撃力を10残して残余HPへ転換。"
+    },
+    {
+      "id": 131,
+      "name": "シュレディンガー",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 132,
+      "name": "ロゼッタ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_132",
+      "notes": "最低ステータス値の符号を保持。"
+    },
+    {
+      "id": 133,
+      "name": "ライブラ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_133",
+      "notes": "相手とのレベル差×400+3000を希望アシストの能力へ付与。"
+    },
+    {
+      "id": 134,
+      "name": "◎パンプキィ・パンピキィ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "pumpkin_panpiki",
+      "notes": null
+    },
+    {
+      "id": 135,
+      "name": "◎ユースティティアのウサギ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_135",
+      "notes": "次2ターンの先攻予約。"
+    },
+    {
+      "id": 136,
+      "name": "ヴィヴィアン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "vivian",
+      "notes": null
+    },
+    {
+      "id": 137,
+      "name": "アガリアレプト",
+      "status": "verified",
+      "tier": "field-verified",
+      "engineKey": "agaliarept",
+      "notes": null
+    },
+    {
+      "id": 138,
+      "name": "アナト",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_138",
+      "notes": "本攻撃直前に同一攻撃力で追加攻撃、前ターンバアルなら攻撃力2倍。バアル分岐未実装。"
+    },
+    {
+      "id": 139,
+      "name": "ネフィリム",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_139",
+      "notes": "敵四能力の順をシード付きでシャッフル。"
+    },
+    {
+      "id": 140,
+      "name": "◎オジ・ナベリウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_140",
+      "notes": "敵最大能力半分を自希望アシストまたは最大能力へ加算。"
+    },
+    {
+      "id": 141,
+      "name": "◎ディアーナ",
+      "status": "description",
+      "tier": "description-model",
+      "engineKey": "diana",
+      "notes": null
+    },
+    {
+      "id": 142,
+      "name": "フルーレティ",
+      "status": "verified",
+      "tier": "field-verified",
+      "engineKey": "flauros_fleurety",
+      "notes": null
+    },
+    {
+      "id": 143,
+      "name": "カマエル",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "kamael",
+      "notes": null
+    },
+    {
+      "id": 144,
+      "name": "マゴト",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "magot",
+      "notes": null
+    },
+    {
+      "id": 145,
+      "name": "◎オスタルの巫女",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "ostal_priestess",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 146,
+      "name": "◎舞いながら戦うオスタルの巫女",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_146",
+      "notes": "敵の初期値を超える分だけ敵から奪う。"
+    },
+    {
+      "id": 147,
+      "name": "アマイモン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_147",
+      "notes": "ランダムに選ぶ敵の素能力値を自HPへ吸収。"
+    },
+    {
+      "id": 148,
+      "name": "マシュー・ホプキンス",
+      "status": "description",
+      "tier": "description-model",
+      "engineKey": "matthew_hopkins",
+      "notes": null
+    },
+    {
+      "id": 149,
+      "name": "リリス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "lilith",
+      "notes": null
+    },
+    {
+      "id": 150,
+      "name": "アリアンロッド",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_150",
+      "notes": "自装備補正の70％分、敵攻守魔を減算。"
+    },
+    {
+      "id": 151,
+      "name": "ジャックフロスト",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 152,
+      "name": "ニンフ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "nymph",
+      "notes": null
+    },
+    {
+      "id": 153,
+      "name": "◎メイ・ナベリウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_153",
+      "notes": "一族人数による増幅は未実装。"
+    },
+    {
+      "id": 154,
+      "name": "ウコバク",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "ucobach",
+      "notes": null
+    },
+    {
+      "id": 155,
+      "name": "バラキエル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "barachiel",
+      "notes": null
+    },
+    {
+      "id": 156,
+      "name": "ライラ・ケプルス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "lilah",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 157,
+      "name": "ドリドルム",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 158,
+      "name": "アンナ・ケプルス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_158",
+      "notes": "終了時に攻撃・魔力を1へ、残余をHPへ移動。"
+    },
+    {
+      "id": 159,
+      "name": "アネッタ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_159",
+      "notes": "自二番目に低い能力を敵攻守魔から符号込みで減算。"
+    },
+    {
+      "id": 160,
+      "name": "ニーナ・ケプルス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_160",
+      "notes": "4T以降・ターン終了時、敵HPを1。隠された但し書き未記載。"
+    },
+    {
+      "id": 161,
+      "name": "ロル・ナイトメア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_161",
+      "notes": "二番目に高いステータスを符号込みで敵攻守魔から減算。"
+    },
+    {
+      "id": 162,
+      "name": "ナルキッソス",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "narcissus",
+      "notes": null
+    },
+    {
+      "id": 163,
+      "name": "◎パパ・ナベリウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_163",
+      "notes": "一族人数に応じた倍率は未実装。"
+    },
+    {
+      "id": 164,
+      "name": "スカアハ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "scathach",
+      "notes": null
+    },
+    {
+      "id": 165,
+      "name": "ダゴン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "dagon",
+      "notes": null
+    },
+    {
+      "id": 166,
+      "name": "ノーム",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_166",
+      "notes": "魔力比較による敵次ターンデビル消滅は未実装。"
+    },
+    {
+      "id": 167,
+      "name": "アバドン",
+      "status": "description",
+      "tier": "description-model",
+      "engineKey": "abaddon",
+      "notes": null
+    },
+    {
+      "id": 168,
+      "name": "ドリー・J",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "dory_j",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 169,
+      "name": "アンドラメレク",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "andramalech",
+      "notes": null
+    },
+    {
+      "id": 170,
+      "name": "◎クー・フーリン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_170",
+      "notes": "隠し条件の詳細は未記載。"
+    },
+    {
+      "id": 171,
+      "name": "ウロボロス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "ouroboros",
+      "notes": null
+    },
+    {
+      "id": 172,
+      "name": "善良なマンドラゴラ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_172",
+      "notes": "先攻守備2倍、後攻敵札消滅＋守備4倍。"
+    },
+    {
+      "id": 173,
+      "name": "◎誕生",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_173",
+      "notes": "敵現在・初期魔力1、当ターン発動阻止。"
+    },
+    {
+      "id": 174,
+      "name": "◎消滅",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_174",
+      "notes": "このターンから3ターン両者札を消滅。"
+    },
+    {
+      "id": 175,
+      "name": "クランメリア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_175",
+      "notes": "守備力40%上昇と当ターンの敵通常攻撃回避。"
+    },
+    {
+      "id": 176,
+      "name": "ムブラン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_176",
+      "notes": "50%で攻撃力半減／混乱を分岐。"
+    },
+    {
+      "id": 177,
+      "name": "ティナ・スピアーナ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_177",
+      "notes": "セット総DP×300を攻撃力加算。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 178,
+      "name": "ケンタウロス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_178",
+      "notes": "自身Lv×使用DP×ターン数÷3ダメージ、通常攻撃停止。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 179,
+      "name": "トロール",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "troll",
+      "notes": null
+    },
+    {
+      "id": 180,
+      "name": "リドル・クラウン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_180",
+      "notes": "敵の現在能力値の最大／最小を入替。"
+    },
+    {
+      "id": 181,
+      "name": "◎邪悪なマンドラゴラ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "evil_mandrake",
+      "notes": "敵の4能力の発動前25%を自身HPへ合算し、敵の4能力を減算する説明文解釈。"
+    },
+    {
+      "id": 182,
+      "name": "リャナンシー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_182",
+      "notes": "反射・混乱状態解除が成立した場合のみ攻撃倍化すべき条件を未厳密化。"
+    },
+    {
+      "id": 183,
+      "name": "クイーンピケル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_183",
+      "notes": "魔力戦中なら解除し攻撃倍化、双方当・次札消滅。"
+    },
+    {
+      "id": 184,
+      "name": "シェミハザ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "shemihazah",
+      "notes": null
+    },
+    {
+      "id": 185,
+      "name": "◎ママ・ナベリウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_185",
+      "notes": "次ターン先攻確定の予約は未実装。"
+    },
+    {
+      "id": 186,
+      "name": "◎ワイルドハント",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_186",
+      "notes": "火属性の味方札数による加算倍率は未実装。"
+    },
+    {
+      "id": 187,
+      "name": "アルマロス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_187",
+      "notes": "敵装備補正四能力の50%を奪う。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 188,
+      "name": "ルサールカ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_188",
+      "notes": "魔力比に応じた次ターンからの連続先攻予約、未確認の端数は暫定。"
+    },
+    {
+      "id": 189,
+      "name": "デュラハン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "dullahan",
+      "notes": null
+    },
+    {
+      "id": 190,
+      "name": "スプリガン",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 191,
+      "name": "ノッカー",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "knocker",
+      "notes": null
+    },
+    {
+      "id": 192,
+      "name": "プロセルピナ",
+      "status": "verified",
+      "tier": "field-verified",
+      "engineKey": "proserpina",
+      "notes": null
+    },
+    {
+      "id": 193,
+      "name": "◎ナパイア",
+      "status": "verified",
+      "tier": "field-verified",
+      "engineKey": "napaiya",
+      "notes": null
+    },
+    {
+      "id": 194,
+      "name": "ネビロス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_194",
+      "notes": "反射は本来被弾後に発動するため未検証。"
+    },
+    {
+      "id": 195,
+      "name": "バロール",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_195",
+      "notes": "自HP閾値による追加攻撃強化は未実装。"
+    },
+    {
+      "id": 196,
+      "name": "エウリノーム",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "eurynome",
+      "notes": "最小値は発動開始時点の値を固定して参照"
+    },
+    {
+      "id": 197,
+      "name": "ペア・フォルター",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_197",
+      "notes": "通常攻撃の実ダメージ分、敵守備力を下げる。"
+    },
+    {
+      "id": 198,
+      "name": "ブランド・フォルター",
+      "status": "verified",
+      "tier": "field-verified",
+      "engineKey": "brand_folter",
+      "notes": null
+    },
+    {
+      "id": 199,
+      "name": "デコラ・フォルター",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_199",
+      "notes": "敵現在DP×5%で即死、自己攻撃停止。5T以降。"
+    },
+    {
+      "id": 200,
+      "name": "サタン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_200",
+      "notes": "3ターン後の開始時に即死を予約。"
+    },
+    {
+      "id": 201,
+      "name": "ガルガメル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_201",
+      "notes": "双方風札数×0.6を自攻撃力に加算。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 202,
+      "name": "シャムシェル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_202",
+      "notes": "敵現札DPで分岐、消去・自攻撃倍率変更。"
+    },
+    {
+      "id": 203,
+      "name": "ハッグ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_203",
+      "notes": "敵が初期値から増加した差分だけ自各能力へ加算。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 204,
+      "name": "ヴェスティア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_204",
+      "notes": "敵セット総DP×100の直接ダメージ。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 205,
+      "name": "◎レブナント",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_205",
+      "notes": "消滅した自身デビルを復帰させる暫定処理。"
+    },
+    {
+      "id": 206,
+      "name": "メロウ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "merrow",
+      "notes": null
+    },
+    {
+      "id": 207,
+      "name": "ヴァルキリー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_207",
+      "notes": "敵闇札数×1000ダメージ、自己攻撃停止。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 208,
+      "name": "◎ハトホラ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_208",
+      "notes": "風属性デビル数による追攻撃倍率は未実装。"
+    },
+    {
+      "id": 209,
+      "name": "ハール・ベル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "haar_bell",
+      "notes": null
+    },
+    {
+      "id": 210,
+      "name": "エゼキエル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_210",
+      "notes": "敵最高を1・自最低2能力を100。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 211,
+      "name": "メリュジーヌ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_211",
+      "notes": "3ターン通常攻撃ダメージ半減。"
+    },
+    {
+      "id": 212,
+      "name": "ギリードゥー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_212",
+      "notes": "5ターンダメージ20％軽減。"
+    },
+    {
+      "id": 213,
+      "name": "ラプラス",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "laplace",
+      "notes": null
+    },
+    {
+      "id": 214,
+      "name": "マニ・エリ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_214",
+      "notes": "攻撃後に敵HP40%ダメージ。敵先攻確定の解除は未実装。"
+    },
+    {
+      "id": 215,
+      "name": "◎誕生と消滅",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 216,
+      "name": "アリオーシュ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_216",
+      "notes": "自初期体力−現在体力を用い、ターン数×0.5倍だけ攻撃力増。"
+    },
+    {
+      "id": 217,
+      "name": "メドゥーサ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_217",
+      "notes": "敵札発動阻止と行動停止、自魔力=敵魔力。"
+    },
+    {
+      "id": 218,
+      "name": "ロッゲンメーメ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "roggenmeme",
+      "notes": null
+    },
+    {
+      "id": 219,
+      "name": "ザントメンヒェン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "sandmannchen",
+      "notes": null
+    },
+    {
+      "id": 220,
+      "name": "ネルガル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "nergal",
+      "notes": null
+    },
+    {
+      "id": 221,
+      "name": "ネモフィラ",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 222,
+      "name": "◎ソラト",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_222",
+      "notes": "敵装備補正の70％を毎ターン引く主効果（本来全能力）。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 223,
+      "name": "ファフナー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_223",
+      "notes": "相手行動停止は攻撃不能＋発動阻止の範囲が未照合。"
+    },
+    {
+      "id": 224,
+      "name": "エニグマ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_224",
+      "notes": "自攻守魔のどれか一つをランダムに3倍。"
+    },
+    {
+      "id": 225,
+      "name": "ナナ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_225",
+      "notes": "敵火札消去、消した数と自水札数合計×1000ダメージ。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 226,
+      "name": "アエロー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_226",
+      "notes": "自攻撃力半分を敵攻撃へ移し、敵混乱。"
+    },
+    {
+      "id": 227,
+      "name": "ペリュトン",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "peryton",
+      "notes": null
+    },
+    {
+      "id": 228,
+      "name": "ネミッサ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_228",
+      "notes": "仕掛け側のみハーモニクス100消費、残余×4ダメージ。"
+    },
+    {
+      "id": 229,
+      "name": "ロスメルタ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_229",
+      "notes": "双方デビルの総DPで分岐して四能力を強化。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 230,
+      "name": "バステト",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_230",
+      "notes": "双方の装備品補正を交換。"
+    },
+    {
+      "id": 231,
+      "name": "アウデベルト",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 232,
+      "name": "ヘカート",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_232",
+      "notes": "敵発動阻止。自攻撃・魔力の高い方の半分HP加算、低い方の半分守備加算。"
+    },
+    {
+      "id": 233,
+      "name": "プリンセス・パンプキン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_233",
+      "notes": "敵HP30%奪取または混乱、確率50%。"
+    },
+    {
+      "id": 234,
+      "name": "ガーゴイル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_234",
+      "notes": "追加攻撃の条件分岐は未実装。"
+    },
+    {
+      "id": 235,
+      "name": "グザファン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_235",
+      "notes": "ハーモニクス比較により差×100加算／攻撃1.5倍。"
+    },
+    {
+      "id": 236,
+      "name": "デル・グレネ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_236",
+      "notes": "原初1Tのデビル名文字数（「・」など含む）でステータス倍率を分岐。"
+    },
+    {
+      "id": 237,
+      "name": "プーカ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_237",
+      "notes": "所持GOLD比較、上位2能力倍化／攻守魔初期値リセット。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 238,
+      "name": "ウルド",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_238",
+      "notes": "魔力比較で3ターン魔力戦か2ターン敵札消滅に分岐。"
+    },
+    {
+      "id": 239,
+      "name": "ヴェルダンディ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_239",
+      "notes": "次ターンのウルド／スクルドで自己HP追加倍化は未実装。"
+    },
+    {
+      "id": 240,
+      "name": "スクルド",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "skuld",
+      "notes": null
+    },
+    {
+      "id": 241,
+      "name": "◎ブラト",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_241",
+      "notes": "光属性敵デビル消滅は未実装。"
+    },
+    {
+      "id": 242,
+      "name": "ロキ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_242",
+      "notes": "自分の初期セット全部が闇属性のときのみ。"
+    },
+    {
+      "id": 243,
+      "name": "ディスコルディア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_243",
+      "notes": "過去に消滅した敵味方札数+1倍、攻撃力・魔力を上昇。"
+    },
+    {
+      "id": 244,
+      "name": "ラジエル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_244",
+      "notes": "魔力50%を四能力加算、アシスト比較で敵次札消滅。"
+    },
+    {
+      "id": 245,
+      "name": "ア・パオ・ア・クゥー",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "apao",
+      "notes": null
+    },
+    {
+      "id": 246,
+      "name": "バルト・アンデルス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_246",
+      "notes": "敵の後続先攻確定を解除して攻守倍化。"
+    },
+    {
+      "id": 247,
+      "name": "アルルーナ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_247",
+      "notes": "1/3で混乱と当ターン魔力戦に変更。"
+    },
+    {
+      "id": 248,
+      "name": "◎ブリューナク",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_248",
+      "notes": "当ターン自分が受けた通常ダメージ×2を敵へ返す。隠し効果不明。"
+    },
+    {
+      "id": 249,
+      "name": "トール",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_249",
+      "notes": "混乱・継続デバフなど解除。隠し追加効果は不明。"
+    },
+    {
+      "id": 250,
+      "name": "タングニョースト",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_250",
+      "notes": "敵HP50%を奪って自攻撃力へ加算。追加効果の後半は不明。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 251,
+      "name": "タングリスニル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_251",
+      "notes": "ダメージ軽減重複不可は未再現。"
+    },
+    {
+      "id": 252,
+      "name": "ナハトマート",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_252",
+      "notes": "当ターン敵攻守90%低下。"
+    },
+    {
+      "id": 253,
+      "name": "ミノタウロス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_253",
+      "notes": "特定相手への追加効果は未記載。"
+    },
+    {
+      "id": 254,
+      "name": "ウプイリ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_254",
+      "notes": "自魔力の25%ずつ敵四能力から毎ターン減算。"
+    },
+    {
+      "id": 255,
+      "name": "枷から解き放たれたマゴト",
+      "status": "verified",
+      "tier": "field-verified",
+      "engineKey": "shackled_magot",
+      "notes": null
+    },
+    {
+      "id": 256,
+      "name": "モイラ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_256",
+      "notes": "敵札が死／ガミジン／デコラなら除去して50％即死、なければ魔力1.5倍。"
+    },
+    {
+      "id": 257,
+      "name": "ルサリィ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_257",
+      "notes": "1000以下のダメージ無効化は未実装。"
+    },
+    {
+      "id": 258,
+      "name": "ネメシス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_258",
+      "notes": "自身の順位番号を入力し、max(0,6666−順位)の直接ダメージ。"
+    },
+    {
+      "id": 259,
+      "name": "エポナ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_259",
+      "notes": "勝利数の十分の一を自魔力に加算。"
+    },
+    {
+      "id": 260,
+      "name": "党首の威光を放つベレト",
+      "status": "description",
+      "tier": "description-model",
+      "engineKey": "beleth",
+      "notes": null
+    },
+    {
+      "id": 261,
+      "name": "ゴヴニュ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_261",
+      "notes": "ウィッカ順位から6666を引いた差を攻撃力に加算。"
+    },
+    {
+      "id": 262,
+      "name": "ラミアー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_262",
+      "notes": "敵闇属性札数により将来枠消去。"
+    },
+    {
+      "id": 263,
+      "name": "容赦ない一撃を放つスカアハ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_263",
+      "notes": "敵混乱は攻撃ダメージの自傷化。"
+    },
+    {
+      "id": 264,
+      "name": "◎スネグラチカ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_264",
+      "notes": "装備の守備補正だけ5倍。"
+    },
+    {
+      "id": 265,
+      "name": "◎鮮血を浴びたクランプス",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "blood_krampus",
+      "notes": null
+    },
+    {
+      "id": 266,
+      "name": "轟雷の矢を放つレライエ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "thunder_leraje",
+      "notes": null
+    },
+    {
+      "id": 267,
+      "name": "暴風吹き荒れるムルムル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "storm_murmur",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 268,
+      "name": "聖杯を抱くウェパル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_268",
+      "notes": "自HP初期×1.5まで回復、通常攻撃前に敵HP半分を減算。"
+    },
+    {
+      "id": 269,
+      "name": "オイフェ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "aoife",
+      "notes": null
+    },
+    {
+      "id": 270,
+      "name": "モルペウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_270",
+      "notes": "敵のHP以外をコピー。"
+    },
+    {
+      "id": 271,
+      "name": "◎春を喜ぶブリギット",
+      "status": "description",
+      "tier": "description-model",
+      "engineKey": "spring_bridget",
+      "notes": null
+    },
+    {
+      "id": 272,
+      "name": "蝶と舞い踊るマリア・グァッゾ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_272",
+      "notes": "当ターン戦闘停止、次T先攻確定。"
+    },
+    {
+      "id": 273,
+      "name": "サイクロプス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "cyclops",
+      "notes": null
+    },
+    {
+      "id": 274,
+      "name": "バジリスク",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "basilisk",
+      "notes": null
+    },
+    {
+      "id": 275,
+      "name": "エイル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "eir",
+      "notes": null
+    },
+    {
+      "id": 276,
+      "name": "セイレーン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_276",
+      "notes": "自攻撃停止、敵混乱、自デッキの水札数×0.7を攻撃力へ加算。"
+    },
+    {
+      "id": 277,
+      "name": "記憶を取り戻したアミー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_277",
+      "notes": "再登場時の追加効果倍増は未実装。"
+    },
+    {
+      "id": 278,
+      "name": "法を改訂するバフォメット",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "law_baphomet",
+      "notes": null
+    },
+    {
+      "id": 279,
+      "name": "永遠を灯すアスモデウス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "eternal_asmodeus",
+      "notes": null
+    },
+    {
+      "id": 280,
+      "name": "夜空に羽撃くスワニール",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "night_swanir",
+      "notes": null
+    },
+    {
+      "id": 281,
+      "name": "春風に舞うグシオン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_281",
+      "notes": "初期セット属性数を参照した攻撃力上昇（300%→3倍増）。"
+    },
+    {
+      "id": 282,
+      "name": "アルミラージ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_282",
+      "notes": "DP−2の編成ボーナスは未実装。"
+    },
+    {
+      "id": 283,
+      "name": "ニュクス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_283",
+      "notes": "先攻なら攻撃+500%・守備−90%、後攻なら先攻2ターン確定。"
+    },
+    {
+      "id": 284,
+      "name": "オジ＆オバ・ナベリウス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_284",
+      "notes": "敵最高能力の80%を奪い自守備力へ加える。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 285,
+      "name": "ヘル",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 286,
+      "name": "キキーモラ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_286",
+      "notes": "敵の初期より強化分を自へ、自の初期より低下分を敵へ移す。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 287,
+      "name": "フレイヤ",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "freya",
+      "notes": null
+    },
+    {
+      "id": 288,
+      "name": "オピーオン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_288",
+      "notes": "敵次2ターン攻撃不能。"
+    },
+    {
+      "id": 289,
+      "name": "ゴリラを連れたケット・シー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_289",
+      "notes": "稀なクリティカルは出現率不明のため主強化のみ。"
+    },
+    {
+      "id": 290,
+      "name": "祈りを捧げるモラクス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_290",
+      "notes": "本ターン終了後から毎ターン、参照魔力を攻撃力へ加算。"
+    },
+    {
+      "id": 291,
+      "name": "賢者の火・フルカス",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "furcas",
+      "notes": null
+    },
+    {
+      "id": 292,
+      "name": "未来を視通すプルソン",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "purson",
+      "notes": null
+    },
+    {
+      "id": 293,
+      "name": "ヴォジャノーイ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_293",
+      "notes": "敵火札消滅数×0.8倍だけ自攻撃力上昇。"
+    },
+    {
+      "id": 294,
+      "name": "ルナ・スピアーナ",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 295,
+      "name": "モーラ",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 296,
+      "name": "ひまわりワンピを着たサレオス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "summer_saleos",
+      "notes": null
+    },
+    {
+      "id": 297,
+      "name": "両脚で立つレヴィアタン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_297",
+      "notes": "自最低能力と敵守備値を交換。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 298,
+      "name": "ニコラス・レミ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "nicholas_remy",
+      "notes": null
+    },
+    {
+      "id": 299,
+      "name": "アングルボザ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_299",
+      "notes": "自アシスト5倍・敵アシスト1/5、セット済みの能力補正へ反映。"
+    },
+    {
+      "id": 300,
+      "name": "◎シュガール",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 301,
+      "name": "ルゲイエ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_301",
+      "notes": "アシスト人数で倍率表を参照。"
+    },
+    {
+      "id": 302,
+      "name": "ナイトストーク",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_302",
+      "notes": "自闇札数×0.5倍分攻撃上昇・敵光札数×0.5倍分守備上昇。"
+    },
+    {
+      "id": 303,
+      "name": "◎カリアッハベーラ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_303",
+      "notes": "自分当ターン攻撃停止と敵次3ターン攻撃停止。"
+    },
+    {
+      "id": 304,
+      "name": "造物主の水・ユースティティアのウサギ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_304",
+      "notes": "次の2ターン先攻予約は未実装。"
+    },
+    {
+      "id": 305,
+      "name": "イピリア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_305",
+      "notes": "アシスト人数比較による攻守調整＋回避。"
+    },
+    {
+      "id": 306,
+      "name": "マクスウェル",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 307,
+      "name": "ナイトメア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_307",
+      "notes": "自身の他札を全消去し消去総DP×100%攻撃力増加。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 308,
+      "name": "冥雷を振りかざすスカアハ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "thunder_skaah",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 309,
+      "name": "フェンリル",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 310,
+      "name": "パーン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_310",
+      "notes": "HPと敵攻撃を交換し、当ターン戦闘停止。"
+    },
+    {
+      "id": 311,
+      "name": "ウヴァル＆ファタ・モルガナ",
+      "status": "provisional",
+      "tier": "field-provisional",
+      "engineKey": "uval_fata",
+      "notes": null
+    },
+    {
+      "id": 312,
+      "name": "モルモル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "moromoro",
+      "notes": null
+    },
+    {
+      "id": 313,
+      "name": "フレイ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_313",
+      "notes": "毎ターンのHP回復。"
+    },
+    {
+      "id": 314,
+      "name": "祈りを捧げるガミジン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_314",
+      "notes": "25%即死、失敗時自守備2倍。"
+    },
+    {
+      "id": 315,
+      "name": "ベローナ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "belona",
+      "notes": "仕掛けた際のソウルストーン効果は戦闘結果外"
+    },
+    {
+      "id": 316,
+      "name": "ジェントルマン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_316",
+      "notes": "両テーブル相手札の3枠循環／通常ジェントルマン対決ティーパーティー。"
+    },
+    {
+      "id": 317,
+      "name": "イカロス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_317",
+      "notes": "登頂階数×30加算、敵火札なら×15減、自己攻撃停止。"
+    },
+    {
+      "id": 318,
+      "name": "ジョン・ゴール",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_318",
+      "notes": "魔力<10の通常能力、同ターンマシューへの特殊反撃。"
+    },
+    {
+      "id": 319,
+      "name": "ヴィドフニル",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 320,
+      "name": "ヨルムンガンド",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_320",
+      "notes": "2ターン通常攻撃ダメージ90％軽減。"
+    },
+    {
+      "id": 321,
+      "name": "コッペリア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_321",
+      "notes": "最新版ドール装備中は装備守備×3、未装備なら敵攻撃30%奪取。"
+    },
+    {
+      "id": 322,
+      "name": "虚の扉を開くモロク",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_322",
+      "notes": "敵最大能力値を1、自己攻撃不能、次ターン敵攻撃不能。"
+    },
+    {
+      "id": 323,
+      "name": "ライフセーバー・サブナック",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "lifeguard_sabnack",
+      "notes": null
+    },
+    {
+      "id": 324,
+      "name": "アラクネ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_324",
+      "notes": "敵最大能力50%を奪い自HPへ加算。"
+    },
+    {
+      "id": 325,
+      "name": "哲学者の土・善良なマンドラゴラ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_325",
+      "notes": "敵土札消滅なら自守備3倍、なければ自HP40％減。"
+    },
+    {
+      "id": 326,
+      "name": "砂浜剣舞バアル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_326",
+      "notes": "自己攻撃は当ターン限定、敵守備低下は永続。"
+    },
+    {
+      "id": 327,
+      "name": "モノケロス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_327",
+      "notes": "毎ターン敵魔力を減らす。 ／ 004.8で条件・参照処理を修正。"
+    },
+    {
+      "id": 328,
+      "name": "ヒュギエイア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_328",
+      "notes": "毎ターン魔力加算。"
+    },
+    {
+      "id": 329,
+      "name": "王の風・グシオン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_329",
+      "notes": "初期セット属性数強化、自攻撃停止、次ターン敵攻撃停止。"
+    },
+    {
+      "id": 330,
+      "name": "未来へ誘うアンドラメレク",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "future_andramelech",
+      "notes": "敵の4能力の発動前25%を自身守備へ合算し、敵の4能力を減算する説明文解釈。"
+    },
+    {
+      "id": 331,
+      "name": "かぼちゃを投げ落とすシャックス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "shax_pumpkin",
+      "notes": null
+    },
+    {
+      "id": 332,
+      "name": "アリエル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_332",
+      "notes": "敵魔力と自守備交換。特定敵への追加効果は不明。"
+    },
+    {
+      "id": 333,
+      "name": "◎ジェド・マロース",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_333",
+      "notes": "装備品HP補正のみ3倍。"
+    },
+    {
+      "id": 334,
+      "name": "ソフィア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_334",
+      "notes": "ベレトと同型、当ターン限定。"
+    },
+    {
+      "id": 335,
+      "name": "アンリ・ボゲ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "henri_boguet",
+      "notes": null
+    },
+    {
+      "id": 336,
+      "name": "アブンディア",
+      "status": "description",
+      "tier": "description-model",
+      "engineKey": "abundia",
+      "notes": null
+    },
+    {
+      "id": 337,
+      "name": "◎イースターバニー",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "easter_bunny",
+      "notes": null
+    },
+    {
+      "id": 338,
+      "name": "剣を手にしたジェントルマン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_338",
+      "notes": "剣持ち対決は両攻撃+5000・双方行動停止。通常時3枠循環＋相手性別分岐。"
+    },
+    {
+      "id": 339,
+      "name": "セベク",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "sebek",
+      "notes": null
+    },
+    {
+      "id": 340,
+      "name": "クエレブレ＆シャナ",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 341,
+      "name": "モロク・ハクタ・イオリニア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_341",
+      "notes": "敵最高能力を1、自己攻撃不能、次々T敵札消去。"
+    },
+    {
+      "id": 342,
+      "name": "巡り会うシャムシェル",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_342",
+      "notes": "敵現札DPで条件分岐。"
+    },
+    {
+      "id": 343,
+      "name": "祝福されたオセ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_343",
+      "notes": "敵全能力を初期値へリセット、自HPを敵HP2倍に設定。"
+    },
+    {
+      "id": 344,
+      "name": "バイア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_344",
+      "notes": "敵水／闇札があれば、敵守備・HP半分を奪取。"
+    },
+    {
+      "id": 345,
+      "name": "サマーバケーション・ファタ・モルガナ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "summer_fata",
+      "notes": null
+    },
+    {
+      "id": 346,
+      "name": "終わりなき夜・ロキ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_346",
+      "notes": "全札が闇属性なら敵四能力50%奪う。追加隠し効果は不明。"
+    },
+    {
+      "id": 347,
+      "name": "ヨハン",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 348,
+      "name": "バラム・アスタルイズ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "balam_astaruiz",
+      "notes": null
+    },
+    {
+      "id": 349,
+      "name": "バンシー",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "banshee",
+      "notes": "説明文の主要数値効果のみ。丸め・競合は実戦未照合。"
+    },
+    {
+      "id": 350,
+      "name": "スノトラ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "snowtra",
+      "notes": null
+    },
+    {
+      "id": 351,
+      "name": "マンドラ・ゴブリン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_351",
+      "notes": "攻撃時に80%奪取、当ターン効果の解除は未対応。"
+    },
+    {
+      "id": 352,
+      "name": "弓月・ニ・ソグ・シオン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_352",
+      "notes": "敵四能力30%を減らし合計を自攻撃へ加算、通常攻撃停止。"
+    },
+    {
+      "id": 353,
+      "name": "フローラ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_353",
+      "notes": "敵風闇光札なら敵攻撃・HP60%を奪取。"
+    },
+    {
+      "id": 354,
+      "name": "白き守護者ヨハン",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 355,
+      "name": "ユミール",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_355",
+      "notes": "敵四能力20%を減らし合計を自HPへ加算。"
+    },
+    {
+      "id": 356,
+      "name": "桜珊瑚の森に立つアリトン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_356",
+      "notes": "自身セット札を水属性にする効果は別途必要。"
+    },
+    {
+      "id": 357,
+      "name": "微笑みをこぼすペア・フォルター",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_357",
+      "notes": "敵へ実際に与えた通常攻撃ダメージ分、自守備を上昇。"
+    },
+    {
+      "id": 358,
+      "name": "密かに微笑むブランド・フォルター",
+      "status": "provisional",
+      "tier": "field-provisional",
+      "engineKey": "secret_brand_folter",
+      "notes": null
+    },
+    {
+      "id": 359,
+      "name": "微笑み忘れたデコラ・フォルター",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_359",
+      "notes": "自攻撃×敵総DP×10%を自HPへ加算。"
+    },
+    {
+      "id": 360,
+      "name": "フギン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_360",
+      "notes": "自装備守備補正2.5倍。"
+    },
+    {
+      "id": 361,
+      "name": "フォルトゥナ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_361",
+      "notes": "攻撃と魔力に独立して4択加算。"
+    },
+    {
+      "id": 362,
+      "name": "マイノール・デュラハン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_362",
+      "notes": "現在HP70%を支払い、その3.5倍だけ攻撃力加算。"
+    },
+    {
+      "id": 363,
+      "name": "ムニン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_363",
+      "notes": "自装備魔力補正3.5倍。"
+    },
+    {
+      "id": 364,
+      "name": "原初の光・アグライア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_364",
+      "notes": "通常アグライアと同一復活条件、詳細不明部分は共通扱い。"
+    },
+    {
+      "id": 365,
+      "name": "シルキー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_365",
+      "notes": "1〜5ターン目のHP倍増。6T特殊能力は未実装。"
+    },
+    {
+      "id": 366,
+      "name": "赤い秘密を交わすフォルター夫妻",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "red_folter",
+      "notes": null
+    },
+    {
+      "id": 367,
+      "name": "ギーブル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "guivre",
+      "notes": null
+    },
+    {
+      "id": 368,
+      "name": "オドラデク",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "odradek",
+      "notes": null
+    },
+    {
+      "id": 369,
+      "name": "夜へと誘うアミー",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "midnight_amy",
+      "notes": null
+    },
+    {
+      "id": 370,
+      "name": "ヴィドフニル＆コゼット",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "vidofnir_cozette",
+      "notes": null
+    },
+    {
+      "id": 371,
+      "name": "四月島にいたヴィドフニル",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "island_vidofnir",
+      "notes": null
+    },
+    {
+      "id": 372,
+      "name": "レディ・アルミラージ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_372",
+      "notes": "DP−3の編成ボーナスは未実装。"
+    },
+    {
+      "id": 373,
+      "name": "夜に涼むオリアス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "night_orias",
+      "notes": null
+    },
+    {
+      "id": 374,
+      "name": "賢者の火・ベリト",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_374",
+      "notes": "敵魔力90%を奪って自HPへ加算し当ターン魔力戦。"
+    },
+    {
+      "id": 375,
+      "name": "若き日のジョン＆メアリー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_375",
+      "notes": "魔力10未満時に元魔力×2を敵攻撃・HP・魔力から減算。追加隠し効果不明。"
+    },
+    {
+      "id": 376,
+      "name": "エルズリー",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_376",
+      "notes": "勝利数の十分の一を自守備力へ加算。"
+    },
+    {
+      "id": 377,
+      "name": "◎時を駆けるヴィネ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_377",
+      "notes": "ヴィネ再発動と敵攻撃力初期値復元の両方。"
+    },
+    {
+      "id": 378,
+      "name": "雪崩を切り裂くルシファー",
+      "status": "provisional",
+      "tier": "explicit-provisional",
+      "engineKey": "lucifer",
+      "notes": null
+    },
+    {
+      "id": 379,
+      "name": "握手を求めるチェシャ猫",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_379",
+      "notes": "仕掛けた側の効果を試作。仕掛けられた側は未実装。"
+    },
+    {
+      "id": 380,
+      "name": "満面の笑みを讃えるミノタウロス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_380",
+      "notes": "相手特定時の効果は未記載。"
+    },
+    {
+      "id": 381,
+      "name": "謹賀新年・アリエル",
+      "status": "description",
+      "tier": "description-model",
+      "engineKey": "newyear_ariel",
+      "notes": null
+    },
+    {
+      "id": 382,
+      "name": "エルピオーネ婦妻",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_382",
+      "notes": "通常アグライアと同一復活条件、詳細不明部分は共通扱い。"
+    },
+    {
+      "id": 383,
+      "name": "哲学者の土・ミノタウロス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_383",
+      "notes": "特定相手との追加効果は不明。"
+    },
+    {
+      "id": 384,
+      "name": "入浴中・ナルキッソス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_384",
+      "notes": "素ステータス2.5倍を加算して敵を攻撃不能に。"
+    },
+    {
+      "id": 385,
+      "name": "両手を広げるマルコシアス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_385",
+      "notes": "守備80%減少。"
+    },
+    {
+      "id": 386,
+      "name": "王の風・グレモリー",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "kings_wind_gremory",
+      "notes": null
+    },
+    {
+      "id": 387,
+      "name": "ミスティ",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_387",
+      "notes": "守備倍化と当ターン敵通常攻撃回避。"
+    },
+    {
+      "id": 388,
+      "name": "終わりなき夜・ビフロンス",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_388",
+      "notes": "敵現札消去、通常攻撃の実ダメージ×1.5を追加。"
+    },
+    {
+      "id": 389,
+      "name": "うさぎと戯れるナルキッソス",
+      "status": "legacy",
+      "tier": "legacy-preview",
+      "engineKey": "rabbit",
+      "notes": null
+    },
+    {
+      "id": 390,
+      "name": "ベッドに誘うマルコシアス",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "bed_marchosias",
+      "notes": null
+    },
+    {
+      "id": 391,
+      "name": "原初の光・マクスウェル",
+      "status": "pending",
+      "tier": "pending",
+      "engineKey": null,
+      "notes": null
+    },
+    {
+      "id": 392,
+      "name": "乾杯するペア・フォルター",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_392",
+      "notes": "通常攻撃の実ダメージ×2の敵守備低下。"
+    },
+    {
+      "id": 393,
+      "name": "シャンパンを開けるアンリ・ボゲ",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "champagne_henri",
+      "notes": null
+    },
+    {
+      "id": 394,
+      "name": "真夜中のマンモン",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_394",
+      "notes": "0〜3時だけ全ステータス3倍。"
+    },
+    {
+      "id": 395,
+      "name": "人形を作るコッペリア",
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_395",
+      "notes": "装備ドールのシリーズに応じて装備攻守倍化／敵攻撃力30%奪取。成長要素不明。"
+    },
+    {
+      "id": 396,
+      "name": "料理をするニスロク",
+      "status": "description",
+      "tier": "source-model",
+      "engineKey": "chef_nisroc",
+      "notes": null
+    }
+  ]
+}
