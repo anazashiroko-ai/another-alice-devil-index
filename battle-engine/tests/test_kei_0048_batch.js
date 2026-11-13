@@ -19,13 +19,13 @@ function battle(key,turn=1,enemyFirst='vasago'){
 let tests=0;
 function check(name,fn){fn();tests++;console.log('PASS',name);}
 const partial=E.SOURCE_RULES.filter(x=>x.coverage==='partial');
-check('004.8部分モデル246体、既存記述モデル97件（重複なし）',()=>{
- assert.equal(partial.length,246);
- assert.equal(new Set(partial.map(x=>x.name)).size,246);
- assert.equal(E.SOURCE_RULES.length,343);
+check('004.8部分モデル247体、既存記述モデル97件（重複なし）',()=>{
+ assert.equal(partial.length,247);
+ assert.equal(new Set(partial.map(x=>x.name)).size,247);
+ assert.equal(E.SOURCE_RULES.length,344);
 });
-check('未対応の2候補はモデル計上しない',()=>{
- for(const id of [94,309])assert.ok(!E.D['catalog_'+id]?.model,'#'+id);
+check('未対応の1候補はモデル計上しない',()=>{
+ for(const id of [94])assert.ok(!E.D['catalog_'+id]?.model,'#'+id);
 });
 for(const r of partial)check('004.8 '+r.id+' '+r.name,()=>{
  const b=battle(r.key,r.minTurn||1);
@@ -125,5 +125,16 @@ check('◎誕生と消滅：予約した次ターンの敵デビルを奪って�
  const b=E.createBattle(config(p,e));E.round(b);E.round(b);
  assert.equal(b.tables.enemy[1],null);
  assert.ok(b.turns[1].fired.player.includes('marbas'));
+});
+check('フェンリル：図鑑に記載された1～3匹の追撃では計算を継続',()=>{
+ const p=blank(),e=blank();p[0]='catalog_309';
+ const b=E.createBattle(config(p,e,{randomSeed:1}));E.round(b);
+ assert.equal(b.error,null);assert.ok(b.turns[0].events.some(x=>x.text.includes('獣1匹')));
+});
+check('フェンリル：10匹の未知倍率を仮定せず計算停止',()=>{
+ const p=blank(),e=blank();p[0]='catalog_309';
+ const b=E.createBattle(config(p,e,{randomSeed:15872}));E.round(b);
+ assert.ok(b.error&&b.error.includes('10匹'));
+ assert.equal(b.outcome,'undetermined');
 });
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
