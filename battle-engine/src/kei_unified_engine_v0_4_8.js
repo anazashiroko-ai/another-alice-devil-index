@@ -388,7 +388,8 @@ function round(b){
      case 'icarusExternal':{const floor=externalNumber(s,'maxFloor');if(b.complete)break;const fire=getDevAttr(b.tables[opp(s)][t-1])==='火';for(const st of STAT)actor.current[st]+=floor*(fire?-15:30);break;}
      case 'johnGoalSpecial':{const enemyKey=b.tables[opp(s)][t-1],special=enemyKey&&D[enemyKey].name==='マシュー・ホプキンス';if(special||actor.current.magic<10){const k=special?3:2;for(const st of ['attack','defense','magic'])target.current[st]-=actor.base.magic*k;}break;}
      case 'schrodingerCatBranches':{
-       // Mariko's 2026-11-14 in-game category checks, not an inference from feline names.
+       // 2026-11-14: Six positive and three negative classifications from Mariko's game tests.
+       // Known cats are an explicit whitelist; feline-looking names alone are NOT evidence.
        const knownCats=new Set(['シロネコ','クロネコ','チェシャ猫','ケット・シー','マニ・エリ','バステト']);
        const knownNonCats=new Set(['フレイヤ','ゴリラを連れたケット・シー','握手を求めるチェシャ猫']);
        const findCats=side=>{
