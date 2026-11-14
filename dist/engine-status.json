@@ -7,9 +7,9 @@
     "verified": 8,
     "provisional": 5,
     "description": 104,
-    "partial": 247,
+    "partial": 248,
     "legacy": 23,
-    "pending": 9
+    "pending": 8
   },
   "devils": [
     {
@@ -759,10 +759,10 @@
     {
       "id": 94,
       "name": "アラストル",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_94",
+      "notes": "2026-11-14実戦ログ：発動ターンに敵の通常攻撃1920ダメージを受けた直後、攻撃力+9600（1920×5）。その後の通常攻撃2775が3・4Tにも継続し、上昇分の持続を支持。反射・混乱・特殊ダメージや複数被弾時の扱いは未照合。"
     },
     {
       "id": 95,
