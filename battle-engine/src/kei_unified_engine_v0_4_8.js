@@ -216,6 +216,8 @@ function round(b){
     else if(sub.op==='noAttack')disabled.add(sub.who==='enemy'?opp(s):s);
     else if(sub.op==='damage')target.current.hp-=originalGet(sub.ref)*sub.scale;
     else if(sub.op==='destroyEnemy'){if(t+sub.offset<=6)b.tables[opp(s)][t+sub.offset-1]=null;}
+    else if(sub.op==='blockDevilFuture'){for(let i=t+sub.start;i<=Math.min(6,t+sub.start+sub.turns-1);i++)b.blockedDevils[opp(s)].add(i);}
+    else if(sub.op==='destroyAllEnemyAttr'){let n=0;for(let i=0;i<6;i++){const k=b.tables[opp(s)][i];if(k&&sub.attrs.includes(getDevAttr(k))){b.tables[opp(s)][i]=null;n++;}}if(n&&sub.noAttackIfSuccess)disabled.add(s);}
     else if(sub.op==='cancelMagic')b.magicUntil=t-1;
     else if(sub.op==='destroyBothDevilsForTurns')for(let i=t-1;i<Math.min(6,t-1+sub.turns);i++){b.tables.player[i]=null;b.tables.enemy[i]=null;}
     else if(sub.op==='transfer'){const p=sub.who==='enemy'?target:actor,q=sub.to==='enemy'?target:actor,v=rule.key==='catalog_346'?integral(p.current[sub.stat]*sub.scale):p.current[sub.stat]*sub.scale;p.current[sub.stat]-=v;q.current[sub.stat]+=v;}

@@ -395,6 +395,17 @@ check('白き守護者：追跡モードは攻撃禁止を実行しない',()=>{
  assert.equal(b.turns[1].events.filter(e=>e.type==='attack'&&e.text.includes('通常攻撃枠')).length,2);
 });
 
+
+check('入れ子条件ルール：イボスの守備力条件が成立したら敵次ターンのデビルを阻止',()=>{
+ const p=blank(),e=blank();p[0]='catalog_73';e[1]='marbas';
+ const b=E.createBattle(config(p,e,{player:{base:{attack:100,defense:10000,hp:100000,magic:100}},
+  enemy:{base:{attack:100,defense:1000,hp:100000,magic:100}}}));
+ E.round(b);assert.equal(b.error,null);
+ assert.ok(b.blockedDevils.enemy.has(2));
+ E.round(b);assert.equal(b.error,null);
+ assert.ok(!b.turns[1].fired.enemy.includes('marbas'));
+});
+
 check('2026-11-14新ログ：パイモン後のベルフェゴールは更新後魔力11307の40%=4522を守備に加算',()=>{
  const p=blank(),e=blank();p[0]='paimon';e[0]='belphegor';
  const b=E.createBattle(config(p,e,{orders:Array(6).fill('player'),
