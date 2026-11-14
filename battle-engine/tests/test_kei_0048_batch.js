@@ -243,7 +243,7 @@ function catClassBattle(enemy5,own5=null,enemy4=null){
  const p=blank(),e=blank();
  p[1]='catalog_131';p[4]=own5;e[3]=enemy4;e[4]=enemy5;
  return E.createBattle(config(p,e,{
-  player:{base:{attack:4171,defense:3050,hp:100000,magic:28634}},
+  player:{base:{attack:4171,defense:3050,hp:19887,magic:28634}},
   enemy:{base:{attack:2000,defense:4700,hp:40000,magic:50000}}
  }));
 }
