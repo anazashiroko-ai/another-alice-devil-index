@@ -51,7 +51,7 @@ for(const row of map.models){
   assert.equal(row.operationParameters,null);
  }
 }
-assert.deepEqual(bucket,{verified:8,A:39,B:16,C:329});
+assert.deepEqual(bucket,{verified:8,A:42,B:17,C:325});
 assert.equal(seen.size,392);
 assert.equal(membership.size,170);
 assert.deepEqual(asSorted([...membership.keys()]),asSorted(map.operators.map(x=>x.name)));
@@ -65,4 +65,4 @@ assert.equal(top.size,169);
 const counters=state.counts;
 assert.equal(counters.verified+counters.provisional+counters.description+counters.partial+counters.legacy,392);
 assert.equal(counters.pending,4);
-console.log('PASS verification map: 392 modeled / 349 declarative / 43 manual / 170 operators (169 top-level) / 8+39+16+329 evidence');
+console.log('PASS verification map: 392 modeled / 349 declarative / 43 manual / 170 operators (169 top-level) / 8+42+17+325 evidence');

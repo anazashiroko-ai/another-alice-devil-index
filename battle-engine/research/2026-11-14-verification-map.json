@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.2",
+  "schemaVersion": "0.3",
   "date": "2026-11-14",
   "notes": "Evidence level indicates index of past observations, not full original-game verification. Declarative operator names and parameters are extracted from existing source; manual models are separate.",
   "summary": {
@@ -13,9 +13,9 @@
     "oneDevilOpKinds": 121,
     "evidence": {
       "verified": 8,
-      "A": 39,
-      "B": 16,
-      "C": 329
+      "A": 42,
+      "B": 17,
+      "C": 325
     },
     "registryStatuses": {
       "verified": 8,
@@ -174,6 +174,7 @@
         393
       ],
       "mainObserved": [
+        73,
         276
       ],
       "partialObserved": [],
@@ -301,10 +302,13 @@
         268,
         331
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        4
+      ],
       "partialObserved": [
         21,
-        26
+        26,
+        214
       ],
       "registryVerified": [],
       "nestedOnly": [
@@ -1138,7 +1142,9 @@
       "members": [
         73
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        73
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": [
@@ -2334,7 +2340,9 @@
       "members": [
         73
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        73
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": []
@@ -2436,8 +2444,12 @@
       "name": "ウァレフォル",
       "engineKey": "catalog_4",
       "modelStatus": "partial",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "アリア・エリ：被通常攻撃後のシロコHP50445×60%=30267を攻撃後に追加減算→20178",
+        "reference": "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2",
+        "remaining": "マニ・エリ・ベルゼブブ共存時の攻撃後発動対象・テーブル配置"
+      },
       "ruleKind": "declarative",
       "phase": "after",
       "stages": null,
@@ -4279,7 +4291,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
+      ]
     },
     {
       "id": 65,
@@ -4521,8 +4536,12 @@
       "name": "イボス",
       "engineKey": "catalog_73",
       "modelStatus": "partial",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "天宮セレス：守備34486>シロコ2400で1T通常攻撃停止、シロコのナルキッソスは発動、2Tフレイヤ阻止",
+        "reference": "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2",
+        "remaining": "守備同値・逆条件の不発／他の妨害と競合"
+      },
       "ruleKind": "declarative",
       "phase": "start",
       "stages": null,
@@ -5691,7 +5710,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
+      ]
     },
     {
       "id": 116,
@@ -5806,7 +5828,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
+      ]
     },
     {
       "id": 120,
@@ -6347,8 +6372,12 @@
       "name": "◎ディアーナ",
       "engineKey": "diana",
       "modelStatus": "description",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "天宮セレス：守備34486−5025=29461、ヴィネ再発動時は装備無効化後17900−5025=12875",
+        "reference": "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2",
+        "remaining": "守備値が逆転して反動ダメージになる分岐"
+      },
       "ruleKind": "manual",
       "phase": null,
       "stages": null,
@@ -7768,7 +7797,8 @@
       "operationParameters": null,
       "implementationNotes": null,
       "supplementalEvidence": [
-        "2026-11-14-eleven-unspecified-battles.md §3"
+        "2026-11-14-eleven-unspecified-battles.md §3",
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
       ]
     },
     {
@@ -8303,11 +8333,18 @@
       "name": "マニ・エリ",
       "engineKey": "catalog_214",
       "modelStatus": "partial",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "B",
+      "evidence": {
+        "observation": "アリア・エリ：マニ・エリが2T開始時に実体化。同じターンの攻撃後にはウァレフォル30267（60%）が表示され、マニ・エリ自身の40%は未照合",
+        "reference": "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2",
+        "remaining": "攻撃後40%効果の成立条件、先攻確定解除、ウァレフォルとの関係"
+      },
       "ruleKind": "declarative",
       "phase": "start",
-      "stages": null,
+      "stages": [
+        "start",
+        "after"
+      ],
       "minTurn": 1,
       "topLevelOperations": [
         "damage"
@@ -8317,10 +8354,11 @@
         {
           "op": "damage",
           "ref": "enemy.hp",
-          "scale": 0.4
+          "scale": 0.4,
+          "phase": "after"
         }
       ],
-      "implementationNotes": "攻撃後に敵HP40%ダメージ。敵先攻確定の解除は未実装。"
+      "implementationNotes": "開始時に実体化、40%HP損失は説明文どおり攻撃後のみ。実戦ではウァレフォルの攻撃後効果との同ターン併存が見られ、マニ・エリ自身の40%実行は未確認。先攻確定解除は未実装。"
     },
     {
       "id": 215,
@@ -10319,7 +10357,8 @@
       "operationParameters": null,
       "implementationNotes": null,
       "supplementalEvidence": [
-        "2026-11-14-eleven-unspecified-battles.md §3"
+        "2026-11-14-eleven-unspecified-battles.md §3",
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
       ]
     },
     {
@@ -10418,7 +10457,8 @@
       "operationParameters": null,
       "implementationNotes": null,
       "supplementalEvidence": [
-        "2026-11-14-eleven-unspecified-battles.md §3"
+        "2026-11-14-eleven-unspecified-battles.md §3",
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
       ]
     },
     {
@@ -12489,7 +12529,8 @@
       "operationParameters": null,
       "implementationNotes": null,
       "supplementalEvidence": [
-        "2026-11-14-eleven-unspecified-battles.md §3"
+        "2026-11-14-eleven-unspecified-battles.md §3",
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
       ]
     },
     {
@@ -12536,7 +12577,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
+      ]
     },
     {
       "id": 369,
@@ -12807,7 +12851,7 @@
       "evidence": {
         "observation": "サイレンA：魔力15950→14266の減少1684を回復、敵魔力−5052（3倍）。サイレンCで回復欠損0でも札消去",
         "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
-        "remaining": "攻撃・守備も同時不足する複合経路と発動済み札消去"
+        "remaining": "魔力と守備で独立実測。ただし攻撃力経路／複数能力同時不足／発動済み札消去は未確認"
       },
       "ruleKind": "manual",
       "phase": null,
@@ -12816,7 +12860,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
+      ]
     },
     {
       "id": 379,
@@ -13074,7 +13121,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
+      ]
     },
     {
       "id": 387,
@@ -13155,7 +13205,8 @@
       "operationParameters": null,
       "implementationNotes": null,
       "supplementalEvidence": [
-        "2026-11-14-eleven-unspecified-battles.md §3"
+        "2026-11-14-eleven-unspecified-battles.md §3",
+        "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md §2"
       ]
     },
     {
@@ -13364,5 +13415,5 @@
       "implementationNotes": null
     }
   ],
-  "latestEvidenceNote": "2026-11-14-eleven-unspecified-battles.md"
+  "latestEvidenceNote": "2026-11-14-four-battle-logs-arielle-jolis-melancholy-ceres.md"
 }

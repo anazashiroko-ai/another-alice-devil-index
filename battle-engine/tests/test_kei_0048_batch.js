@@ -460,4 +460,54 @@ check('2026-11-14新ログ：装備無効化の後なら初期魔力装備18100�
  assert.equal(b.fighters.player.current.defense,1);
 });
 
+
+check('実戦4本・イボス：敵の通常攻撃を封じても開始時ナルキッソスは発動し、次Tフレイヤは阻止',()=>{
+ const p=blank(),e=blank();p[0]='rabbit';p[1]='freya';e[0]='catalog_73';
+ const b=E.createBattle(config(p,e,{orders:Array(6).fill('enemy'),
+ player:{base:{attack:1001,defense:1050,hp:11200,magic:10200},assist:{attack:20,hp:270,magic:334},equipment:{attack:3915,defense:1350,hp:12217,magic:12900}},
+ enemy:{base:{attack:5560,defense:34486,hp:5246,magic:100}}}));
+ E.round(b);assert.equal(b.error,null);
+ assert.ok(b.turns[0].fired.player.includes('rabbit'));
+ assert.ok(b.blockedDevils.player.has(2));
+ assert.ok(b.turns[0].events.some(x=>x.type==='attack'&&x.text.includes('動き')&&x.text.includes('封じ')));
+ E.round(b);assert.equal(b.error,null);assert.ok(!b.turns[1].fired.player.includes('freya'));
+});
+check('実戦4本・ディアーナ：現在守備差29461を与え、装備無効化後のヴィネ再発動で12875',()=>{
+ const p=blank(),e=blank();p[0]='rabbit';p[2]='red_folter';e[1]='diana';e[2]='vine';
+ const b=E.createBattle(config(p,e,{orders:Array(6).fill('enemy'),
+ player:{base:{attack:1001,defense:1050,hp:11200,magic:10200},assist:{attack:20,hp:270,magic:334},equipment:{attack:3915,defense:1350,hp:12217,magic:12900}},
+ enemy:{base:{attack:100,defense:17900,hp:4000,magic:0},assist:{hp:46},equipment:{attack:5460,defense:16586,hp:1200}}}));
+ E.round(b);E.round(b);E.round(b);assert.equal(b.error,null);
+ const hits=b.events.filter(x=>x.type==='effect'&&x.text.includes('ディアーナ：守備力の差分'));
+ assert.equal(hits.length,2);assert.ok(hits[0].text.includes('29,461'));assert.ok(hits[1].text.includes('12,875'));
+});
+check('実戦4本・ウァレフォル：通常攻撃で変化しないHP50445の攻撃後60%は30267',()=>{
+ const e=blank();e[0]='catalog_4';
+ const b=E.createBattle(config(blank(),e,{player:{base:{attack:0,defense:10000,hp:50445,magic:100}},
+ enemy:{base:{attack:0,defense:10000,hp:1000000,magic:100}}}));
+ E.round(b);assert.equal(b.error,null);assert.equal(b.fighters.player.current.hp,20178);
+ assert.ok(b.turns[0].fired.enemy.includes('catalog_4'));
+});
+check('実戦4本・マニエリ：開始時の実体化だけで40%ダメージは与えず攻撃後フェーズ',()=>{
+ const e=blank();e[0]='catalog_214';
+ const b=E.createBattle(config(blank(),e,{player:{base:{attack:0,defense:10000,hp:50445,magic:100}},
+ enemy:{base:{attack:0,defense:10000,hp:1000000,magic:100}}}));
+ E.round(b);assert.equal(b.error,null);
+ const i=b.events.map(x=>x.type==='attack'?x.text:x.type==='devil'?'DEVIL '+x.key:'').filter(Boolean);
+ assert.equal(b.fighters.player.current.hp,30267,'図鑑説明に基づく攻撃後の40%（この分岐は原作数値未照合）');
+ assert.ok(i.findIndex(x=>x.includes('DEVIL catalog_214'))<i.findIndex(x=>x.includes('攻撃')));
+ assert.equal(b.turns[0].fired.enemy.filter(x=>x==='catalog_214').length,2);
+});
+check('実戦4本・ルシファー：フルカスによる守備3020低下を復旧し敵守備9060減',()=>{
+ const p=blank(),e=blank();p[3]='marbas';e[3]='lucifer';
+ const b=E.createBattle(config(p,e,{orders:Array(6).fill('enemy'),
+ player:{base:{attack:4936,defense:2400,hp:10000000,magic:23434}},
+ enemy:{base:{attack:900,defense:10068,hp:10000000,magic:19010}}}));
+ E.round(b);E.round(b);E.round(b);b.fighters.enemy.current.defense=7048;
+ E.round(b);assert.equal(b.error,null);
+ assert.equal(b.fighters.enemy.current.defense,10068);
+ assert.equal(b.fighters.player.current.defense,-6660);
+ assert.equal(b.tables.player[3],null);
+});
+
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
