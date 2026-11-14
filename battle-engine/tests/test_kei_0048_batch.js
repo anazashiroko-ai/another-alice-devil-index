@@ -469,7 +469,7 @@ check('実戦4本・イボス：敵の通常攻撃を封じても開始時ナル
  E.round(b);assert.equal(b.error,null);
  assert.ok(b.turns[0].fired.player.includes('rabbit'));
  assert.ok(b.blockedDevils.player.has(2));
- assert.ok(b.turns[0].events.some(x=>x.type==='attack'&&x.text.includes('動き')&&x.text.includes('封じ')));
+ assert.ok(!b.turns[0].events.some(x=>x.type==='attack'&&x.text.startsWith('シロコの攻撃')),'イボスでシロコの通常攻撃イベントはない');
  E.round(b);assert.equal(b.error,null);assert.ok(!b.turns[1].fired.player.includes('freya'));
 });
 check('実戦4本・ディアーナ：現在守備差29461を与え、装備無効化後のヴィネ再発動で12875',()=>{
