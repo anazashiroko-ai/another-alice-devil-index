@@ -7,9 +7,9 @@
     "verified": 8,
     "provisional": 5,
     "description": 104,
-    "partial": 249,
+    "partial": 251,
     "legacy": 23,
-    "pending": 7
+    "pending": 5
   },
   "devils": [
     {
@@ -2287,10 +2287,10 @@
     {
       "id": 285,
       "name": "ヘル",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_285",
+      "notes": "2026-11-14シロコ対なーな観測：4T開始のヘルで1Tへ移動し、4T開始時の体力・能力値を保持、再訪1Tは開始時デビルを再発動せず攻撃だけ再処理。再訪2T/3Tではエリゴスとウァサゴが再発動。双方ヘルを現行札から削除。先攻判定・継続予約・両側ヘル・他時系列操作競合は未検証。"
     },
     {
       "id": 286,
@@ -2367,10 +2367,10 @@
     {
       "id": 295,
       "name": "モーラ",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_295",
+      "notes": "2026-11-14シロコ対なーな観測：2T終了時にモーラ発動、消化ターン数が3になり、3Tの行動/デビルはなく次は4Tと解釈。双方モーラは現行札から消去。6T直前の発動や他終了時効果との順序は未検証。"
     },
     {
       "id": 296,
