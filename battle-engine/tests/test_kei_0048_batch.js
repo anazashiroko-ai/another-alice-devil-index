@@ -19,10 +19,10 @@ function battle(key,turn=1,enemyFirst='vasago'){
 let tests=0;
 function check(name,fn){fn();tests++;console.log('PASS',name);}
 const partial=E.SOURCE_RULES.filter(x=>x.coverage==='partial');
-check('004.8部分モデル248体、既存記述モデル97件（重複なし）',()=>{
- assert.equal(partial.length,248);
- assert.equal(new Set(partial.map(x=>x.name)).size,248);
- assert.equal(E.SOURCE_RULES.length,345);
+check('004.8部分モデル249体、既存記述モデル97件（重複なし）',()=>{
+ assert.equal(partial.length,249);
+ assert.equal(new Set(partial.map(x=>x.name)).size,249);
+ assert.equal(E.SOURCE_RULES.length,346);
 });
 check('アラストルが主効果の部分モデルとして登録された',()=>{
  assert.ok(E.D.catalog_94?.model,'#94');
@@ -176,5 +176,46 @@ check('アラストル：自身が先攻なら被弾前の通常攻撃には上�
  assert.equal(b.fighters.player.current.attack,13771);
  E.round(b);
  assert.ok(b.turns[1].events.some(x=>x.type==='attack'&&x.text.includes('2,775')));
+});
+// 2026-11-14 マリコのシュレディンガー実戦ログで確かめた3分岐。
+check('シュレディンガー②：ネコなしで最低守備3050→6100',()=>{
+ const p=blank();p[1]='catalog_131';
+ const b=E.createBattle(config(p,blank(),{player:{base:{attack:4171,defense:3050,hp:19887,magic:28634}},enemy:{base:{attack:8180,defense:7974,hp:11200,magic:7980}}}));
+ E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.fighters.player.current.defense,6100);
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー②')));
+});
+check('シュレディンガー①：先のターンに実体化済みのケット・シーも消滅させ、最高魔力28634→13410',()=>{
+ const p=blank(),e=blank();p[1]='catalog_131';e[0]='catalog_123';
+ const b=E.createBattle(config(p,e,{player:{base:{attack:4171,defense:3050,hp:100000,magic:28634}},enemy:{base:{attack:13410,defense:13410,hp:17654,magic:13130}}}));
+ E.round(b);assert.equal(b.error,null);
+ b.fighters.enemy.current.magic=28634;b.fighters.enemy.current.hp=16817;
+ E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.fighters.enemy.current.magic,13410);
+ assert.equal(b.tables.enemy[0],null);
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー①')));
+});
+check('シュレディンガー③：自分にシロネコがいたら自分の最高魔力28634→最低守備3050、シロネコ消滅',()=>{
+ const p=blank();p[0]='catalog_70';p[1]='catalog_131';
+ const b=E.createBattle(config(p,blank(),{player:{base:{attack:4171,defense:3050,hp:19887,magic:28634}},enemy:{base:{attack:8180,defense:7974,hp:11200,magic:7980}}}));
+ E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.fighters.player.current.magic,3050);
+ assert.equal(b.tables.player[0],null);
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー③')));
+});
+check('シュレディンガー：相手猫札消滅後、死と再生で奪って再発動すると猫なし②に変わる',()=>{
+ const p=blank(),e=blank();p[0]='catalog_70';p[1]='catalog_83';e[1]='catalog_131';
+ const b=E.createBattle(config(p,e,{orders:Array(6).fill('enemy'),player:{base:{attack:4171,defense:3050,hp:19887,magic:28634}},enemy:{base:{attack:620,defense:4730,hp:10247,magic:5960}}}));
+ E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.tables.player[0],null);
+ assert.equal(b.tables.enemy[1],null);
+ assert.equal(b.fighters.player.current.magic,3050);
+ assert.equal(b.fighters.player.current.defense,6100);
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー①')));
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー②')));
 });
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
