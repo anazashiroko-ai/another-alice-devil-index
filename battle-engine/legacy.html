@@ -141,7 +141,7 @@ function renderDeckChoices(){
   clear(select);option(select,'──── 空欄 ────','');
   for(var j=0;j<list.length;j++){
    var d=list[j],prefix=kind==='id'?(d.id?'ID '+d.id+'｜':'IDなし｜'):'';
-   var label=prefix+d.name+(d.key==='lucifer'?'（仮）':(!d.model?'（未実装）':''))+(d.min>1?'／'+d.min+'T以降':'');
+   var label=prefix+d.name+(d.key==='lucifer'?'（仮）':(!d.model?'（能力未実装）':''))+(d.min>1?'／'+d.min+'T以降':'');
    option(select,label,d.key);
   }
   select.value=chosen;

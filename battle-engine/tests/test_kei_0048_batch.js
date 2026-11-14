@@ -375,4 +375,23 @@ check('ヴィドフニル：アシスト人数未入力は値を捏造せず停�
  assert.equal(b.outcome,'undetermined');
 });
 
+check('ヨハン系：編成候補は残すが能力未実装で安全停止する',()=>{
+ for(const id of [347,354]){
+  const key='catalog_'+id,p=blank();p[0]=key;
+  assert.equal(E.D[key]?.model,false);
+  assert.equal(E.D[key].phase,'start');
+  const b=E.createBattle(config(p,blank()));E.round(b);
+  assert.equal(b.outcome,'undetermined');
+  assert.ok(b.error?.includes('能力未実装'));
+  assert.ok(b.events.some(e=>e.type==='devil'&&e.key===key));
+ }
+});
+check('白き守護者：追跡モードは攻撃禁止を実行しない',()=>{
+ const p=blank();p[0]='catalog_354';
+ const b=E.createBattle(config(p,blank(),{mode:'trace'}));
+ E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.ok(b.events.some(e=>e.type==='caveat'&&e.text.includes('未計算')));
+ assert.equal(b.turns[1].events.filter(e=>e.type==='attack'&&e.text.includes('通常攻撃枠')).length,2);
+});
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');

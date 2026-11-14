@@ -30,6 +30,8 @@ const util=window._test;
 assert.equal(util.map.catalog_7,7,'ID must come from real catalog');
 assert.equal(util.map.catalog_48,48,'catalog ID 48 must be present');
 assert.equal(util.map.catalog_221,221,'catalog ID 221 must be present');
+assert.equal(util.map.catalog_347,347,'Johan in options map');
+assert.equal(util.map.catalog_354,354,'White guardian in options map');
 const list=[
  {key:'catalog_7',id:7,name:'グシオン',model:true,min:1},
  {key:'catalog_48',id:48,name:'アロケル',model:true,min:1},
@@ -62,4 +64,6 @@ for(const kind of ['id','kana'])for(const dir of ['asc','desc']){
 }
 const code=ui.replace(/^var DEVIL_ID_MAP=.*; \/\* KEI-DEVIL-ID-MAP \*\/$/m,'var DEVIL_ID_MAP={}; /* KEI-DEVIL-ID-MAP */');
 assert.ok(!/(^|[^a-zA-Z])(let|const|class)\s+/.test(code),'legacy UI should use ES5 syntax');
+util.setChoices([...list,{key:'catalog_347',id:347,name:'ヨハン',model:false,min:1},{key:'catalog_354',id:354,name:'白き守護者ヨハン',model:false,min:1}]);util.render();
+for(const key of ['catalog_347','catalog_354']){const o=nodes.playerdeck1.children.find(x=>x.value===key);assert.ok(o);assert.ok(o.textContent.includes('能力未実装'));}
 console.log('PASS legacy deck sort: 50音/ID, 昇順/降順, ID mapping, slot preservation, 12 native selects');

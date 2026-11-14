@@ -23,7 +23,8 @@ function classify(x){const k=clean(x.name),s=String(x.ability||'');
   const labels={verified:'実戦規則反映',provisional:'部分暫定',description:'記述モデル',partial:'主効果・部分実装',legacy:'旧試作モデル',pending:'未実装'};
   const reasons={partial:'主な効果はモデル化。ただし未解明の例外・タイミング・競合がある',description:'記述ベースの数値・状態モデル。原作完全一致未保証',verified:'主要な実戦規則を反映（全条件の保証ではない）',provisional:'確認済みの主効果のみ実装',legacy:'旧試作・再検証が必要',pending:'数値能力の実装なし'};
   if(!labels[r.status])return ['pending','分類不能','エンジン状態表の分類が不明'];
-  return [r.status==='description'?'source':r.status,labels[r.status],reasons[r.status]];
+  if((x.id===347||x.id===354)&&r.status==='pending')return ['pending','能力未実装（意図的）','ヨハン系：変動するランダム召喚は再現しない。自由編成と役割が重なり、数値戦闘では判定不能で停止する。'];
+   return [r.status==='description'?'source':r.status,labels[r.status],reasons[r.status]];
  }
 
  if(anames.has(k))return ['provisional','（仮）計算','雪崩ルシファーの低下差分×3・初期値への復元・当ターン札消去を仮定。実戦未照合'];
@@ -33,7 +34,8 @@ function classify(x){const k=clean(x.name),s=String(x.ability||'');
  if(partialnames.has(k))return ['partial','004.8・主効果モデル（部分実装）','主な数値・状態効果を実装。ただし省略した分岐、発動順・継続・原作ダメージ式など未再現の可能性あり。実戦一致は未保証'];
  if(snames.has(k))return ['source','追加記述モデル','図鑑記述を数値操作にした試作。端数・組合せの実戦照合は未了'];
  if(lnames.has(k))return ['legacy','旧試作モデル','従来の計算処理。能力の部分実装・再検証の可能性あり'];
- let why='複合効果・計算端数・例外条件の再確認が必要';
+ if(x.id===347||x.id===354)return ['pending','能力未実装（意図的）','ヨハン系のランダム召喚は再現対象外。数値戦闘は判定不能で停止する。'];
+  let why='複合効果・計算端数・例外条件の再確認が必要';
  if(!phase(x))why='発動段階を一意に特定できない';
  else if(/詳細未記載|未記載|ただし…|さらに…|特定の相手|特定相手/.test(s))why='隠し条件・追加効果が未記載';
  else if(/確率|ランダム|抽選|1\/3|１／３|クリティカル/.test(s))why='乱数・確率効果の処理が未検証';

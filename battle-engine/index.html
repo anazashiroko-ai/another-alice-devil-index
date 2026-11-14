@@ -1331,7 +1331,7 @@ function updateSupport(side,i,autoPhase=true){
  if(!value){status.textContent='空欄';status.className='support';phase.disabled=false;if(autoPhase)phase.value='';return;}
  const entry=catalogMatch(value);
  const original=entry?.name||value;
- if(key){const d=E.D[key];status.textContent=`${d.tier==='field-verified'?'実戦規則反映・部分確認':d.tier==='field-provisional'?'実戦対応・周辺仕様は暫定':d.tier==='explicit-provisional'?'（仮）説明文の暫定解釈・要検証':d.tier==='description-model'?'図鑑記述に沿った実装・要実戦照合':d.tier==='source-model'?'記述モデル・要実戦照合':d.tier==='description-partial'?'004.8主効果・部分モデル（原作未照合）':d.model?'旧試作・暫定':'数値未実装'} ／ ${phaseLabel[d.phase]}${d.minimumTurn>1?' ／ '+d.minimumTurn+'T以降':''}${entry?' ／ '+entry.dp+' '+entry.attr:''}`;status.className='support '+(d.model?'known':'unknown');phase.value=d.phase;phase.disabled=true;}
+ if(key){const d=E.D[key];status.textContent=`${d.tier==='field-verified'?'実戦規則反映・部分確認':d.tier==='field-provisional'?'実戦対応・周辺仕様は暫定':d.tier==='explicit-provisional'?'（仮）説明文の暫定解釈・要検証':d.tier==='description-model'?'図鑑記述に沿った実装・要実戦照合':d.tier==='source-model'?'記述モデル・要実戦照合':d.tier==='description-partial'?'004.8主効果・部分モデル（原作未照合）':d.model?'旧試作・暫定':(key==='catalog_347'||key==='catalog_354')?'能力未実装（ヨハン系：意図的に再現対象外）':'数値未実装'} ／ ${phaseLabel[d.phase]}${d.minimumTurn>1?' ／ '+d.minimumTurn+'T以降':''}${entry?' ／ '+entry.dp+' '+entry.attr:''}`;status.className='support '+(d.model?'known':'unknown');phase.value=d.phase;phase.disabled=true;}
  else if(entry){
   const target=catalogPhase(entry);
   if(autoPhase)phase.value=target||'';
@@ -1352,7 +1352,8 @@ function auditRecord(entry){
  if(model?.tier==='description-model')return {status:'source',label:'図鑑記述を実装',reason:'図鑑の主要効果を計算。未確認の端数・競合等は要照合'};
  if(model?.tier==='source-model')return {status:'source',label:'追加記述モデル',reason:'図鑑説明から操作を実装。実戦の端数処理・連鎖条件は未検証'};
  if(model?.model)return {status:'legacy',label:'先行試作',reason:'既存の計算処理。能力ごとの再検証が必要'};
- let reason='複合処理・端数規則・実戦検証が未完了';
+ if(entry.id===347||entry.id===354)return {status:'pending',label:'能力未実装（意図的）',reason:'候補300体が変動するランダム召喚は原作再現できず、手動編成と機能が重なるため、ヨハン系の召喚と攻撃封じを意図的に再現しない。'};
+  let reason='複合処理・端数規則・実戦検証が未完了';
  if(!catalogPhase(entry))reason='発動タイミングが図鑑から一意に決められない';
  else if(/詳細未記載|未記載|ただし…|さらに…|ただし……|特定の相手|特定相手/.test(txt))reason='隠し条件・例外の記載が不足';
  else if(/確率|ランダム|抽選|1\/3|１／３|クリティカル/.test(txt))reason='確率分岐・乱数処理が未検証';
