@@ -410,6 +410,7 @@ check('2026-11-14新ログ：終わりなき夜ロキの敵半減奪取は各能
   player:{base:{attack:4171,defense:3050,hp:19887,magic:28634}},
   enemy:{base:{attack:10570,defense:5960,hp:7233,magic:7361}}}));
  E.round(b);assert.equal(b.error,null);
+ assert.equal(E.D.catalog_346.attr,'闇','Nodeとブラウザで同じ属性メタを読む');
  assert.equal(b.fighters.player.current.attack,2086);
  assert.equal(b.fighters.player.current.defense,1525);
  assert.equal(b.fighters.player.current.magic,14317);
