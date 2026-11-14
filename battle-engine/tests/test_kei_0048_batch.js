@@ -19,13 +19,14 @@ function battle(key,turn=1,enemyFirst='vasago'){
 let tests=0;
 function check(name,fn){fn();tests++;console.log('PASS',name);}
 const partial=E.SOURCE_RULES.filter(x=>x.coverage==='partial');
-check('004.8部分モデル247体、既存記述モデル97件（重複なし）',()=>{
- assert.equal(partial.length,247);
- assert.equal(new Set(partial.map(x=>x.name)).size,247);
- assert.equal(E.SOURCE_RULES.length,344);
+check('004.8部分モデル248体、既存記述モデル97件（重複なし）',()=>{
+ assert.equal(partial.length,248);
+ assert.equal(new Set(partial.map(x=>x.name)).size,248);
+ assert.equal(E.SOURCE_RULES.length,345);
 });
-check('未対応の1候補はモデル計上しない',()=>{
- for(const id of [94])assert.ok(!E.D['catalog_'+id]?.model,'#'+id);
+check('アラストルが主効果の部分モデルとして登録された',()=>{
+ assert.ok(E.D.catalog_94?.model,'#94');
+ assert.equal(E.D.catalog_94.tier,'description-partial');
 });
 for(const r of partial)check('004.8 '+r.id+' '+r.name,()=>{
  const b=battle(r.key,r.minTurn||1);
@@ -136,5 +137,44 @@ check('フェンリル：10匹の未知倍率を仮定せず計算停止',()=>{
  const b=E.createBattle(config(p,e,{randomSeed:15872}));E.round(b);
  assert.ok(b.error&&b.error.includes('10匹'));
  assert.equal(b.outcome,'undetermined');
+});
+// 2026-11-14 なーなとの実戦ログ：敵1920ダメージ→被弾側アラストル+9600。
+function alastorBattle(orders){
+ const playerDeck=blank(),enemyDeck=blank();playerDeck[0]='catalog_94';
+ return E.createBattle({
+  mode:'full',damageMode:'observed',randomSeed:1,orders,
+  player:{name:'シロコ',base:{attack:4171,defense:3050,hp:19887,magic:28634}},
+  enemy:{name:'なーな',base:{attack:6275,defense:6730,hp:17823,magic:5960}},
+  playerDeck,enemyDeck,
+  observedHits:[
+   {attacker:'enemy',attack:6275,defense:3050,damage:1920},
+   {attacker:'player',attack:4171,defense:6730,damage:841},
+   {attacker:'player',attack:13771,defense:6730,damage:2775}
+  ]
+ });
+}
+check('アラストル：受けた通常攻撃1920×5=9600が被弾直後に増える',()=>{
+ const b=alastorBattle(Array(6).fill('enemy'));E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.fighters.player.current.attack,13771);
+ assert.ok(b.turns[0].events.some(x=>x.type==='effect'&&x.text.includes('攻撃力+9,600')));
+ assert.ok(b.turns[0].events.some(x=>x.type==='attack'&&x.text.includes('2,775')));
+});
+check('アラストル：発動できるのは当ターン、攻撃力9600加算は3Tまで持続',()=>{
+ const b=alastorBattle(Array(6).fill('enemy'));E.round(b);E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.fighters.player.current.attack,13771);
+ assert.equal(b.turns[1].events.filter(x=>x.type==='effect'&&x.text.includes('アラストル：')).length,0);
+ assert.equal(b.turns[2].events.filter(x=>x.type==='effect'&&x.text.includes('アラストル：')).length,0);
+});
+check('アラストル：自身が先攻なら被弾前の通常攻撃には上昇が間に合わない',()=>{
+ const b=alastorBattle(Array(6).fill('player'));E.round(b);
+ assert.equal(b.error,null);
+ const hits=b.turns[0].events.filter(x=>x.type==='attack');
+ assert.ok(hits[0].text.includes('841'));
+ assert.ok(hits[1].text.includes('1,920'));
+ assert.equal(b.fighters.player.current.attack,13771);
+ E.round(b);
+ assert.ok(b.turns[1].events.some(x=>x.type==='attack'&&x.text.includes('2,775')));
 });
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
