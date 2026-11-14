@@ -9,7 +9,7 @@ const definitions=new Map([...SOURCE_RULES,...batch].map(x=>[x.key,x]));
 assert.equal(definitions.size,349);
 assert.equal(state.devils.length,396);
 assert.equal(map.models.length,392);
-assert.equal(map.operators.length,168);
+assert.equal(map.operators.length,170);
 function collect(ops){
  const out=[];
  function walk(list,depth){for(const x of list||[]){
@@ -51,9 +51,9 @@ for(const row of map.models){
   assert.equal(row.operationParameters,null);
  }
 }
-assert.deepEqual(bucket,{verified:8,A:27,B:17,C:340});
+assert.deepEqual(bucket,{verified:8,A:39,B:16,C:329});
 assert.equal(seen.size,392);
-assert.equal(membership.size,168);
+assert.equal(membership.size,170);
 assert.deepEqual(asSorted([...membership.keys()]),asSorted(map.operators.map(x=>x.name)));
 for(const op of map.operators){
  assert.deepEqual(asSorted(op.members),asSorted(membership.get(op.name)),
@@ -61,8 +61,8 @@ for(const op of map.operators){
  assert.equal(op.members.length,new Set(op.members).size,'no duplicates '+op.name);
 }
 const top=new Set(map.models.flatMap(x=>x.topLevelOperations));
-assert.equal(top.size,167);
+assert.equal(top.size,169);
 const counters=state.counts;
 assert.equal(counters.verified+counters.provisional+counters.description+counters.partial+counters.legacy,392);
 assert.equal(counters.pending,4);
-console.log('PASS verification map: 392 modeled / 349 declarative / 43 manual / 168 operators (167 top-level) / 8+27+17+340 evidence');
+console.log('PASS verification map: 392 modeled / 349 declarative / 43 manual / 170 operators (169 top-level) / 8+39+16+329 evidence');

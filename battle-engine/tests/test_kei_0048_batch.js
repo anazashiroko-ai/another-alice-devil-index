@@ -394,4 +394,58 @@ check('白き守護者：追跡モードは攻撃禁止を実行しない',()=>{
  assert.ok(b.events.some(e=>e.type==='caveat'&&e.text.includes('未計算')));
  assert.equal(b.turns[1].events.filter(e=>e.type==='attack'&&e.text.includes('通常攻撃枠')).length,2);
 });
+
+check('2026-11-14新ログ：パイモン後のベルフェゴールは更新後魔力11307の40%=4522を守備に加算',()=>{
+ const p=blank(),e=blank();p[0]='paimon';e[0]='belphegor';
+ const b=E.createBattle(config(p,e,{orders:Array(6).fill('player'),
+  player:{base:{attack:4171,defense:3050,hp:19887,magic:28634}},
+  enemy:{base:{attack:10739,defense:12312,hp:11307,magic:1046}}}));
+ E.round(b);assert.equal(b.error,null);
+ assert.equal(b.fighters.enemy.current.magic,11307);
+ assert.equal(b.fighters.enemy.current.defense,16834);
+});
+check('2026-11-14新ログ：終わりなき夜ロキの敵半減奪取は各能力で整数切捨て',()=>{
+ const p=blank(),e=blank();p[0]='paimon';e[0]='catalog_346';
+ const b=E.createBattle(config(p,e,{orders:Array(6).fill('player'),
+  player:{base:{attack:4171,defense:3050,hp:19887,magic:28634}},
+  enemy:{base:{attack:10570,defense:5960,hp:7233,magic:7361}}}));
+ E.round(b);assert.equal(b.error,null);
+ assert.equal(b.fighters.player.current.attack,2086);
+ assert.equal(b.fighters.player.current.defense,1525);
+ assert.equal(b.fighters.player.current.magic,14317);
+ assert.equal(b.fighters.enemy.current.attack,12655);
+ assert.equal(b.fighters.enemy.current.defense,7485);
+ assert.equal(b.fighters.enemy.current.magic,21550);
+});
+check('2026-11-14新ログ：レディ・アルミラージは13912の99%で13772を引き140残す',()=>{
+ const p=blank();p[0]='catalog_372';
+ const b=E.createBattle(config(p,blank(),{player:{base:{attack:1,defense:10000,hp:13912,magic:100}},
+  enemy:{base:{attack:0,defense:10000,hp:100000,magic:100}}}));
+ E.round(b);assert.equal(b.error,null);
+ assert.equal(b.fighters.player.current.hp,140);
+});
+check('2026-11-14新ログ：ルシファーは初期魔力15950との差1684を復旧し相手魔力5052減',()=>{
+ const p=blank(),e=blank();p[2]='marbas';e[2]='lucifer';
+ const b=E.createBattle(config(p,e,{orders:Array(6).fill('enemy'),
+  player:{base:{attack:4171,defense:3050,hp:10000000,magic:28634}},
+  enemy:{base:{attack:5010,defense:6000,hp:10000000,magic:15950}}}));
+ E.round(b);E.round(b);
+ b.fighters.enemy.current.magic=14266;
+ E.round(b);assert.equal(b.error,null);
+ assert.equal(b.fighters.enemy.current.magic,15950);
+ assert.equal(b.fighters.player.current.magic,23582);
+ assert.equal(b.tables.player[2],null);
+});
+check('2026-11-14新ログ：装備無効化の後なら初期魔力装備18100でもオドラデクが有効',()=>{
+ const p=blank(),e=blank();e[1]='red_folter';e[2]='odradek';
+ const b=E.createBattle(config(p,e,{orders:Array(6).fill('enemy'),
+  player:{base:{attack:1021,defense:1050,hp:10000000,magic:10534},equipment:{attack:3150,defense:2000,hp:8417,magic:18100}},
+  enemy:{base:{attack:100,defense:10000,hp:10000000,magic:1000}}}));
+ E.round(b);E.round(b);assert.equal(b.error,null);
+ assert.equal(b.fighters.player.activeEquipment.magic,0);
+ E.round(b);assert.equal(b.error,null);
+ assert.equal(b.fighters.player.current.attack,1);
+ assert.equal(b.fighters.player.current.defense,1);
+});
+
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');

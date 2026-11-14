@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.1",
+  "schemaVersion": "0.2",
   "date": "2026-11-14",
   "notes": "Evidence level indicates index of past observations, not full original-game verification. Declarative operator names and parameters are extracted from existing source; manual models are separate.",
   "summary": {
@@ -7,15 +7,15 @@
     "modeled": 392,
     "ruleBased": 349,
     "manual": 43,
-    "topLevelOpKinds": 167,
-    "allOpKindsIncludingNested": 168,
+    "topLevelOpKinds": 169,
+    "allOpKindsIncludingNested": 170,
     "sharedOpKinds": 49,
-    "oneDevilOpKinds": 119,
+    "oneDevilOpKinds": 121,
     "evidence": {
       "verified": 8,
-      "A": 27,
-      "B": 17,
-      "C": 340
+      "A": 39,
+      "B": 16,
+      "C": 329
     },
     "registryStatuses": {
       "verified": 8,
@@ -91,7 +91,6 @@
         364,
         365,
         369,
-        372,
         382,
         383,
         385,
@@ -174,7 +173,9 @@
         384,
         393
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        276
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": [
@@ -221,7 +222,9 @@
         343,
         393
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        110
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": [
@@ -238,7 +241,6 @@
         30,
         32,
         51,
-        84,
         110,
         129,
         134,
@@ -259,7 +261,9 @@
         380,
         384
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        110
+      ],
       "partialObserved": [
         185
       ],
@@ -360,7 +364,9 @@
         351,
         396
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        346
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": [
@@ -405,7 +411,8 @@
       ],
       "mainObserved": [],
       "partialObserved": [
-        60
+        60,
+        375
       ],
       "registryVerified": [],
       "nestedOnly": [
@@ -555,7 +562,9 @@
         263,
         276
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        276
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": [
@@ -681,7 +690,9 @@
         272,
         310
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        78
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": []
@@ -938,7 +949,9 @@
         242,
         346
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        346
+      ],
       "partialObserved": [
         242
       ],
@@ -980,6 +993,19 @@
       "nestedOnly": []
     },
     {
+      "name": "addTrunc",
+      "family": "ステータス数値",
+      "members": [
+        84
+      ],
+      "mainObserved": [
+        84
+      ],
+      "partialObserved": [],
+      "registryVerified": [],
+      "nestedOnly": []
+    },
+    {
       "name": "alastorReactive",
       "family": "固有・その他",
       "members": [
@@ -1009,7 +1035,9 @@
       "members": [
         244
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        244
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": []
@@ -1097,7 +1125,9 @@
       "members": [
         84
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        84
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": []
@@ -1275,7 +1305,9 @@
       "members": [
         276
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        276
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": []
@@ -1531,7 +1563,9 @@
         375
       ],
       "mainObserved": [],
-      "partialObserved": [],
+      "partialObserved": [
+        375
+      ],
       "registryVerified": [],
       "nestedOnly": []
     },
@@ -1609,7 +1643,9 @@
       "members": [
         244
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        244
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": []
@@ -1801,6 +1837,19 @@
         54
       ],
       "mainObserved": [],
+      "partialObserved": [],
+      "registryVerified": [],
+      "nestedOnly": []
+    },
+    {
+      "name": "percentLossTrunc",
+      "family": "ステータス数値",
+      "members": [
+        372
+      ],
+      "mainObserved": [
+        372
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": []
@@ -2215,7 +2264,9 @@
       "members": [
         297
       ],
-      "mainObserved": [],
+      "mainObserved": [
+        297
+      ],
       "partialObserved": [],
       "registryVerified": [],
       "nestedOnly": []
@@ -3443,7 +3494,10 @@
           "second": "enemy.magic"
         }
       ],
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 41,
@@ -4615,8 +4669,12 @@
       "name": "マリア・グァッゾ",
       "engineKey": "maria_guazzo",
       "modelStatus": "description",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "ヤミ1T、マリア・グァッゾが両者の通常攻撃を停止し、後発パイモンの実体化もなし",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "既発動能力や再発動連鎖との競合"
+      },
       "ruleKind": "declarative",
       "phase": "start",
       "stages": null,
@@ -4784,15 +4842,19 @@
       "name": "ベルフェゴール",
       "engineKey": "belphegor",
       "modelStatus": "description",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "美夜羽：パイモン後の現在魔力11307×40%=4522切捨て→守備+4522",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "2ターン後のデビル発動阻止効果はこの戦闘では未確認"
+      },
       "ruleKind": "declarative",
       "phase": "start",
       "stages": null,
       "minTurn": 1,
       "topLevelOperations": [
         "blockDevil",
-        "add"
+        "addTrunc"
       ],
       "nestedOperations": [],
       "operationParameters": [
@@ -4801,7 +4863,7 @@
           "offset": 2
         },
         {
-          "op": "add",
+          "op": "addTrunc",
           "who": "self",
           "stat": "defense",
           "ref": "self.magic",
@@ -5126,8 +5188,12 @@
       "name": "バフォメット",
       "engineKey": "baphomet",
       "modelStatus": "legacy",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "サイレンC：相手魔力15950→自攻撃31900・自HP15950に上書き、ヴィネ再発動でも同じ値",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "相手魔力の後続変化・妨害競合"
+      },
       "ruleKind": "manual",
       "phase": null,
       "stages": null,
@@ -5230,7 +5296,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 101,
@@ -5318,7 +5387,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 105,
@@ -5382,7 +5454,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 108,
@@ -5433,8 +5508,12 @@
       "name": "ファタ・モルガナ",
       "engineKey": "fata_morgana",
       "modelStatus": "description",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "サイレンB：攻撃時に守備3050×2=6100を攻撃加算し守備を0へ",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "混乱による超大型自傷ダメージの原作公式"
+      },
       "ruleKind": "declarative",
       "phase": "before",
       "stages": null,
@@ -6451,7 +6530,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 149,
@@ -7684,7 +7766,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 193,
@@ -8261,7 +8346,10 @@
           "op": "scheduleStealNextEnemy"
         }
       ],
-      "implementationNotes": "次ターンの相手札を奪う予約モデル。相手先攻時や予約後の配置変更の競合は未検証。"
+      "implementationNotes": "次ターンの相手札を奪う予約モデル。相手先攻時や予約後の配置変更の競合は未検証。",
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 216,
@@ -9052,8 +9140,12 @@
       "name": "ラジエル",
       "engineKey": "catalog_244",
       "modelStatus": "partial",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "サイレンA：ルシファー後の現在魔力23582×50%=11791を四能力へ加算",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "次ターン消去のアシスト合計比較の実値確認"
+      },
       "ruleKind": "declarative",
       "phase": "start",
       "stages": null,
@@ -9351,7 +9443,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 256,
@@ -9890,8 +9985,12 @@
       "name": "セイレーン",
       "engineKey": "catalog_276",
       "modelStatus": "partial",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "サイレンB：自身攻撃停止、相手混乱、攻撃+3507（5010×70%で水1体と整合）",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "相手の全デビル枠未提示のため水属性カウント自体は未確定"
+      },
       "ruleKind": "declarative",
       "phase": "start",
       "stages": null,
@@ -10218,7 +10317,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 288,
@@ -10314,7 +10416,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 292,
@@ -10334,7 +10439,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 293,
@@ -10453,8 +10561,12 @@
       "name": "両脚で立つレヴィアタン",
       "engineKey": "catalog_297",
       "modelStatus": "partial",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "サイレンA：フレイヤ後の自己最小値HP1684と相手守備3050を交換",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "最小値同値時の選択優先順"
+      },
       "ruleKind": "declarative",
       "phase": "start",
       "stages": null,
@@ -11542,8 +11654,12 @@
       "name": "アブンディア",
       "engineKey": "abundia",
       "modelStatus": "description",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "カササギ：守備33980−シロコ魔力23434=10546の直接ダメージ",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "自分の守備が相手魔力より低い反動分岐"
+      },
       "ruleKind": "manual",
       "phase": null,
       "stages": null,
@@ -11851,8 +11967,12 @@
       "name": "終わりなき夜・ロキ",
       "engineKey": "catalog_346",
       "modelStatus": "partial",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "ミノハ：シロコ四能力50%を切捨て奪取（2085／1525／9943／14317）",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "敵のデビル全6枠闇属性条件と隠し効果の判定"
+      },
       "ruleKind": "declarative",
       "phase": "start",
       "stages": null,
@@ -12367,7 +12487,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 367,
@@ -12400,11 +12523,11 @@
       "name": "オドラデク",
       "engineKey": "odradek",
       "modelStatus": "legacy",
-      "evidenceLevel": "B",
+      "evidenceLevel": "A",
       "evidence": {
-        "observation": "装備無効化後の能力発動を観測。閾値の参照先は未確定",
-        "reference": "四月島・解析ノートv0.8 §30.2",
-        "remaining": null
+        "observation": "寡黙A：元魔力装備+18100→フォルター夫妻で装備無効化→オドラデクが攻守1",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "現在有効な装備値の5000ちょうどの境界"
       },
       "ruleKind": "manual",
       "phase": null,
@@ -12496,27 +12619,29 @@
       "name": "レディ・アルミラージ",
       "engineKey": "catalog_372",
       "modelStatus": "partial",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "A",
+      "evidence": {
+        "observation": "サイレンC：HP13912×99%の減算13772（切捨て）、HP140が残る",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "DP減算の編成効果、端数負値の境界"
+      },
       "ruleKind": "declarative",
       "phase": "start",
       "stages": null,
       "minTurn": 1,
       "topLevelOperations": [
-        "multiply"
+        "percentLossTrunc"
       ],
       "nestedOperations": [],
       "operationParameters": [
         {
-          "op": "multiply",
+          "op": "percentLossTrunc",
           "who": "self",
-          "stats": [
-            "hp"
-          ],
-          "value": 0.01
+          "stat": "hp",
+          "fraction": 0.99
         }
       ],
-      "implementationNotes": "DP−3の編成ボーナスは未実装。"
+      "implementationNotes": "実戦13912→−13772→140：現在体力の99%を0方向に切り捨てて減算。DP−3の編成ボーナスは未実装。"
     },
     {
       "id": 373,
@@ -12575,8 +12700,12 @@
       "name": "若き日のジョン＆メアリー",
       "engineKey": "catalog_375",
       "modelStatus": "partial",
-      "evidenceLevel": "C",
-      "evidence": null,
+      "evidenceLevel": "B",
+      "evidence": {
+        "observation": "サイレンC：若き日のジョン＆メアリーが実体化するが効果なし。魔力10未満の起動条件未成立と整合",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "魔力10未満時の数値・追加隠し効果"
+      },
       "ruleKind": "declarative",
       "phase": "start",
       "stages": null,
@@ -12674,11 +12803,11 @@
       "name": "雪崩を切り裂くルシファー",
       "engineKey": "lucifer",
       "modelStatus": "provisional",
-      "evidenceLevel": "B",
+      "evidenceLevel": "A",
       "evidence": {
-        "observation": "ルシファーの発動と召喚予約取消らしい分岐を観測。3倍減算の基準不明",
-        "reference": "四月島・解析ノートv0.8 §38.3",
-        "remaining": null
+        "observation": "サイレンA：魔力15950→14266の減少1684を回復、敵魔力−5052（3倍）。サイレンCで回復欠損0でも札消去",
+        "reference": "2026-11-14-eleven-unspecified-battles.md §2–4",
+        "remaining": "攻撃・守備も同時不足する複合経路と発動済み札消去"
       },
       "ruleKind": "manual",
       "phase": null,
@@ -13024,7 +13153,10 @@
       "topLevelOperations": [],
       "nestedOperations": [],
       "operationParameters": null,
-      "implementationNotes": null
+      "implementationNotes": null,
+      "supplementalEvidence": [
+        "2026-11-14-eleven-unspecified-battles.md §3"
+      ]
     },
     {
       "id": 390,
@@ -13231,5 +13363,6 @@
       ],
       "implementationNotes": null
     }
-  ]
+  ],
+  "latestEvidenceNote": "2026-11-14-eleven-unspecified-battles.md"
 }
