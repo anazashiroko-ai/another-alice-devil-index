@@ -387,6 +387,55 @@ function round(b){
      case 'gentlemanRotate':{const k=b.tables[opp(s)][t-1];if(k&&D[k].name===dev.name){if(!duelHandled.has(dev.name)){duelHandled.add(dev.name);if(op.variant==='normal'){disabled.add(s);disabled.add(opp(s));actor.current.hp+=500;target.current.hp+=500;}else{disabled.add(s);disabled.add(opp(s));actor.current.attack+=5000;target.current.attack+=5000;}}}else{const old=[...b.tables[opp(s)]];b.tables[opp(s)]=[...old.slice(3),...old.slice(0,3)];if(op.variant==='sword'){const g=ext[opp(s)]?.gender;if(g==='male')actor.current.attack*=1.5;else if(g==='female')target.current.defense*=1.5;else markUnknown('剣ジェントルマン：相手性別入力が必要');}}break;}
      case 'icarusExternal':{const floor=externalNumber(s,'maxFloor');if(b.complete)break;const fire=getDevAttr(b.tables[opp(s)][t-1])==='火';for(const st of STAT)actor.current[st]+=floor*(fire?-15:30);break;}
      case 'johnGoalSpecial':{const enemyKey=b.tables[opp(s)][t-1],special=enemyKey&&D[enemyKey].name==='マシュー・ホプキンス';if(special||actor.current.magic<10){const k=special?3:2;for(const st of ['attack','defense','magic'])target.current[st]-=actor.base.magic*k;}break;}
+     case 'schrodingerCatBranches':{
+       // Observed cat types only; other feline-themed variants are explicitly unresolved.
+       const knownCats=new Set(['シロネコ','クロネコ','チェシャ猫','ケット・シー']);
+       const findCats=side=>{
+         const found=[],ambiguous=[];
+         for(let i=0;i<b.tables[side].length;i++){
+           const k=b.tables[side][i];if(!k)continue;
+           const nm=String(D[k]?.name||'').normalize('NFKC').replace(/^[○◎]+/,'').trim();
+           if(knownCats.has(nm))found.push(i);
+           else if(/ネコ|猫|ケット・シー/.test(nm))ambiguous.push(nm);
+         }
+         return {found,ambiguous};
+       };
+       const myCats=findCats(s),theirCats=findCats(opp(s));
+       const uncertain=[...myCats.ambiguous,...theirCats.ambiguous];
+       if(uncertain.length){markUnknown('シュレディンガー：未検証のネコデビル候補 '+[...new Set(uncertain)].join('、')+' の判定が必要');break;}
+       const selectExtreme=(fighter,high)=>{
+         let st=STAT[0],best=fighter.current[st],same=1;
+         for(const k of STAT.slice(1)){
+           const v=fighter.current[k];
+           if(high?v>best:v<best){st=k;best=v;same=1;}
+           else if(v===best)same++;
+         }
+         return {stat:st,value:best,tied:same>1};
+       };
+       if(myCats.found.length){
+         // Clause ③ ("ただし") takes precedence over clause ① when both sides have a cat.
+         const hi=selectExtreme(actor,true),lo=selectExtreme(actor,false);
+         if(hi.tied){markUnknown('シュレディンガー：自身の最高ステータス同値時の選択順は未検証');break;}
+         for(const i of myCats.found)b.tables[s][i]=null;
+         actor.current[hi.stat]=lo.value;
+         emit('effect',`シュレディンガー③：${actor.name}のネコデビル${myCats.found.length}枠が消滅。自身の${LABEL[hi.stat]}は${LABEL[lo.stat]}の値${fstr(lo.value)}となった`);
+         if(lo.tied)b.warnings.push('シュレディンガー：最低ステータス同値時の名称優先順は未検証');
+       }else if(theirCats.found.length){
+         const hi=selectExtreme(target,true),lo=selectExtreme(target,false);
+         if(hi.tied){markUnknown('シュレディンガー：相手の最高ステータス同値時の選択順は未検証');break;}
+         for(const i of theirCats.found)b.tables[opp(s)][i]=null;
+         target.current[hi.stat]=lo.value;
+         emit('effect',`シュレディンガー①：${target.name}のネコデビル${theirCats.found.length}枠が消滅。相手の${LABEL[hi.stat]}は${LABEL[lo.stat]}の値${fstr(lo.value)}となった`);
+         if(lo.tied)b.warnings.push('シュレディンガー：最低ステータス同値時の名称優先順は未検証');
+       }else{
+         const lo=selectExtreme(actor,false);
+         actor.current[lo.stat]=lo.value*2;
+         emit('effect',`シュレディンガー②：ネコデビルが見つからず、${actor.name}の${LABEL[lo.stat]}は${fstr(lo.value*2)}となった`);
+         if(lo.tied)b.warnings.push('シュレディンガー：最低ステータス同値時の名称優先順は未検証');
+       }
+       outcome();
+       break;
+     }
      case 'stealAttackLeaveOne':{
        const stolen=target.current.attack-1;target.current.attack=1;
        actor.current.attack+=stolen;tempUndo.push({f:actor,st:'attack',delta:stolen});break;
