@@ -7,9 +7,9 @@
     "verified": 8,
     "provisional": 5,
     "description": 104,
-    "partial": 248,
+    "partial": 249,
     "legacy": 23,
-    "pending": 8
+    "pending": 7
   },
   "devils": [
     {
@@ -1055,10 +1055,10 @@
     {
       "id": 131,
       "name": "シュレディンガー",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_131",
+      "notes": "2026-11-14実戦ログ：猫なし→自分の最低ステータス2倍（守備3050→6100）；相手ケット・シー既発動済でも残っていれば敵最高ステータスを最低値にする・猫札消滅；自分シロネコ既発動済なら自分の最高を最低値に・自分猫札消滅。死と再生で奪取後は残存する現在の猫札を再判定する。既知猫はシロネコ/クロネコ/チェシャ猫/ケット・シーのみ確証あり。派生猫・同時両猫・同値選択・一部奪取ログは未確定。"
     },
     {
       "id": 132,
