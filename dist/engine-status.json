@@ -2986,7 +2986,7 @@
       "status": "partial",
       "tier": "description-partial",
       "engineKey": "catalog_372",
-      "notes": "DP−3の編成ボーナスは未実装。"
+      "notes": "実戦13912→−13772→140：現在体力の99%を0方向に切り捨てて減算。DP−3の編成ボーナスは未実装。"
     },
     {
       "id": 373,
