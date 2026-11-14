@@ -215,7 +215,7 @@ function round(b){
     else if(sub.op==='suppressEnemy')suppressed.add(opp(s));
     else if(sub.op==='noAttack')disabled.add(sub.who==='enemy'?opp(s):s);
     else if(sub.op==='damage')target.current.hp-=originalGet(sub.ref)*sub.scale;
-    else if(sub.op==='destroyEnemy')if(t+sub.offset<=6)b.tables[opp(s)][t+sub.offset-1]=null;
+    else if(sub.op==='destroyEnemy'){if(t+sub.offset<=6)b.tables[opp(s)][t+sub.offset-1]=null;}
     else if(sub.op==='cancelMagic')b.magicUntil=t-1;
     else if(sub.op==='destroyBothDevilsForTurns')for(let i=t-1;i<Math.min(6,t-1+sub.turns);i++){b.tables.player[i]=null;b.tables.enemy[i]=null;}
     else if(sub.op==='transfer'){const p=sub.who==='enemy'?target:actor,q=sub.to==='enemy'?target:actor,v=rule.key==='catalog_346'?integral(p.current[sub.stat]*sub.scale):p.current[sub.stat]*sub.scale;p.current[sub.stat]-=v;q.current[sub.stat]+=v;}
