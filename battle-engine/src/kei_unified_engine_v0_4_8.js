@@ -72,7 +72,7 @@ const SOURCE_RULES=[{"key":"vasago","name":"ウァサゴ","phase":"before","minT
 const BATCH_0048=(root&&root.KeiBatchRules0048)||(typeof require==='function'?require('./kei_batch_rules_0048.js'):[]);
 const BATCH_META=Object.fromEntries(BATCH_0048.map(x=>[x.key,x]));
 const META_LOOKUP=new Map((root?.KeiDevilMeta0048||[]).map(x=>[String(x.name).normalize('NFKC').replace(/^[○◎]+/,'').trim(),x]));
-const BATCH_EXCLUDED_0048=new Set([94]); // Needs unresolved phases/effects: not counted as implemented.
+const BATCH_EXCLUDED_0048=new Set(); // Alastor added from the 2026-11-14 observed damage log; unknown edge branches remain partial.
 SOURCE_RULES.push(...BATCH_0048.filter(x=>!BATCH_EXCLUDED_0048.has(x.id)));
 for(const x of SOURCE_RULES)D[x.key]={name:x.name,phase:x.phase,model:true,tier:x.coverage==='partial'?'description-partial':'source-model',sourceId:x.key,minimumTurn:x.minTurn,notes:x.comment,coverage:x.coverage||'existing',phases:x.stages||[x.phase]};
 for(const d of Object.values(D)){const meta=META_LOOKUP.get(String(d.name).normalize('NFKC').replace(/^[○◎]+/,'').trim());if(meta){d.dp=meta.dp;d.attr=meta.attr;}}
@@ -127,6 +127,7 @@ function round(b){
  b.turn++;const t=b.turn;const c=b.config,first=b.forcedFirst[t]||c.orders[t-1],order=[first,opp(first)],events=[];
  const tempUndo=[],lastHits={player:0,enemy:0},turnReceived={player:0,enemy:0},duelHandled=new Set();
  const sprigganSurvival=new Set();
+ const alastorReactive=new Map(); // Enabled only this round; the attack gain itself is permanent.
  b.absorbing=new Set(); // Ostar absorption is only active during this turn.
   const fired={player:[],enemy:[]},disabled=new Set(),suppressed=new Set(),evading=new Set(),reflecting=new Set(),confused=new Set(),postAttackUvalFata=new Set();let endTurn=false;
  function emit(type,text,meta={}){const e={turn:t,type,text,...meta};b.events.push(e);events.push(e);}
@@ -233,6 +234,7 @@ function round(b){
      case 'rotateEnemy':{const q={...target.current};target.current.attack=q.magic;target.current.defense=q.attack;target.current.hp=q.defense;target.current.magic=q.hp;break;}
      case 'sacrificeHp':{const loss=actor.current.hp*op.fraction;actor.current.hp-=loss;actor.current.attack+=loss*op.attackScale;break;}
      case 'damageTakenBoost':actor.current.attack+=(actor.initial.hp-actor.current.hp)*op.scale*t;break;
+     case 'alastorReactive':alastorReactive.set(s,op.scale);break; // Defensive trigger is resolved after a real opponent normal-attack hit.
      case 'sharedMagicHit':{const val=(actor.current.magic+target.current.magic)*op.fraction;target.current.defense-=val;target.current.hp-=val;break;}
      case 'transferExcess':{const value=f.current[op.fromStat];if(value>=op.minRemain){const excess=value-op.minRemain;f.current[op.fromStat]=op.minRemain;f.current[op.toStat]+=excess;}break;}
      case 'magicToAttack':{const delta=actor.current.magic-1;actor.current.magic=1;actor.current.attack+=delta*op.multiplier;break;}
@@ -727,14 +729,20 @@ function round(b){
     const receiver=confused.has(s)?actor:reflecting.has(opp(s))?actor:target;
     const reduction=Math.max(0,...(b.damageReduction||[]).filter(x=>x.side===opp(s)&&x.from<=t&&x.until>=t).map(x=>x.fraction));
     hit.damage*=1-reduction;lastHits[s]=receiver===target?hit.damage:0;
+    let actualOpponentAttackDamage=false;
     if(receiver===target&&sprigganSurvival.has(opp(s))&&hit.damage>0&&target.current.hp>hit.damage){
      target.current.defense+=3*hit.damage;turnReceived[target.id]+=hit.damage;
      emit('effect','スプリガン：受けた通常攻撃ダメージを回復し、守備力にその3倍を加算（即死時は不発）');
     }
     else if(receiver===target&&b.absorbing?.has(opp(s))){target.current.hp+=hit.damage;lastHits[s]=0;emit('effect',`${target.name}は通常攻撃を吸収し回復`);}
-    else{receiver.current.hp-=hit.damage;turnReceived[receiver.id]+=hit.damage;}
+    else{receiver.current.hp-=hit.damage;turnReceived[receiver.id]+=hit.damage;actualOpponentAttackDamage=receiver===target&&hit.damage>0;}
     const suffix=confused.has(s)?'〔混乱・自傷〕':reflecting.has(opp(s))?'〔反射〕':magical?'〔魔力戦・参照魔力／ダメージ式は仮式〕':'';
     emit('attack',`${actor.name}の${magical?'攻撃魔法':'攻撃'}！ ${receiver.name}に${fstr(hit.damage)}のダメージ〔${hit.confidence}〕${suffix}`);
+    if(actualOpponentAttackDamage&&alastorReactive.has(receiver.id)){
+     const gain=hit.damage*alastorReactive.get(receiver.id);
+     receiver.current.attack+=gain;
+     emit('effect',`アラストル：${receiver.name}が受けた通常攻撃${fstr(hit.damage)}ダメージ×5で攻撃力+${fstr(gain)}〔後続ターンにも持続・実戦ログ参照〕`);
+    }
     outcome();
    }
   }
