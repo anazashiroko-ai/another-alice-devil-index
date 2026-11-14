@@ -342,9 +342,9 @@ function vdConfig(enemy,enemyCount,devil){
    assist:{attack:20,hp:270,magic:334},equipment:{attack:3150,defense:2000,hp:8417,magic:18100}},
   enemy});
 }
-check('ヴィドフニル：なーな99%と自17%、サルガタナス装備模倣は元装備参照を変えない',()=>{
+check('ヴィドフニル：なーな1人→99%減と自17%（自己人数未確認）、サルガタナス模倣は元装備参照を変えない',()=>{
  const b=E.createBattle(vdConfig({name:'なーな',base:{attack:500,defense:580,hp:2330,magic:50},
-  assist:{hp:17},equipment:{attack:120,defense:4150,hp:7900,magic:5910}},99,'sargatanas'));
+  assist:{hp:17},equipment:{attack:120,defense:4150,hp:7900,magic:5910}},1,'sargatanas'));
  E.round(b);assert.equal(b.error,null);
  const v=b.events.find(x=>x.type==='effect'&&x.key==='catalog_319');assert.ok(v);
  assert.deepEqual(v.enemyEquipmentLoss,{attack:118,defense:4108,hp:7821,magic:5850});
@@ -356,9 +356,9 @@ check('ヴィドフニル：なーな99%と自17%、サルガタナス装備模�
  assert.equal(b.fighters.player.current.defense,3390);
  assert.equal(b.fighters.player.current.magic,31711);
 });
-check('ヴィドフニル：トモキ94%を元装備1500/3000/3200/16300へ適用',()=>{
+check('ヴィドフニル：トモキ6人→94%減を元装備1500/3000/3200/16300へ適用',()=>{
  const b=E.createBattle(vdConfig({name:'トモキ・クラウン',base:{attack:100,defense:100,hp:14915,magic:100},
-  assist:{hp:83},equipment:{attack:1500,defense:3000,hp:3200,magic:16300}},94));
+  assist:{hp:83},equipment:{attack:1500,defense:3000,hp:3200,magic:16300}},6));
  E.round(b);assert.equal(b.error,null);
  const v=b.events.find(x=>x.type==='effect'&&x.key==='catalog_319');assert.ok(v);
  assert.deepEqual(v.enemyEquipmentLoss,{attack:1410,defense:2820,hp:3008,magic:15322});
@@ -368,7 +368,7 @@ check('ヴィドフニル：トモキ94%を元装備1500/3000/3200/16300へ適�
  assert.equal(b.fighters.enemy.current.magic,1078);
 });
 check('ヴィドフニル：アシスト人数未入力は値を捏造せず停止',()=>{
- const c=vdConfig({base:{attack:100,defense:100,hp:100000,magic:100},equipment:{attack:1000}},94);
+ const c=vdConfig({base:{attack:100,defense:100,hp:100000,magic:100},equipment:{attack:1000}},6);
  delete c.external.player.assistCount;
  const b=E.createBattle(c);E.round(b);
  assert.ok(b.error?.includes('外部入力が必要：player.assistCount'));
