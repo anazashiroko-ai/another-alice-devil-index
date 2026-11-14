@@ -323,7 +323,26 @@ function round(b){
 
      case 'chanceSwap':if(roll(b)<op.p){const [wa,sa]=op.first.split('.'),[wb,sb]=op.second.split('.'),p=who(wa),q=who(wb),v=p.current[sa];p.current[sa]=q.current[sb];q.current[sb]=v;}break;
      case 'magicHit':{const h=prev.estimateDamage(actor.current.magic,target.current.magic);if(!h.ok){markUnknown('魔力攻撃の式を計算できない');break;}target.current.hp-=h.damage;emit('attack',`${dev.name}の魔力攻撃：${fstr(h.damage)}ダメージ〔仮式〕`);break;}
-     case 'assistThreshold':{const n=externalNumber(s,'assistTotal');if(b.complete)break;if(n>=501)target.current.attack=externalNumber(s,'assistAttack');else actor.current.hp*=.1;break;}
+     case 'vidofnirEquipmentAssist':{
+        // Two observed logs support trunc(original equipment * assist count / 100).
+        // Opponent's Sargatanas copy adds stats but does not alter original equipment.
+        const selfCount=externalNumber(s,'assistCount');if(b.complete)break;
+        const enemyCount=externalNumber(opp(s),'assistCount');if(b.complete)break;
+        if(!Number.isInteger(selfCount)||selfCount<0||!Number.isInteger(enemyCount)||enemyCount<0){
+         markUnknown('ヴィドフニル：両者のアシスト人数は0以上の整数が必要');break;
+        }
+        const loss={},gain={};
+        for(const st of STAT){
+         loss[st]=integral(target.equipment[st]*enemyCount/100);
+         gain[st]=integral(actor.equipment[st]*selfCount/100);
+         target.current[st]-=loss[st];
+         actor.current[st]+=gain[st];
+        }
+        emit('effect',`ヴィドフニル：${target.name}の元装備値×アシスト${enemyCount}人/100を減算、${actor.name}の元装備値×アシスト${selfCount}人/100を加算〔部分モデル〕`,
+          {key:'catalog_319',enemyEquipmentLoss:loss,selfEquipmentGain:gain,selfAssistCount:selfCount,enemyAssistCount:enemyCount});
+        outcome();break;
+       }
+      case 'assistThreshold':{const n=externalNumber(s,'assistTotal');if(b.complete)break;if(n>=501)target.current.attack=externalNumber(s,'assistAttack');else actor.current.hp*=.1;break;}
      case 'chanceMagic':if(roll(b)<op.p)b.magicUntil=Math.max(b.magicUntil,t+op.turns-1);break;
      case 'whenEnemyAttr':if(op.attrs.includes(getDevAttr(b.tables[opp(s)][t-1])))simpleSubops(op.ops);break;
      case 'ifPreviousDevil':{const k=t>1?b.original[s][t-2]:null;simpleSubops(k&&D[k].name.replace(/^[○◎]/,'')===op.name?op.then:op.otherwise);break;}

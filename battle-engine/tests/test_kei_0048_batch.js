@@ -19,10 +19,10 @@ function battle(key,turn=1,enemyFirst='vasago'){
 let tests=0;
 function check(name,fn){fn();tests++;console.log('PASS',name);}
 const partial=E.SOURCE_RULES.filter(x=>x.coverage==='partial');
-check('004.8部分モデル251体、既存記述モデル97件（重複なし）',()=>{
- assert.equal(partial.length,251);
- assert.equal(new Set(partial.map(x=>x.name)).size,251);
- assert.equal(E.SOURCE_RULES.length,348);
+check('004.8部分モデル252体、既存記述モデル97件（重複なし）',()=>{
+ assert.equal(partial.length,252);
+ assert.equal(new Set(partial.map(x=>x.name)).size,252);
+ assert.equal(E.SOURCE_RULES.length,349);
 });
 check('アラストルが主効果の部分モデルとして登録された',()=>{
  assert.ok(E.D.catalog_94?.model,'#94');
@@ -331,6 +331,48 @@ check('ヘル：再訪2Tと3Tは発動済みのエリゴスとマルバスを新
  E.round(b);
  assert.equal(b.turns[5].turn,3);
  assert.ok(b.turns[5].fired.enemy.includes('marbas'));
+});
+
+
+function vdConfig(enemy,enemyCount,devil){
+ const p=Array(6).fill(null),e=Array(6).fill(null);p[0]='catalog_319';e[0]=devil||null;
+ return config(p,e,{orders:Array(6).fill(devil?'enemy':'player'),
+  external:{initiator:'player',player:{assistCount:17},enemy:{assistCount:enemyCount}},
+  player:{name:'シロコ',base:{attack:1001,defense:1050,hp:11200,magic:10200},
+   assist:{attack:20,hp:270,magic:334},equipment:{attack:3150,defense:2000,hp:8417,magic:18100}},
+  enemy});
+}
+check('ヴィドフニル：なーな99%と自17%、サルガタナス装備模倣は元装備参照を変えない',()=>{
+ const b=E.createBattle(vdConfig({name:'なーな',base:{attack:500,defense:580,hp:2330,magic:50},
+  assist:{hp:17},equipment:{attack:120,defense:4150,hp:7900,magic:5910}},99,'sargatanas'));
+ E.round(b);assert.equal(b.error,null);
+ const v=b.events.find(x=>x.type==='effect'&&x.key==='catalog_319');assert.ok(v);
+ assert.deepEqual(v.enemyEquipmentLoss,{attack:118,defense:4108,hp:7821,magic:5850});
+ assert.deepEqual(v.selfEquipmentGain,{attack:535,defense:340,hp:1430,magic:3077});
+ assert.equal(b.fighters.enemy.current.attack,3652);
+ assert.equal(b.fighters.enemy.current.defense,2622);
+ assert.equal(b.fighters.enemy.current.magic,18210);
+ assert.equal(b.fighters.player.current.attack,4706);
+ assert.equal(b.fighters.player.current.defense,3390);
+ assert.equal(b.fighters.player.current.magic,31711);
+});
+check('ヴィドフニル：トモキ94%を元装備1500/3000/3200/16300へ適用',()=>{
+ const b=E.createBattle(vdConfig({name:'トモキ・クラウン',base:{attack:100,defense:100,hp:14915,magic:100},
+  assist:{hp:83},equipment:{attack:1500,defense:3000,hp:3200,magic:16300}},94));
+ E.round(b);assert.equal(b.error,null);
+ const v=b.events.find(x=>x.type==='effect'&&x.key==='catalog_319');assert.ok(v);
+ assert.deepEqual(v.enemyEquipmentLoss,{attack:1410,defense:2820,hp:3008,magic:15322});
+ assert.deepEqual(v.selfEquipmentGain,{attack:535,defense:340,hp:1430,magic:3077});
+ assert.equal(b.fighters.enemy.current.attack,190);
+ assert.equal(b.fighters.enemy.current.defense,280);
+ assert.equal(b.fighters.enemy.current.magic,1078);
+});
+check('ヴィドフニル：アシスト人数未入力は値を捏造せず停止',()=>{
+ const c=vdConfig({base:{attack:100,defense:100,hp:100000,magic:100},equipment:{attack:1000}},94);
+ delete c.external.player.assistCount;
+ const b=E.createBattle(c);E.round(b);
+ assert.ok(b.error?.includes('外部入力が必要：player.assistCount'));
+ assert.equal(b.outcome,'undetermined');
 });
 
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
