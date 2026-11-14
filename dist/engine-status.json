@@ -7,9 +7,9 @@
     "verified": 8,
     "provisional": 5,
     "description": 104,
-    "partial": 251,
+    "partial": 252,
     "legacy": 23,
-    "pending": 5
+    "pending": 4
   },
   "devils": [
     {
@@ -2559,10 +2559,10 @@
     {
       "id": 319,
       "name": "ヴィドフニル",
-      "status": "pending",
-      "tier": "pending",
-      "engineKey": null,
-      "notes": null
+      "status": "partial",
+      "tier": "description-partial",
+      "engineKey": "catalog_319",
+      "notes": "2026-11-14実戦2件：元装備値×アシスト人数/100の整数切捨てが両者全4能力で一致。自17％、相手99％/94％（実人数は未確認）。サルガタナスの模倣補正は減算対象外。装備無効化等との競合は未照合。"
     },
     {
       "id": 320,
