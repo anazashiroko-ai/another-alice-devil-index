@@ -124,12 +124,13 @@ function roll(b){let x=b.rngState>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;b.rngState=x>>>
 
 function round(b){
  if(b.complete)return null;
- b.turn++;const t=b.turn;const c=b.config,first=b.forcedFirst[t]||c.orders[t-1],order=[first,opp(first)],events=[];
+ b.turn++;let t=b.turn;const c=b.config,first=b.forcedFirst[t]||c.orders[t-1],order=[first,opp(first)],events=[];
+ // A rewind may change the active table slot mid-round without re-running turn-start effects.
  const tempUndo=[],lastHits={player:0,enemy:0},turnReceived={player:0,enemy:0},duelHandled=new Set();
  const sprigganSurvival=new Set();
  const alastorReactive=new Map(); // Enabled only this round; the attack gain itself is permanent.
  b.absorbing=new Set(); // Ostar absorption is only active during this turn.
-  const fired={player:[],enemy:[]},disabled=new Set(),suppressed=new Set(),evading=new Set(),reflecting=new Set(),confused=new Set(),postAttackUvalFata=new Set();let endTurn=false;
+  const fired={player:[],enemy:[]},disabled=new Set(),suppressed=new Set(),evading=new Set(),reflecting=new Set(),confused=new Set(),postAttackUvalFata=new Set();let endTurn=false,hellRewoundInThisRound=false,moraAdvancedInThisRound=false;
  function emit(type,text,meta={}){const e={turn:t,type,text,...meta};b.events.push(e);events.push(e);}
  function outcome(){if(c.mode==='trace')return false;
   for(const s of order)if(b.fighters[s].current.hp<=0){
@@ -235,6 +236,26 @@ function round(b){
      case 'sacrificeHp':{const loss=actor.current.hp*op.fraction;actor.current.hp-=loss;actor.current.attack+=loss*op.attackScale;break;}
      case 'damageTakenBoost':actor.current.attack+=(actor.initial.hp-actor.current.hp)*op.scale*t;break;
      case 'alastorReactive':alastorReactive.set(s,op.scale);break; // Defensive trigger is resolved after a real opponent normal-attack hit.
+     case 'hellTurnRewind':{
+       // Observed 4T -> 1T. Keep current stats/HP and the current attack-order selection.
+       // The already-entered turn-start phase is NOT repeated for the returned 1T.
+       if(t<4){markUnknown('ヘル：4ターン未満の発動は原作未確認');break;}
+       const before=t;
+       for(const side of ['player','enemy'])for(let i=0;i<6;i++)if(b.tables[side][i]==='catalog_285')b.tables[side][i]=null;
+       t=Math.max(1,t-(op.turns||3));b.turn=t;hellRewoundInThisRound=true;
+       emit('effect',`ヘル：${before}Tから${t}Tへ3ターン巻戻し。両者のヘルを消滅。ステータスと体力は保持し、再訪したターンの開始時能力はその場では再発動しない〔観測範囲〕`);
+       break;
+     }
+     case 'moraTurnAdvance':{
+       // Mora acts at end-of-turn after both attacks: consume one extra turn without executing its phases.
+       // Example: active 2T -> elapsed count 3T, next actual round executes 4T.
+       const before=t;
+       for(const side of ['player','enemy'])for(let i=0;i<6;i++)if(b.tables[side][i]==='catalog_295')b.tables[side][i]=null;
+       b.turn=Math.min(6,t+(op.turns||1));moraAdvancedInThisRound=true;
+       emit('effect',`モーラ：${before}Tの終了時、消化ターン数を${b.turn}Tへ進めた。両者のモーラを消滅し、飛ばしたターンの行動・デビル能力は処理しない〔観測範囲〕`);
+       break;
+     }
+
      case 'sharedMagicHit':{const val=(actor.current.magic+target.current.magic)*op.fraction;target.current.defense-=val;target.current.hp-=val;break;}
      case 'transferExcess':{const value=f.current[op.fromStat];if(value>=op.minRemain){const excess=value-op.minRemain;f.current[op.fromStat]=op.minRemain;f.current[op.toStat]+=excess;}break;}
      case 'magicToAttack':{const delta=actor.current.magic-1;actor.current.magic=1;actor.current.attack+=delta*op.multiplier;break;}
@@ -760,7 +781,7 @@ function round(b){
  if(b.deathCurses)for(const curse of b.deathCurses)if(curse.due===t){b.fighters[curse.target].current.hp=0;emit('effect','死の宣告が発動');outcome();}
  emit('turn',`第${t}ターン（${b.fighters[first].name}先攻）`);
  if(t<=b.magicUntil)emit('effect',`魔力戦継続中（${t}T）／両者に適用。通常ダメージ式の流用は仮式`);
- for(const s of order)phase(s,'start');
+ for(const s of order){phase(s,'start');if(hellRewoundInThisRound||b.complete||endTurn)break;}
  if(!b.complete&&!endTurn)for(const s of order){
   phase(s,'before');if(b.complete||endTurn)break;
   if(c.mode==='trace'){emit('attack',`${b.fighters[s].name}：通常攻撃枠（数値未計算）`);}
@@ -801,7 +822,7 @@ function round(b){
   if(b.complete||endTurn)break;
   if(!disabled.has(s)&&!b.blockedAttacks[s].has(t))phase(s,'after');
  }
- if(!b.complete&&!endTurn)for(const s of order)phase(s,'end');
+ if(!b.complete&&!endTurn)for(const s of order){phase(s,'end');if(moraAdvancedInThisRound||b.complete)break;}
  for(let i=tempUndo.length-1;i>=0;i--){const u=tempUndo[i];u.f.current[u.st]-=u.delta;}
  if(endTurn)emit('effect','クロリッサにより当ターンを終了（後続の実体化・攻撃はなし）');
  // 継続効果は終了時能力と独立。クロリッサのターン打切り後も処理する。
@@ -816,7 +837,7 @@ function round(b){
   }
  }
  if(!b.complete&&b.statGrowth)for(const e of b.statGrowth)if(e.from<=t)b.fighters[e.target].current[e.stat]+=e.amount;
- if(!b.complete&&t===6){b.complete=true;b.outcome=c.mode==='trace'?'trace_complete':'draw';emit('result',c.mode==='trace'?'6ターンの発動順追跡完了（勝敗は未計算）':'6ターン終了。両者生存のため引き分け');}
+ if(!b.complete&&(t===6||(moraAdvancedInThisRound&&b.turn>=6))){b.complete=true;b.outcome=c.mode==='trace'?'trace_complete':'draw';emit('result',c.mode==='trace'?'6ターンの発動順追跡完了（勝敗は未計算）':'6ターン終了。両者生存のため引き分け');}
  const snapshot={turn:t,first,events,fired,table:{player:[...b.tables.player],enemy:[...b.tables.enemy]},
   fighters:{player:{...b.fighters.player.current},enemy:{...b.fighters.enemy.current}},endTurn,outcome:b.outcome};
  b.turns.push(snapshot);return snapshot;
