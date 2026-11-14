@@ -218,4 +218,21 @@ check('シュレディンガー：相手猫札消滅後、死と再生で奪っ�
  assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー①')));
  assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー②')));
 });
+check('シュレディンガー③：死と再生で2T奪取しても5T未発動クロネコを検出・消滅させる',()=>{
+ const p=blank(),e=blank();p[1]='catalog_83';p[4]='catalog_69';e[1]='catalog_131';
+ const b=E.createBattle(config(p,e,{
+  orders:Array(6).fill('player'),
+  player:{base:{attack:4171,defense:3050,hp:19887,magic:28634}},
+  enemy:{base:{attack:620,defense:4730,hp:10247,magic:5960}}
+ }));
+ E.round(b);
+ assert.equal(b.tables.player[4],'catalog_69','2T前の未来5T枠にはクロネコが残る');
+ E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.tables.player[4],null,'2Tの奪取されたシュレディンガーで5Tクロネコが消滅する');
+ assert.equal(b.tables.enemy[1],null,'相手シュレディンガーは奪取済み');
+ assert.equal(b.fighters.player.current.magic,3050,'自分の最高魔力が最低守備3050へ変わる');
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー③')));
+ assert.ok(b.turns[1].fired.player.includes('catalog_131'),'奪ったシュレディンガーを2Tに発動');
+});
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
