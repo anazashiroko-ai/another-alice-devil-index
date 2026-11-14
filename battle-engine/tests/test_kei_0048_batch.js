@@ -235,4 +235,45 @@ check('シュレディンガー③：死と再生で2T奪取しても5T未発動
  assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー③')));
  assert.ok(b.turns[1].fired.player.includes('catalog_131'),'奪ったシュレディンガーを2Tに発動');
 });
+
+/* 2026-11-14 マリコの実機ネコ判定：名称からの推測ではなく明示的な分類。 */
+const confirmedCats=[['シロネコ','catalog_70'],['クロネコ','catalog_69'],['チェシャ猫','catalog_111'],['ケット・シー','catalog_123'],['マニ・エリ','catalog_214'],['バステト','catalog_230']];
+const confirmedNonCats=[['フレイヤ','freya'],['ゴリラを連れたケット・シー','catalog_289'],['握手を求めるチェシャ猫','catalog_379']];
+function catClassBattle(enemy5,own5=null,enemy4=null){
+ const p=blank(),e=blank();
+ p[1]='catalog_131';p[4]=own5;e[3]=enemy4;e[4]=enemy5;
+ return E.createBattle(config(p,e,{
+  player:{base:{attack:4171,defense:3050,hp:100000,magic:28634}},
+  enemy:{base:{attack:2000,defense:4700,hp:40000,magic:50000}}
+ }));
+}
+for(const [name,key] of confirmedCats)check('シュレディンガー・ネコ判定：'+name+'は5T未発動でも①の対象',()=>{
+ const b=catClassBattle(key);E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.tables.enemy[4],null,name+'はシュレディンガーで消滅');
+ assert.equal(b.fighters.enemy.current.magic,2000,'最高魔力50000→最低攻撃2000');
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー①')));
+});
+for(const [name,key] of confirmedNonCats)check('シュレディンガー・非ネコ判定：'+name+'は消滅せず②になる',()=>{
+ const b=catClassBattle(key);E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.tables.enemy[4],key,'非ネコ '+name+' を消滅させない');
+ assert.equal(b.fighters.player.current.defense,6100,'ネコなし②で自身最低守備を倍化');
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー②')));
+});
+for(const [name,key] of confirmedCats.filter(x=>['マニ・エリ','バステト'].includes(x[0])))check('シュレディンガー③：自分の5T'+name+'をネコとして検出',()=>{
+ const b=catClassBattle(null,key);E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.tables.player[4],null,'自分の猫デビル消滅');
+ assert.equal(b.fighters.player.current.magic,3050,'最高魔力→最低守備');
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー③')));
+});
+check('シュレディンガー：ネコと名前だけ猫の派生が共存すると確定猫だけ消滅',()=>{
+ const b=catClassBattle('catalog_289',null,'catalog_214');E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.tables.enemy[3],null,'マニ・エリは消滅');
+ assert.equal(b.tables.enemy[4],'catalog_289','ゴリラを連れたケット・シーは残る');
+ assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー①')));
+});
+
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
