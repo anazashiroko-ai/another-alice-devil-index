@@ -504,7 +504,8 @@ check('実戦4本・ルシファー：フルカスによる守備3020低下を�
  player:{base:{attack:4936,defense:2400,hp:10000000,magic:23434}},
  enemy:{base:{attack:900,defense:10068,hp:10000000,magic:19010}}}));
  E.round(b);E.round(b);E.round(b);b.fighters.enemy.current.defense=7048;
- E.round(b);assert.equal(b.error,null);
+ E.round(b);
+ assert.ok(b.error?.includes('守備力が負のとき'),'負守備への通常攻撃は原作公式未確定として安全停止する');
  assert.equal(b.fighters.enemy.current.defense,10068);
  assert.equal(b.fighters.player.current.defense,-6660);
  assert.equal(b.tables.player[3],null);
