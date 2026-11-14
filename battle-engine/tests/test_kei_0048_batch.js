@@ -19,10 +19,10 @@ function battle(key,turn=1,enemyFirst='vasago'){
 let tests=0;
 function check(name,fn){fn();tests++;console.log('PASS',name);}
 const partial=E.SOURCE_RULES.filter(x=>x.coverage==='partial');
-check('004.8部分モデル249体、既存記述モデル97件（重複なし）',()=>{
- assert.equal(partial.length,249);
- assert.equal(new Set(partial.map(x=>x.name)).size,249);
- assert.equal(E.SOURCE_RULES.length,346);
+check('004.8部分モデル251体、既存記述モデル97件（重複なし）',()=>{
+ assert.equal(partial.length,251);
+ assert.equal(new Set(partial.map(x=>x.name)).size,251);
+ assert.equal(E.SOURCE_RULES.length,348);
 });
 check('アラストルが主効果の部分モデルとして登録された',()=>{
  assert.ok(E.D.catalog_94?.model,'#94');
@@ -274,6 +274,63 @@ check('シュレディンガー：ネコと名前だけ猫の派生が共存す�
  assert.equal(b.tables.enemy[3],null,'マニ・エリは消滅');
  assert.equal(b.tables.enemy[4],'catalog_289','ゴリラを連れたケット・シーは残る');
  assert.ok(b.turns[1].events.some(x=>x.type==='effect'&&x.text.includes('シュレディンガー①')));
+});
+
+
+// 2026-11-14 モーラとヘル。原作ログで確認できた時間移動だけを検査する。
+check('モーラ：2Tの双方の攻撃が済んだあと消化3Tへ、次に実行するのは4T',()=>{
+ const p=blank(),e=blank();p[1]='catalog_295';p[3]='marbas';e[2]='eligos';
+ const b=E.createBattle(config(p,e,{player:{base:{attack:1000,defense:5000,hp:1e10,magic:1000}},enemy:{base:{attack:1100,defense:4700,hp:1e10,magic:1100}}}));
+ E.round(b);const firstHP=b.fighters.enemy.current.hp;
+ E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.turn,3,'2Tが終了し消化ターン数が3に変化');
+ assert.equal(b.turns[1].turn,2,'モーラ自身の発動は2T終了時');
+ assert.equal(b.tables.player[1],null,'モーラの札は消滅');
+ assert.ok(b.fighters.enemy.current.hp<firstHP,'2Tの通常攻撃が行われる');
+ assert.ok(b.turns[1].events.some(x=>x.text.includes('モーラ：2Tの終了時')));
+ E.round(b);
+ assert.equal(b.turns[2].turn,4,'3Tは実行されない');
+ assert.ok(b.turns[2].fired.player.includes('marbas'),'4Tのデビルが通常発動');
+ assert.ok(!b.events.some(x=>x.type==='devil'&&x.key==='eligos'),'3Tの敵デビルは発動しない');
+});
+check('モーラ：双方のモーラ札を完全消滅させ、重複飛ばしをしない',()=>{
+ const p=blank(),e=blank();p[1]='catalog_295';e[4]='catalog_295';
+ const b=E.createBattle(config(p,e));E.round(b);E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.turn,3);
+ assert.equal(b.tables.player[1],null);
+ assert.equal(b.tables.enemy[4],null);
+});
+check('ヘル：4T開始で1Tへ戻り現在体力を保持、双方ヘルを消す',()=>{
+ const p=blank(),e=blank();p[0]='marbas';p[3]='catalog_285';e[0]='sitri';e[5]='catalog_285';
+ const b=E.createBattle(config(p,e));
+ for(let i=0;i<3;i++)E.round(b);
+ const hpBefore=b.fighters.player.current.hp;
+ const fourth=E.round(b);
+ assert.equal(b.error,null);
+ assert.equal(b.turn,1);
+ assert.equal(fourth.turn,1);
+ assert.equal(b.tables.player[3],null);
+ assert.equal(b.tables.enemy[5],null);
+ assert.ok(b.fighters.player.current.hp<hpBefore,'再訪1Tの被弾は巻戻し前体力から引く');
+ assert.ok(fourth.fired.player.includes('catalog_285'),'ヘルは4Tに実体化');
+ assert.ok(!fourth.fired.player.includes('marbas'),'再訪1Tの開始時デビルは再発動しない');
+ assert.ok(!fourth.fired.enemy.includes('sitri'),'相手の1T開始時デビルも再発動しない');
+});
+check('ヘル：再訪2Tと3Tは発動済みのエリゴスとマルバスを新たに発動',()=>{
+ const p=blank(),e=blank();p[1]='marbas';p[3]='catalog_285';e[1]='eligos';e[2]='marbas';e[0]='sitri';
+ const b=E.createBattle(config(p,e));
+ for(let i=0;i<4;i++)E.round(b);
+ assert.deepEqual(b.turns.map(x=>x.turn),[1,2,3,1]);
+ const afterRewindAtk=b.fighters.enemy.current.attack;
+ E.round(b);
+ assert.equal(b.turns[4].turn,2);
+ assert.ok(b.turns[4].fired.enemy.includes('eligos'));
+ assert.ok(b.fighters.enemy.current.attack>afterRewindAtk,'元の攻撃値から再実体化分を加算');
+ E.round(b);
+ assert.equal(b.turns[5].turn,3);
+ assert.ok(b.turns[5].fired.enemy.includes('marbas'));
 });
 
 console.log('004.8 suite:',tests,'defined assertions passed (other versions have separate suites)');
