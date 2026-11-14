@@ -36,6 +36,8 @@ jobs:
         run: node scripts/sync-engine.cjs --check
       - name: Run batched ability regression suite
         run: node battle-engine/tests/test_kei_0048_batch.js
+      - name: Check verification-map indexes against model sources
+        run: node battle-engine/tests/test_verification_map.cjs
       - name: Test legacy dropdown sorting and preservation
         run: node battle-engine/tests/test_legacy_deck_sort.cjs
       - name: Commit synchronized catalog and browsers
