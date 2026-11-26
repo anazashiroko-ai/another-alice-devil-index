@@ -1,10 +1,11 @@
 <!DOCTYPE html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>デビルテーブル自動提案エンジン</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f2eb;color:#202d2a;font:16px/1.6 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:26px 18px}header{border-top:5px solid #28574b;margin-bottom:22px}h1{font-size:clamp(23px,4vw,36px);letter-spacing:-.04em}h2{font-size:21px}h3{font-size:17px}section,article{background:#fff;border:1px solid #d6dbd3;border-radius:12px;padding:18px;margin:14px 0}article{border-left:4px solid #4c7264}small,p{color:#47574f}input,textarea,button{font:inherit}input,textarea{width:100%;padding:8px;border:1px solid #abb9b1;border-radius:5px}textarea{min-height:95px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}button{background:#245646;color:white;border:0;border-radius:6px;padding:11px 22px;cursor:pointer}button:disabled{opacity:.55}summary{cursor:pointer;font-weight:bold}table{border-collapse:collapse;width:100%;font-size:.9rem}td,th{padding:6px;border-bottom:1px solid #dae0da;text-align:left}li{margin:5px 0}.scroll{overflow:auto}.note{color:#774b19}details{margin:12px 0}#status{font-weight:bold}
-</style><main><header><h1>デビルテーブル自動提案エンジン</h1><p>所持デビルと上限DPから配置を考えます。仮想敵を指定すると、応戦時の勝敗も比較できます。</p></header>
+.stat-table{table-layout:fixed}.stat-table th,.stat-table td{text-align:center;padding:6px 3px}.stat-table input{padding:6px 3px;text-align:right}.stat-table th:first-child{width:15%}.stat-table th:last-child{width:18%}</style><main><header><h1>デビルテーブル自動提案エンジン</h1><p>所持デビルと上限DPから配置を考えます。仮想敵を指定すると、応戦時の勝敗も比較できます。</p></header>
 <form id="form"><section><h2>構築条件</h2><label>所持デビル<textarea id="owned" required></textarea></label><small>半角・全角カナに対応。名前は /・読点・カンマ・改行で区切れます。先頭の○・◎は省略できます。</small><div id="budget"></div></section>
+<section><h2>自分のステータス</h2><div id="stats"></div></section>
 <section><h2>対戦条件（任意）</h2><label>仮想敵テーブル<textarea id="opponents"></textarea></label><small>1行1案、最大12案。左から1〜6Tを /・読点・カンマで区切り、空き枠は「－」。相手を空欄にすると、所持札とDPだけで配置案を作ります。</small>
-<details id="parameters"><summary>自分と相手の能力値</summary><p>対戦する場合は双方の素の4能力を入力してください。装備補正の空欄は0、アシスト合計の空欄は不明として扱います。</p><h3>自分</h3><div class="grid" id="stats"></div><h3>相手</h3><div class="grid" id="enemyStats"></div></details></section>
+<h3>相手のステータス</h3><div id="enemyStats"></div></section>
 <button id="run">テーブルを提案</button> <button type="reset">入力をクリア</button></form><p id="status" role="status"></p><div id="result"></div>
 <details><summary>探索方法と根拠</summary><p>入力した所持札から、特定の初手を優先せずに配置を生成。6枠の配置・DP・同名・図鑑の同時セット制限を検査します。対戦時は自先・敵先から始まる先攻交互の2系列を使い、各案の勝ち条件数を主に、同じ条件での敗戦と初動の集中を減点して順次選びます。初手を複数用意できない場合はそのまま表示します。総当たり最適解や原作勝率を示すものではありません。</p><p>図鑑・004.8の固定版を同梱。能力の省略、通常ダメージの推定、未確認の隠し効果があります。確率札は固定シードの一例。アムドゥスキアスは発動分岐未確認のため探索を保留します。</p><a href="https://github.com/anazashiroko-ai/another-alice-devil-index/blob/main/battle-engine/research/2026-11-25-guyan-five-table-construction-failure-and-temporal-overlap.md">11月25日構築メモ</a> · <a href="https://anazashiroko-ai.github.io/another-alice-devil-index/dist/">デビル図鑑</a> · <a href="https://anazashiroko-ai.github.io/another-alice-devil-index/battle-engine/">仮想戦闘004.8</a></details></main>
 <script>/*
@@ -7353,17 +7354,29 @@ const $=id=>document.getElementById(id);
 function el(tag,txt,parent){const e=document.createElement(tag);e.textContent=txt;parent.append(e);return e}
 const abilities=[['attack','攻撃'],['defense','守備'],['hp','体力'],['magic','魔力']];
 function numberField(parent,id,title,min=0){
- const input=el('input','',el('label',title,$(parent)));
+ const input=el('input','',el('label',title,typeof parent==='string'?$(parent):parent));
  Object.assign(input,{id,type:'number',min,step:1});
  return input;
 }
 numberField('budget','dp','上限DP').required=true;
 for(const [parent,prefix] of [['stats',''],['enemyStats','e']]){
- for(const [key,title] of abilities)numberField(parent,prefix+key,'素の'+title,key==='hp'?1:0);
- for(const [key,title] of abilities)numberField(parent,prefix+key+'Plus','装備'+title+'＋');
+ const table=el('table','',$(parent));table.className='stat-table';
+ line(table,['能力','素ステータス','装備・アバター補正','合計'],'th');
+ for(const [key,title] of abilities){
+  const row=el('tr','',table);el('th',title,row).scope='row';
+  const base=numberField(el('td','',row),prefix+key,'',key==='hp'?1:0);
+  const bonus=numberField(el('td','',row),prefix+key+'Plus','');
+  base.setAttribute('aria-label',(prefix?'相手':'自分')+'の素の'+title);
+  bonus.setAttribute('aria-label',(prefix?'相手':'自分')+'の'+title+'の装備・アバター補正');
+  const total=el('output','—',el('td','',row));
+  function refresh(){total.textContent=base.value!==''&&base.validity.valid&&bonus.validity.valid?String(Number(base.value)+Number(bonus.value)):'—'}
+  base.addEventListener('input',refresh);bonus.addEventListener('input',refresh);
+  $('form').addEventListener('reset',()=>{total.textContent='—'});
+ }
+ el('small','仮想対戦には素の4種が必要です。補正の空欄は0として計算します。',$(parent));
  numberField(parent,prefix+'assistTotal','アシスト合計');
 }
-$('form').addEventListener('reset',()=>{$('result').replaceChildren();$('status').textContent='';$('parameters').open=false});
+$('form').addEventListener('reset',()=>{$('result').replaceChildren();$('status').textContent=''});
 function readEnemies(){
  const lines=$('opponents').value.split(/\n/).map(s=>s.trim()).filter(Boolean);
  if(lines.length>12)throw Error('仮想敵は1〜12案を入力してください。');
@@ -7416,7 +7429,7 @@ async function run(){
  const fighters={},external={};
  for(const [side,prefix,title] of [['player','','自分'],['enemy','e','相手']]){
   for(const [key,label] of abilities)if($(prefix+key).value===''){
-   $('parameters').open=true;throw Error(title+'の「素の'+label+'」を入力してください。');
+   throw Error(title+'の「素の'+label+'」を入力してください。');
   }
   fighters[side]={name:title,base:stats(prefix),equipment:Object.fromEntries(abilities.map(([k])=>[k,val(prefix+k+'Plus')]))};
   const assist=$(prefix+'assistTotal').value;
