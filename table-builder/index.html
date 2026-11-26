@@ -7361,20 +7361,23 @@ function numberField(parent,id,title,min=0){
 numberField('budget','dp','上限DP').required=true;
 for(const [parent,prefix] of [['stats',''],['enemyStats','e']]){
  const table=el('table','',$(parent));table.className='stat-table';
- line(table,['能力','素ステータス','装備・アバター補正','合計'],'th');
+ line(table,['能力','素ステータス','アシスト','装備・アバター補正','合計'],'th');
  for(const [key,title] of abilities){
   const row=el('tr','',table);el('th',title,row).scope='row';
   const base=numberField(el('td','',row),prefix+key,'',key==='hp'?1:0);
+  const assist=numberField(el('td','',row),prefix+key+'Assist','');
+  assist.setAttribute('aria-label',(prefix?'相手':'自分')+'の'+title+'のアシスト');
   const bonus=numberField(el('td','',row),prefix+key+'Plus','');
   base.setAttribute('aria-label',(prefix?'相手':'自分')+'の素の'+title);
   bonus.setAttribute('aria-label',(prefix?'相手':'自分')+'の'+title+'の装備・アバター補正');
   const total=el('output','—',el('td','',row));
-  function refresh(){total.textContent=base.value!==''&&base.validity.valid&&bonus.validity.valid?String(Number(base.value)+Number(bonus.value)):'—'}
-  base.addEventListener('input',refresh);bonus.addEventListener('input',refresh);
+  function refresh(){total.textContent=base.value!==''&&base.validity.valid&&assist.validity.valid&&bonus.validity.valid?String(Number(base.value)+Number(assist.value)+Number(bonus.value)):'—'}
+  for(const field of [base,assist,bonus])field.addEventListener('input',refresh);
   $('form').addEventListener('reset',()=>{total.textContent='—'});
  }
- el('small','仮想対戦には素の4種が必要です。補正の空欄は0として計算します。',$(parent));
- numberField(parent,prefix+'assistTotal','アシスト合計');
+ el('small','仮想対戦には素の4種が必要です。開始時の合計では、アシストと装備補正の空欄を0として計算します。',$(parent));
+ numberField(parent,prefix+'assistTotal','能力判定用のアシスト合計（任意）');
+ el('small','空欄の場合、アシスト4種がすべて入力済みならその合計を使い、それ以外は不明として扱います。',$(parent));
 }
 $('form').addEventListener('reset',()=>{$('result').replaceChildren();$('status').textContent=''});
 function readEnemies(){
@@ -7431,9 +7434,20 @@ async function run(){
   for(const [key,label] of abilities)if($(prefix+key).value===''){
    throw Error(title+'の「素の'+label+'」を入力してください。');
   }
-  fighters[side]={name:title,base:stats(prefix),equipment:Object.fromEntries(abilities.map(([k])=>[k,val(prefix+k+'Plus')]))};
-  const assist=$(prefix+'assistTotal').value;
-  external[side]=assist===''?{}:{assistTotal:Number(assist)};
+  const assist={}, effectInputs={};
+  for(const [key] of abilities){
+   const value=$(prefix+key+'Assist').value;
+   assist[key]=Number(value);
+   if(value!=='')effectInputs['assist_'+key]=Number(value);
+  }
+  if('assist_attack' in effectInputs)effectInputs.assistAttack=assist.attack;
+  const total=$(prefix+'assistTotal').value;
+  if(total!=='')effectInputs.assistTotal=Number(total);
+  else if(abilities.every(([key])=>'assist_'+key in effectInputs)){
+   effectInputs.assistTotal=Object.values(assist).reduce((sum,value)=>sum+value,0);
+  }
+  fighters[side]={name:title,base:stats(prefix),assist,equipment:Object.fromEntries(abilities.map(([k])=>[k,val(prefix+k+'Plus')]))};
+  external[side]=effectInputs;
  }
  const scenes=[];
  for(const enemy of enemies)for(const first of ['player','enemy']){
